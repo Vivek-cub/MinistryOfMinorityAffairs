@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 
 /// Home screen controller
 /// Manages home screen state and business logic
@@ -117,12 +118,8 @@ class HomeController extends GetxController {
   }
 
   void onViewAllTap() {
-    // Navigate to all projects list
-    Get.snackbar(
-      'View All',
-      'Navigating to all projects list',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Navigate to work in progress screen
+    Get.toNamed(AppRoutes.workInProgress);
   }
 
   void onChangePinTap() {

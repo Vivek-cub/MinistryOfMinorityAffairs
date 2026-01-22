@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_in_progress_view.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import '../controllers/home_controller.dart';
 
 /// Home screen view
@@ -11,20 +14,30 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      drawer: _buildDrawer(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              _buildQuickOverview(context),
-              const SizedBox(height: 24),
-              _buildWorkList(context),
-              const SizedBox(height: 24),
-            ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: AppColors.primary,
+        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        drawer: _buildDrawer(context),
+        body: SafeArea(
+          top: false,
+          bottom: true,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                _buildQuickOverview(context),
+                const SizedBox(height: 24),
+                _buildWorkList(context),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
@@ -32,62 +45,63 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final statusBarHeight = MediaQuery.of(context).padding.top;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.8),
-          ],
+          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
         ),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, statusBarHeight + 20, 20, 20),
       child: Column(
         children: [
           Row(
             children: [
               Builder(
-                builder: (context) => GestureDetector(
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/emblem.png'),
-                        fit: BoxFit.cover,
+                builder:
+                    (context) => GestureDetector(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                          image: const DecorationImage(
+                            image: AssetImage('assets/images/emblem.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Obx(() => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome ${controller.userName.value}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                child: Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome ${controller.userName.value}',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Track Progress of works in real-time',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Track Progress of works in real-time',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
                         ),
-                      ],
-                    )),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               Container(
                 width: 48,
@@ -96,11 +110,7 @@ class HomeView extends GetView<HomeController> {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.search,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: const Icon(Icons.search, color: Colors.white, size: 24),
               ),
             ],
           ),
@@ -146,6 +156,9 @@ class HomeView extends GetView<HomeController> {
                         icon: Icons.access_time,
                         backgroundColor: Colors.orange.withOpacity(0.1),
                         iconColor: Colors.orange,
+                        onTap: () {
+                          Get.toNamed(AppRoutes.workInProgress);
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -156,6 +169,7 @@ class HomeView extends GetView<HomeController> {
                         icon: Icons.cancel_outlined,
                         backgroundColor: Colors.red.withOpacity(0.1),
                         iconColor: Colors.red,
+                        onTap: () => Get.toNamed(AppRoutes.notStartedProjects),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -166,6 +180,7 @@ class HomeView extends GetView<HomeController> {
                         icon: Icons.check_circle,
                         backgroundColor: Colors.green.withOpacity(0.1),
                         iconColor: Colors.green,
+                        onTap: () => Get.toNamed(AppRoutes.completedProjects),
                       ),
                     ),
                   ],
@@ -209,22 +224,11 @@ class HomeView extends GetView<HomeController> {
     required Color backgroundColor,
     required Color iconColor,
     bool isLarge = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: EdgeInsets.all(isLarge ? 20 : 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: isLarge
-          ? Row(
+    Widget cardContent =
+        isLarge
+            ? Row(
               children: [
                 Container(
                   width: 64,
@@ -261,7 +265,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ],
             )
-          : Column(
+            : Column(
               children: [
                 Container(
                   width: 56,
@@ -291,8 +295,36 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ],
-            ),
+            );
+
+    final container = Container(
+      padding: EdgeInsets.all(isLarge ? 20 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: cardContent,
     );
+
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: container,
+        ),
+      );
+    }
+
+    return container;
   }
 
   Widget _buildWorkList(BuildContext context) {
@@ -316,10 +348,7 @@ class HomeView extends GetView<HomeController> {
                 onPressed: controller.onViewAllTap,
                 child: const Text(
                   'View All',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -328,12 +357,13 @@ class HomeView extends GetView<HomeController> {
           Obx(() {
             final projects = controller.workList.take(3).toList();
             return Column(
-              children: projects.map((project) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildProjectCard(project),
-                );
-              }).toList(),
+              children:
+                  projects.map((project) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildProjectCard(project),
+                    );
+                  }).toList(),
             );
           }),
         ],
@@ -411,7 +441,10 @@ class HomeView extends GetView<HomeController> {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusBgColor,
                   borderRadius: BorderRadius.circular(20),
@@ -444,11 +477,7 @@ class HomeView extends GetView<HomeController> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
-                Icons.location_on,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
+              Icon(Icons.location_on, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 4),
               Text(
                 project.location,
@@ -458,11 +487,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               const SizedBox(width: 16),
-              Icon(
-                Icons.access_time,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
+              Icon(Icons.access_time, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -479,11 +504,7 @@ class HomeView extends GetView<HomeController> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(
-                  Icons.business,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
+                Icon(Icons.business, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   project.department!,
@@ -510,10 +531,7 @@ class HomeView extends GetView<HomeController> {
               ),
               child: const Text(
                 'Update progress',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -556,14 +574,16 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Obx(() => Text(
-                        controller.userName.value,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      )),
+                  Obx(
+                    () => Text(
+                      controller.userName.value,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'Field Officer',
@@ -608,10 +628,7 @@ class HomeView extends GetView<HomeController> {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'Version 1.0.1',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
             ),
           ],
@@ -627,10 +644,7 @@ class HomeView extends GetView<HomeController> {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: textColor ?? AppColors.textPrimary,
-      ),
+      leading: Icon(icon, color: textColor ?? AppColors.textPrimary),
       title: Text(
         title,
         style: TextStyle(

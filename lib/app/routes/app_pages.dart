@@ -11,6 +11,12 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/views/mobile_numbe
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/otp_verification_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/set_pin_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/pin_login_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/work_in_progress_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/completed_projects_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/not_started_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_in_progress_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/views/completed_projects_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/views/not_started_view.dart';
 import 'app_routes.dart';
 
 /// Application pages and route configuration
@@ -58,6 +64,28 @@ class AppPages {
       name: AppRoutes.home,
       page: () => HomeView(),
       binding: HomeBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    // Projects routes
+    GetPage(
+      name: AppRoutes.workInProgress,
+      page: () => const WorkInProgressView(),
+      binding: WorkInProgressBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.completedProjects,
+      page: () => const CompletedProjectsView(),
+      binding: CompletedProjectsBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.notStartedProjects,
+      page: () => const NotStartedView(),
+      binding: NotStartedBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

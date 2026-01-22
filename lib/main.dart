@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import 'app/core/theme/app_theme.dart';
 import 'app/core/constants/app_constants.dart';
 import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
 import 'app/services/storage_service.dart';
 import 'app/services/api_service.dart';
 
@@ -51,6 +52,20 @@ class MyApp extends StatelessWidget {
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       defaultTransition: Transition.rightToLeft,
+      unknownRoute: GetPage(
+        name: '/not-found',
+        page: () {
+          // Redirect unknown routes to home
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.offAllNamed(AppRoutes.home);
+          });
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        },
+      ),
 
       // Localization (can be extended later)
       locale: const Locale('en', 'IN'),

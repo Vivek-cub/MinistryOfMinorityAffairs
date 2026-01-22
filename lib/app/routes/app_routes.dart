@@ -10,5 +10,11 @@ abstract class AppRoutes {
   static const otpVerification = '/otp-verification';
   static const setPin = '/set-pin';
   static const pinLogin = '/pin-login';
+  
+  // Projects routes
+  static const workInProgress = '/work-in-progress';
+  static const completedProjects = '/completed-projects';
+  static const notStartedProjects = '/not-started-projects';
+  
   // Add more routes as needed
 }

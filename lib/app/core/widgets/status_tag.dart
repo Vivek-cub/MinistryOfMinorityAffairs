@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+
+/// Reusable status tag widget
+/// Displays work status with a colored dot indicator
+class StatusTag extends StatelessWidget {
+  final String status;
+  final Color? backgroundColor;
+  final Color? dotColor;
+
+  const StatusTag({
+    super.key,
+    required this.status,
+    this.backgroundColor,
+    this.dotColor,
+  });
+
+  String get _statusLabel {
+    switch (status) {
+      case 'in_progress':
+        return 'Work In Progress';
+      case 'not_started':
+        return 'Not Started';
+      case 'completed':
+        return 'Completed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Color get _statusColor {
+    switch (status) {
+      case 'in_progress':
+        return AppColors.primary; // Gold/Yellow
+      case 'not_started':
+        return Colors.red;
+      case 'completed':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color get _statusBgColor {
+    switch (status) {
+      case 'in_progress':
+        return AppColors.primaryLight.withOpacity(0.2); // Light yellow
+      case 'not_started':
+        return Colors.red.withOpacity(0.1);
+      case 'completed':
+        return Colors.green.withOpacity(0.1);
+      default:
+        return Colors.grey.withOpacity(0.1);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = backgroundColor ?? _statusBgColor;
+    final dotColorValue = dotColor ?? _statusColor;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: dotColorValue,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _statusLabel,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
