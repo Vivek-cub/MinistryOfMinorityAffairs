@@ -31,7 +31,7 @@ class StatusTag extends StatelessWidget {
   Color get _statusColor {
     switch (status) {
       case 'in_progress':
-        return AppColors.primary; // Gold/Yellow
+        return const Color(0xFFFFC107); // Yellow/Gold
       case 'not_started':
         return Colors.red;
       case 'completed':
@@ -44,7 +44,7 @@ class StatusTag extends StatelessWidget {
   Color get _statusBgColor {
     switch (status) {
       case 'in_progress':
-        return AppColors.primaryLight.withOpacity(0.2); // Light yellow
+        return const Color(0xFFFFF9C4); // Light yellow background
       case 'not_started':
         return Colors.red.withOpacity(0.1);
       case 'completed':
@@ -60,7 +60,7 @@ class StatusTag extends StatelessWidget {
     final dotColorValue = dotColor ?? _statusColor;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(20),

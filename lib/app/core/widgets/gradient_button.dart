@@ -5,7 +5,7 @@ import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
 /// Used for "Update progress" button with orange-to-red gradient
 class GradientButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final EdgeInsetsGeometry? padding;
   final double? fontSize;
   final List<Color>? gradientColors;
@@ -13,7 +13,7 @@ class GradientButton extends StatelessWidget {
   const GradientButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.padding,
     this.fontSize,
     this.gradientColors,
@@ -44,16 +44,19 @@ class GradientButton extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding:
-                padding ??
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: fontSize ?? 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+          child: Opacity(
+            opacity: onPressed == null ? 0.6 : 1.0,
+            child: Container(
+              padding:
+                  padding ??
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: fontSize ?? 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

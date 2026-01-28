@@ -7,6 +7,12 @@ class ProjectModel {
   final DateTime updatedAt;
   final bool isGeotagged;
   final String? department;
+  // Additional fields for Work Detail screen
+  final String? state;
+  final String? district;
+  final String? block;
+  final String? workType;
+  final String? approvalYear;
 
   ProjectModel({
     required this.id,
@@ -16,6 +22,11 @@ class ProjectModel {
     required this.updatedAt,
     required this.isGeotagged,
     this.department,
+    this.state,
+    this.district,
+    this.block,
+    this.workType,
+    this.approvalYear,
   });
 
   String get statusLabel {

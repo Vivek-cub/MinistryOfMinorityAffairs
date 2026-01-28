@@ -7,3 +7,6 @@ export 'search_bar_widget.dart';
 export 'filter_dropdown.dart';
 export 'work_progress_header.dart';
 export 'reusable_widgets.dart';
+export 'photo_upload_widget.dart';
+export 'remarks_input_widget.dart';
+export 'work_detail_info_widget.dart';

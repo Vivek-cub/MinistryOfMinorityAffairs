@@ -14,9 +14,11 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/views/pin_login_vi
 import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/work_in_progress_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/completed_projects_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/not_started_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/work_detail_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_in_progress_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/completed_projects_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/not_started_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_detail_view.dart';
 import 'app_routes.dart';
 
 /// Application pages and route configuration
@@ -86,6 +88,13 @@ class AppPages {
       name: AppRoutes.notStartedProjects,
       page: () => const NotStartedView(),
       binding: NotStartedBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.workDetail,
+      page: () => const WorkDetailView(),
+      binding: WorkDetailBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

@@ -1,29 +1,30 @@
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 
 /// Base controller for all project list screens
 /// Contains shared logic that can be extended by specific controllers
 abstract class BaseProjectsController extends GetxController {
   // Status filter - must be set by child classes
   String get statusFilter;
-  
+
   // All projects
   final allProjects = <ProjectModel>[].obs;
-  
+
   // Filtered projects
   final filteredProjects = <ProjectModel>[].obs;
-  
+
   // Search query
   final searchQuery = ''.obs;
-  
+
   // Selected filters
   final selectedSector = Rx<String?>(null);
   final selectedYear = Rx<String?>(null);
-  
+
   // Dropdown states
   final isSectorDropdownOpen = false.obs;
   final isYearDropdownOpen = false.obs;
-  
+
   // Loading state
   final isLoading = false.obs;
 
@@ -44,7 +45,7 @@ abstract class BaseProjectsController extends GetxController {
   Future<void> loadProjects() async {
     isLoading.value = true;
     errorMessage.value = '';
-    
+
     try {
       // For now, load static data
       // In future, replace with API call: await fetchProjectsFromAPI();
@@ -55,7 +56,7 @@ abstract class BaseProjectsController extends GetxController {
       errorMessage.value = 'Failed to load projects: ${e.toString()}';
       Get.snackbar(
         'Error',
-        errorMessage.value ?? 'Something went wrong',
+        errorMessage.value,
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -77,7 +78,7 @@ abstract class BaseProjectsController extends GetxController {
   Future<List<ProjectModel>> loadStaticData() async {
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     final allProjects = getStaticProjects();
     return allProjects.where((project) {
       return project.status == statusFilter;
@@ -89,20 +90,45 @@ abstract class BaseProjectsController extends GetxController {
     return [
       // In Progress Projects
       ProjectModel(
+        id: 'UPED20100152',
+        title:
+            '9 additional classrooms for three higher secondary schools located in Sarva nagar Dhourana and Lakhimpur',
+        location: 'LAKHIMPUR KHERI',
+        status: 'in_progress',
+        updatedAt: DateTime.now().subtract(const Duration(days: 12)),
+        isGeotagged: true,
+        state: 'Uttar Pradesh',
+        district: 'Lakhimpur Kheri',
+        block: 'Pasgawan',
+        workType: 'Education',
+        approvalYear: '2025',
+      ),
+      ProjectModel(
         id: 'UPDW20080145',
         title: 'Extra deep mark-II hand pumps',
         location: 'LAKHIMPUR KHERI',
         status: 'in_progress',
         updatedAt: DateTime.now().subtract(const Duration(days: 12)),
         isGeotagged: true,
+        state: 'Uttar Pradesh',
+        district: 'Lakhimpur Kheri',
+        block: 'Pasgawan',
+        workType: 'DWS',
+        approvalYear: '2024',
       ),
       ProjectModel(
         id: 'UPDW20120052',
-        title: 'Water supply scheme (10 km pipe line 2 Overhead tank 1600 KL capacity 7 tube wells)',
+        title:
+            'Water supply scheme (10 km pipe line 2 Overhead tank 1600 KL capacity 7 tube wells)',
         location: 'HAZRATPUR, BADAUN',
         status: 'in_progress',
         updatedAt: DateTime.now().subtract(const Duration(days: 14)),
         isGeotagged: true,
+        state: 'Uttar Pradesh',
+        district: 'Badaun',
+        block: 'Hazratpur',
+        workType: 'DWS',
+        approvalYear: '2023',
       ),
       ProjectModel(
         id: 'UPDW202420853',
@@ -111,16 +137,27 @@ abstract class BaseProjectsController extends GetxController {
         status: 'in_progress',
         updatedAt: DateTime.now().subtract(const Duration(days: 24)),
         isGeotagged: false,
+        state: 'Uttar Pradesh',
+        district: 'Barabanki',
+        block: 'Kasba',
+        workType: 'Other Community Infrastructure',
+        approvalYear: '2024',
       ),
       ProjectModel(
         id: 'UPDW20120053',
-        title: 'Water supply scheme (7 km of pipe line and 1 Overhead tank with 1100 KL capacity 7 tube wells)',
+        title:
+            'Water supply scheme (7 km of pipe line and 1 Overhead tank with 1100 KL capacity 7 tube wells)',
         location: 'LAKHIMPUR KHERI',
         status: 'in_progress',
         updatedAt: DateTime.now().subtract(const Duration(days: 8)),
         isGeotagged: true,
+        state: 'Uttar Pradesh',
+        district: 'Lakhimpur Kheri',
+        block: 'Pasgawan',
+        workType: 'DWS',
+        approvalYear: '2023',
       ),
-      
+
       // Not Started Projects
       ProjectModel(
         id: 'UPDW20080146',
@@ -132,7 +169,8 @@ abstract class BaseProjectsController extends GetxController {
       ),
       ProjectModel(
         id: 'UPDW20120054',
-        title: 'Stormwater Drainage Channel Construction- Building new drainage pathways to reduce flooding',
+        title:
+            'Stormwater Drainage Channel Construction- Building new drainage pathways to reduce flooding',
         location: 'GOLA BLOCK, LAKHIMPUR KHERI',
         status: 'not_started',
         updatedAt: DateTime.now().subtract(const Duration(days: 45)),
@@ -140,7 +178,8 @@ abstract class BaseProjectsController extends GetxController {
       ),
       ProjectModel(
         id: 'UPDW20120055',
-        title: 'Extra Deep Mark-II Hand Pump Installation- Ensuring deeper groundwater access in rural areas',
+        title:
+            'Extra Deep Mark-II Hand Pump Installation- Ensuring deeper groundwater access in rural areas',
         location: 'KUNDA NAGAR, PRATAPGARH',
         status: 'not_started',
         updatedAt: DateTime.now().subtract(const Duration(days: 60)),
@@ -148,13 +187,14 @@ abstract class BaseProjectsController extends GetxController {
       ),
       ProjectModel(
         id: 'UPDW20120056',
-        title: 'Overhead Water Tank Construction (1500 KL) Elevated storage tank under construction',
+        title:
+            'Overhead Water Tank Construction (1500 KL) Elevated storage tank under construction',
         location: 'BARABANKI',
         status: 'not_started',
         updatedAt: DateTime.now().subtract(const Duration(days: 20)),
         isGeotagged: false,
       ),
-      
+
       // Completed Projects
       ProjectModel(
         id: 'UPDW20080147',
@@ -166,7 +206,8 @@ abstract class BaseProjectsController extends GetxController {
       ),
       ProjectModel(
         id: 'UPDW20120057',
-        title: 'Water supply scheme (10 km pipe line 2 Overhead tank 1600 KL capacity 7 tube wells)',
+        title:
+            'Water supply scheme (10 km pipe line 2 Overhead tank 1600 KL capacity 7 tube wells)',
         location: 'BARABANKI',
         status: 'completed',
         updatedAt: DateTime.now().subtract(const Duration(days: 14)),
@@ -215,33 +256,29 @@ abstract class BaseProjectsController extends GetxController {
   }
 
   void _applyFilters() {
-    var filtered = allProjects.where((project) {
-      // Filter by search query
-      if (searchQuery.value.isNotEmpty) {
-        final query = searchQuery.value.toLowerCase();
-        if (!project.title.toLowerCase().contains(query) &&
-            !project.location.toLowerCase().contains(query) &&
-            !project.id.toLowerCase().contains(query)) {
-          return false;
-        }
-      }
-      
-      // Filter by sector (if implemented)
-      // Filter by year (if implemented)
-      
-      return true;
-    }).toList();
-    
+    var filtered =
+        allProjects.where((project) {
+          // Filter by search query
+          if (searchQuery.value.isNotEmpty) {
+            final query = searchQuery.value.toLowerCase();
+            if (!project.title.toLowerCase().contains(query) &&
+                !project.location.toLowerCase().contains(query) &&
+                !project.id.toLowerCase().contains(query)) {
+              return false;
+            }
+          }
+
+          // Filter by sector (if implemented)
+          // Filter by year (if implemented)
+
+          return true;
+        }).toList();
+
     filteredProjects.value = filtered;
   }
 
   void onUpdateProgress(ProjectModel project) {
-    Get.snackbar(
-      'Update Progress',
-      'Updating progress for ${project.id}',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-    // Navigate to update progress screen
+    Get.toNamed(AppRoutes.workDetail, arguments: project);
   }
 
   /// Refresh projects list

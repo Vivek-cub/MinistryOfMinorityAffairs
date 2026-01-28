@@ -18,6 +18,7 @@ class SplashController extends GetxController {
     // Check if user is first time or logged in
     // For now, navigate to mobile number entry screen
     Get.offAllNamed(AppRoutes.mobileNumber);
+    // Get.offAllNamed(AppRoutes.home);
 
     // Example logic for checking first time user:
     // final storageService = Get.find<StorageService>();

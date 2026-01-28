@@ -15,6 +15,7 @@ abstract class AppRoutes {
   static const workInProgress = '/work-in-progress';
   static const completedProjects = '/completed-projects';
   static const notStartedProjects = '/not-started-projects';
+  static const workDetail = '/work-detail';
   
   // Add more routes as needed
 }
