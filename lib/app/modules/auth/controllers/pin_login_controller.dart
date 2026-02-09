@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
-import 'package:ministry_of_minority_affairs/app/services/storage_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/storage/s_storage_service.dart';
 
 /// PIN Login Controller
 /// Handles PIN verification for quick login
 class PinLoginController extends GetxController {
-  final StorageService _storageService = Get.find<StorageService>();
-  
+
+  final AuthService authService;
+    
   final List<TextEditingController> pinControllers = List.generate(
     4,
     (index) => TextEditingController(),
@@ -20,6 +22,8 @@ class PinLoginController extends GetxController {
   
   final RxBool isButtonEnabled = false.obs;
   final RxBool isPinVisible = false.obs;
+
+  PinLoginController(this.authService);
   
   @override
   void onInit() {
@@ -72,7 +76,7 @@ class PinLoginController extends GetxController {
   }
   
   /// Verify PIN and login
-  void login() {
+  void login() async{
     if (!isButtonEnabled.value) return;
     
     final enteredPin = getPin();
@@ -89,9 +93,10 @@ class PinLoginController extends GetxController {
       );
       return;
     }
-    
+    final isMatched = await authService.isPinMatched(enteredPin);
+
     // Verify PIN with stored PIN
-    if (_storageService.verifyPin(enteredPin)) {
+    if (isMatched==true) {
       // PIN is correct - navigate to home screen
       Get.snackbar(
         'Success',
@@ -103,7 +108,10 @@ class PinLoginController extends GetxController {
       );
       
       // Navigate to home screen
-      Get.offAllNamed(AppRoutes.home);
+      Get.back();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offNamed(AppRoutes.home);
+      });
     } else {
       // PIN is incorrect
       Get.snackbar(
@@ -142,7 +150,7 @@ class PinLoginController extends GetxController {
             onPressed: () {
               Get.back();
               // Clear PIN from storage
-              _storageService.clearPin();
+              
               // Navigate back to mobile number screen
               Get.offAllNamed(AppRoutes.mobileNumber);
             },

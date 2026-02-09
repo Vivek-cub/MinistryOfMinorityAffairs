@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import '../controllers/work_in_progress_controller.dart';
 
@@ -31,18 +31,20 @@ class WorkInProgressView extends GetView<WorkInProgressController> {
                   children: [
                     // Header
                     WorkProgressHeader(
-                      userName: 'User Name',
                       title: controller.screenTitle,
                       subtitle: 'Track Progress of works in real-time',
                       avatarAssetPath: 'assets/images/emblem.png',
                     ),
                     // Search and Filters Section
-                    Padding(
+                    Container(
+                      height: 80,
                       padding: const EdgeInsets.all(16),
-                      child: Row(
+                      child: ListView(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
                         children: [
                           SizedBox(
-                            width: 110,
+                            width: MediaQuery.of(context).size.width*0.40,
                             child: SearchBarWidget(
                               hintText: 'Search',
                               onChanged: controller.onSearchChanged,
@@ -51,7 +53,7 @@ class WorkInProgressView extends GetView<WorkInProgressController> {
                           const SizedBox(width: 12),
                           // Sector Wise Dropdown
                           SizedBox(
-                            width: 120,
+                            width: MediaQuery.of(context).size.width*0.40,
                             child: FilterDropdown<String>(
                               label: 'Sector Wise',
                               selectedValue: controller.selectedSector.value,
@@ -63,7 +65,7 @@ class WorkInProgressView extends GetView<WorkInProgressController> {
                           const SizedBox(width: 12),
                           // Year Wise Dropdown
                           SizedBox(
-                            width: 120,
+                            width: MediaQuery.of(context).size.width*0.40,
                             child: FilterDropdown<String>(
                               label: 'Year Wise',
                               selectedValue: controller.selectedYear.value,
@@ -138,22 +140,23 @@ class WorkInProgressView extends GetView<WorkInProgressController> {
                           );
                         }
 
-                        return RefreshIndicator(
-                          onRefresh: controller.refreshProjects,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: controller.filteredProjects.length,
-                            itemBuilder: (context, index) {
-                              final project =
-                                  controller.filteredProjects[index];
-                              return WorkProgressCard(
-                                project: project,
-                                onUpdateProgress:
-                                    () => controller.onUpdateProgress(project),
-                              );
-                            },
-                          ),
-                        );
+                        return Container();
+                        // return RefreshIndicator(
+                        //   onRefresh: controller.refreshProjects,
+                        //   child: ListView.builder(
+                        //     padding: const EdgeInsets.symmetric(horizontal: 16),
+                        //     itemCount: controller.filteredProjects.length,
+                        //     itemBuilder: (context, index) {
+                        //       final project =
+                        //           controller.filteredProjects[index];
+                        //       return WorkProgressCard(
+                        //         project: project,
+                        //         onUpdateProgress:
+                        //             () => controller.onUpdateProgress(project),
+                        //       );
+                        //     },
+                        //   ),
+                        // );
                       }),
                     ),
                   ],

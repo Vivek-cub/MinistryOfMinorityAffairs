@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 /// Reusable photo upload widget
 /// Displays a dashed border box with camera icon for photo upload
@@ -19,7 +19,6 @@ class PhotoUploadWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFile = imagePath != null && imagePath!.startsWith('/');
-    
     return GestureDetector(
       onTap: onTap,
       child: AspectRatio(
@@ -35,35 +34,39 @@ class PhotoUploadWidget extends StatelessWidget {
               // Content
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: imagePath != null
-                    ? (isFile
-                        ? Image.file(
-                            File(imagePath!),
-                            fit: BoxFit.cover,
-                          )
-                        : Image.asset(
-                            imagePath!,
-                            fit: BoxFit.cover,
-                          ))
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.camera_alt_outlined,
-                            size: 40,
-                            color: AppColors.textHint,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            label ?? 'Tap to take a photo',
-                            style: TextStyle(
-                              fontSize: 12,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width*0.30,
+                  height: 140,
+                  child: imagePath != null
+                      ? (isFile
+                          ? Image.file(
+                              File(imagePath!),
+                              fit: BoxFit.fill,
+                            )
+                          : Image.asset(
+                              imagePath!,
+                              fit: BoxFit.fill,
+                            ))
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.camera_alt_outlined,
+                              size: 40,
                               color: AppColors.textHint,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+                            const SizedBox(height: 8),
+                            Text(
+                              label ?? 'Tap to take a photo',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textHint,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                ),
               ),
               // Dashed border
               CustomPaint(

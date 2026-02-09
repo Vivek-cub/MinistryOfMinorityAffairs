@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
-import 'package:ministry_of_minority_affairs/app/modules/auth/controllers/otp_verification_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/login/controllers/otp_verification_controller.dart';
+
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_header.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 
 /// OTP Verification Screen
 /// Allows users to enter OTP for phone number verification
@@ -14,66 +17,11 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 60),
-              
-              // Government Logo
-              Image.asset(
-                'assets/images/emblem.png',
-                color: AppColors.governmentBlue,
-                height: 100,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.account_balance,
-                    size: 100,
-                    color: AppColors.governmentBlue,
-                  );
-                },
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Title
-              const Text(
-                'PRADHAN MANTRI JAN VIKAS KARYAKRAM (PMJVK)',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              const Text(
-                'अल्पसंख्यक कार्य मंत्रालय',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              
-              const SizedBox(height: 4),
-              
-              const Text(
-                'MINISTRY OF MINORITY AFFAIRS',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              
-              const SizedBox(height: 60),
-              
+        
+              AuthHeader(),
               // Main Heading
               const Text(
                 'Please Enter OTP',
@@ -83,7 +31,7 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              
+        
               const Text(
                 'to Continue',
                 style: TextStyle(
@@ -92,9 +40,9 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              
+        
               const SizedBox(height: 24),
-              
+        
               // Phone Number Display
               Obx(() => RichText(
                 text: TextSpan(
@@ -116,9 +64,9 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
                 ),
                 textAlign: TextAlign.center,
               )),
-              
+        
               const SizedBox(height: 40),
-              
+        
               // OTP Input Fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -129,64 +77,27 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
                   );
                 }),
               ),
-              
+        
               const SizedBox(height: 32),
-              
+        
               // Enter OTP Button
-              Obx(() {
-                final isEnabled = controller.isButtonEnabled.value;
-                return SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: isEnabled
-                          ? const LinearGradient(
-                              colors: [
-                                Color(0xFFFFB84D),
-                                Color(0xFFFF6B6B),
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            )
-                          : null,
-                      color: isEnabled ? null : const Color(0xFFCCCCCC),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: isEnabled ? controller.verifyOTP : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.transparent,
-                        disabledForegroundColor: Colors.white,
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Enter OTP',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, size: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              
+        
+              Obx(
+                (){
+                  final isEnabled = controller.isButtonEnabled.value;
+                  return AuthSubmitButton(
+                    title: "Enter OTP",
+                    isEnabled: isEnabled,
+                    onPressed: (){
+                        if (isEnabled) {
+                          controller.verifyOTP();
+                        }
+                      },
+                    ); 
+                }
+              ),
               const SizedBox(height: 24),
-              
+        
               // Resend OTP
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -216,8 +127,7 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
                   ),
                 ],
               ),
-              
-              const Spacer(),
+        
             ],
           ),
         ),

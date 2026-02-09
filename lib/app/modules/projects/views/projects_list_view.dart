@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
-import '../controllers/projects_list_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/project_list_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 
 /// Projects list view
 /// Reusable screen for displaying projects filtered by status
@@ -28,7 +29,6 @@ class ProjectsListView extends GetView<ProjectsListController> {
             children: [
               // Header
               WorkProgressHeader(
-                userName: 'User Name',
                 title: controller.screenTitle,
                 subtitle: 'Track Progress of works in real-time',
                 avatarAssetPath: 'assets/images/emblem.png',
@@ -38,7 +38,8 @@ class ProjectsListView extends GetView<ProjectsListController> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    Row(
+                    ListView(
+                      scrollDirection: Axis.horizontal,
                       children: [
                         Expanded(
                           child: SearchBarWidget(
@@ -118,7 +119,7 @@ class ProjectsListView extends GetView<ProjectsListController> {
                     );
                   }
 
-                  if (controller.filteredProjects.isEmpty) {
+                  if (controller.projects.isEmpty) {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -140,16 +141,17 @@ class ProjectsListView extends GetView<ProjectsListController> {
                       ),
                     );
                   }
-
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: controller.filteredProjects.length,
+                    itemCount: controller.projects.length,
                     itemBuilder: (context, index) {
-                      final project = controller.filteredProjects[index];
+                      final project = controller.projects[index];
                       return WorkProgressCard(
                         project: project,
-                        onUpdateProgress: () =>
-                            controller.onUpdateProgress(project),
+                        onUpdateProgress: (){
+                           controller.onUpdateProgress(project.project??ProjectDetails());
+                        }
+                           
                       );
                     },
                   );

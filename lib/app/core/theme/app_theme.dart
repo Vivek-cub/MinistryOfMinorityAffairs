@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 /// Application theme configuration
 class AppTheme {
@@ -38,7 +38,7 @@ class AppTheme {
       ),
       
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

@@ -1,0 +1,21 @@
+
+import 'package:geolocator/geolocator.dart';
+
+class LocationPermissionService {
+  static Future<bool> request() async {
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      await Geolocator.openAppSettings();
+      return false;
+    }
+
+    return permission == LocationPermission.always ||
+           permission == LocationPermission.whileInUse;
+  }
+}

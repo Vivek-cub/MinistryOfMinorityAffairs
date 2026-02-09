@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/bindings/project_list_bindings.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/views/project_list_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/splash/bindings/splash_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/splash/views/splash_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/bindings/home_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/views/home_view.dart';
-import 'package:ministry_of_minority_affairs/app/modules/auth/bindings/mobile_number_binding.dart';
-import 'package:ministry_of_minority_affairs/app/modules/auth/bindings/otp_verification_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/login/bindings/mobile_number_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/login/bindings/otp_verification_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/bindings/set_pin_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/bindings/pin_login_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/mobile_number_view.dart';
@@ -14,11 +16,11 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/views/pin_login_vi
 import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/work_in_progress_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/completed_projects_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/not_started_binding.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/work_detail_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/work_detail_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_in_progress_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/completed_projects_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/not_started_view.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_detail_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/work_detail_view.dart';
 import 'app_routes.dart';
 
 /// Application pages and route configuration
@@ -93,8 +95,15 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.workDetail,
-      page: () => const WorkDetailView(),
+      page: () =>  WorkDetailView(),
       binding: WorkDetailBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.projectList,
+      page: () =>  ProjectListView(),
+      binding: ProjectListBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

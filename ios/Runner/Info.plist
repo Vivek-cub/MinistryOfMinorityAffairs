@@ -47,5 +47,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location is required for attendance verification</string>
+
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Location is required for attendance verification</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Audio recording is required for this feature</string>
+
+
 </dict>
 </plist>

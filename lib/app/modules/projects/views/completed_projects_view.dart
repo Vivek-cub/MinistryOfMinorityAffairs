@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import '../controllers/completed_projects_controller.dart';
 
@@ -27,7 +27,6 @@ class CompletedProjectsView extends GetView<CompletedProjectsController> {
             children: [
               // Header
               WorkProgressHeader(
-                userName: 'User Name',
                 title: controller.screenTitle,
                 subtitle: 'Track Progress of works in real-time',
                 avatarAssetPath: 'assets/images/emblem.png',
@@ -133,22 +132,23 @@ class CompletedProjectsView extends GetView<CompletedProjectsController> {
                       ),
                     );
                   }
+                  return Container();
 
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshProjects,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: controller.filteredProjects.length,
-                      itemBuilder: (context, index) {
-                        final project = controller.filteredProjects[index];
-                        return WorkProgressCard(
-                          project: project,
-                          onUpdateProgress: () =>
-                              controller.onUpdateProgress(project),
-                        );
-                      },
-                    ),
-                  );
+                  // return RefreshIndicator(
+                  //   onRefresh: controller.refreshProjects,
+                  //   child: ListView.builder(
+                  //     padding: const EdgeInsets.symmetric(horizontal: 16),
+                  //     itemCount: controller.filteredProjects.length,
+                  //     itemBuilder: (context, index) {
+                  //       final project = controller.filteredProjects[index];
+                  //       return WorkProgressCard(
+                  //         project: project,
+                  //         onUpdateProgress: () =>
+                  //             controller.onUpdateProgress(project),
+                  //       );
+                  //     },
+                  //   ),
+                  // );
                 }),
               ),
             ],

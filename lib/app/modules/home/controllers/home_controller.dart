@@ -1,10 +1,26 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
+import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
+import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
+import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 
 /// Home screen controller
 /// Manages home screen state and business logic
-class HomeController extends GetxController {
+class HomeController extends GetxController with SnackBarMixin{
+  final HomeRepo repo;
+  final AuthService authService;
+  final SubmissionRepository submissionRepo;
+  final ProjectDetailRepo projectRepo;
+  //final ProjectDao projectDao;
+
+  HomeController(this.repo,this.authService,this.submissionRepo,this.projectRepo);
   // User info
   final userName = 'Ramesh'.obs;
   
@@ -23,11 +39,30 @@ class HomeController extends GetxController {
   // Work list
   final workList = <ProjectModel>[].obs;
   final isLoading = false.obs;
+  Rx<HomeData> data = HomeData().obs;
+  RxBool hasInternet=true.obs;
 
   @override
   void onInit() {
     super.onInit();
+   //checkInternet();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    getDashboardCount();
+    });
     _loadStaticData();
+    _syncPendingSubmissions();
+    
+  }
+
+  Future<void> checkInternet()async{
+     hasInternet.value = await NetworkService.hasInternet();
+    if(hasInternet.value==true){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    getDashboardCount();
+    });
+    _loadStaticData();
+    _syncPendingSubmissions();
+    }
   }
 
   void _loadStaticData() {
@@ -144,15 +179,95 @@ class HomeController extends GetxController {
       middleText: 'Are you sure you want to logout?',
       textConfirm: 'Yes',
       textCancel: 'No',
-      onConfirm: () {
+      onConfirm: () async{
         Get.back();
         // Perform logout
+        await authService.onLogout();
         Get.snackbar(
           'Logged Out',
           'You have been logged out successfully',
           snackPosition: SnackPosition.BOTTOM,
         );
+        Get.offNamed(AppRoutes.splash);
       },
     );
   }
+
+
+  void getDashboardCount() async{
+    
+    try {
+      showAlertCustom(
+        backBtnDisable: true,
+        title: "Fetching..."
+      );
+      final modelData = await repo.getHomeData();
+      
+      if (modelData?.statusCode == "200") {
+        Get.back();
+        if (modelData?.data != null) {
+          data.value = modelData!.data!;
+        }
+      } else {
+        Get.back();
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      Get.back();
+     
+    } finally {
+      
+    }
+    
+  }
+
+
+Future<void> _syncPendingSubmissions() async {
+  //Check internet
+  final hasInternet = await NetworkService.hasInternet();
+  if (!hasInternet) {
+    debugPrint('No internet, skipping sync');
+    return;
+  }
+
+  //Fetch pending data
+  final pendingList = await submissionRepo.getPending();
+
+  if (pendingList.isEmpty) {
+    debugPrint('No pending submissions');
+    return;
+  }
+
+  debugPrint('Syncing ${pendingList.length} pending submissions');
+
+  //Upload one by one
+  for (final item in pendingList) {
+    try {
+      showAlertCustom(
+        backBtnDisable: true,
+        title: "Uploading..."
+      );
+      final response = await projectRepo.uploadMilestoneFiles(
+        projectId: item.submission.projectId,
+        milestoneId: item.submission.milestoneId,
+        imagePaths: item.images.map((e) => e.filePath).toList(),
+        audioPath: item.audio?.filePath,
+        videoPath: item.video?.filePath,
+      );
+
+      //Mark as synced on success
+      if (response.statusCode == '200') {
+        await submissionRepo.markAsSynced(item.submission.id);
+        debugPrint('Synced submission ${item.submission.id}');
+        Get.back();
+      }
+    } catch (e) {
+      //Fail silently, retry later
+      debugPrint('Sync failed for ${item.submission.id}: $e');
+    }
+  }
+}
+
+
+
 }

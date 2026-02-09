@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 /// Reusable gradient button widget
 /// Used for "Update progress" button with orange-to-red gradient
+
+
 class GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;

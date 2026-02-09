@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_in_progress_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import '../controllers/home_controller.dart';
 
@@ -26,7 +29,7 @@ class HomeView extends GetView<HomeController> {
         body: SafeArea(
           top: false,
           bottom: true,
-          child: SingleChildScrollView(
+          child: controller.hasInternet.value==true? SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +41,29 @@ class HomeView extends GetView<HomeController> {
                 const SizedBox(height: 24),
               ],
             ),
-          ),
+          )
+          : Center(
+            child: Column(
+              children: [
+                TitleText(text: "No Intenet"),
+                const SizedBox(height: 24,),
+                AuthSubmitButton(
+                  title: "Open Project List",
+                  isEnabled: true,
+                  onPressed: (){
+                    Get.offNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "noInternet",
+                            'paramName': "noInternet",
+                            'statusFilter': "",
+                          },
+                        );
+                  },
+                  )
+              ],
+            ),
+            ),
         ),
       ),
     );
@@ -77,35 +102,24 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 4),
               Expanded(
                 child: Obx(
                   () => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Welcome ${controller.userName.value}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      HeaderText(text: 'Welcome ${controller.userName.value}',color: AppColors.textWhite,),
+
                       const SizedBox(height: 4),
-                      Text(
-                        'Track Progress of works in real-time',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ),
+                      CustomText(text: 'Track Progress of works in real-time',color: AppColors.textWhite,),
+
                     ],
                   ),
                 ),
               ),
               Container(
-                width: 48,
-                height: 48,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -135,12 +149,16 @@ class HomeView extends GetView<HomeController> {
           ),
           const SizedBox(height: 16),
           Obx(() {
-            final stats = controller.dashboardStats.value;
+            final data = controller.data.value;
+
+            if (data == null) {
+              return const SizedBox.shrink();
+            }
             return Column(
               children: [
                 _buildStatCard(
                   title: 'Total Assigned Projects',
-                  value: stats.totalAssigned.toString(),
+                  value: data.inProgress.toString(),
                   icon: Icons.business,
                   backgroundColor: Colors.blue.withOpacity(0.1),
                   iconColor: Colors.blue,
@@ -152,12 +170,19 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Work in Progress',
-                        value: stats.inProgress.toString(),
+                        value: controller.data.value.inProgress.toString(),
                         icon: Icons.access_time,
                         backgroundColor: Colors.orange.withOpacity(0.1),
                         iconColor: Colors.orange,
                         onTap: () {
-                          Get.toNamed(AppRoutes.workInProgress);
+                          Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "Assigned",
+                            'paramName': "status",
+                            'statusFilter': "in_progress",
+                          },
+                        );
                         },
                       ),
                     ),
@@ -165,22 +190,38 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Not Started',
-                        value: stats.notStarted.toString(),
+                        value: controller.data.value.notStarted.toString(),
                         icon: Icons.cancel_outlined,
                         backgroundColor: Colors.red.withOpacity(0.1),
                         iconColor: Colors.red,
-                        onTap: () => Get.toNamed(AppRoutes.notStartedProjects),
+                        onTap: (){
+                          Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "NotStarted",
+                            'paramName': "status",
+                            'statusFilter': "not_started",
+                          },
+                        );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildStatCard(
                         title: 'Completed',
-                        value: stats.completed.toString(),
+                        value: controller.data.value.totalCompleted.toString(),
                         icon: Icons.check_circle,
                         backgroundColor: Colors.green.withOpacity(0.1),
                         iconColor: Colors.green,
-                        onTap: () => Get.toNamed(AppRoutes.completedProjects),
+                        onTap: (){Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "Completed",
+                            'paramName': "status",
+                            'statusFilter': "completed",
+                          },
+                        );},
                       ),
                     ),
                   ],
@@ -191,20 +232,40 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Geotagged',
-                        value: stats.geotagged.toString(),
+                        value: controller.data.value.geoTagged.toString(),
                         icon: Icons.location_on,
                         backgroundColor: Colors.blue.withOpacity(0.1),
                         iconColor: Colors.blue,
+                        onTap: (){Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "",
+                            'paramName': "geoTagged",
+                            'statusFilter': "",
+                            'geoStatus':true
+                          },
+                        );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildStatCard(
                         title: 'Non-Geotagged',
-                        value: stats.nonGeotagged.toString(),
+                        value: controller.data.value.nonGeoTagged.toString(),
                         icon: Icons.location_off,
                         backgroundColor: Colors.brown.withOpacity(0.1),
                         iconColor: Colors.brown,
+                        onTap: (){Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "",
+                            'paramName': "geoTagged",
+                            'statusFilter': "",
+                            'geoStatus':false
+                          },
+                        );
+                        },
                       ),
                     ),
                   ],

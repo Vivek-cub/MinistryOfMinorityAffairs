@@ -1,40 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:ministry_of_minority_affairs/app/utils/app_constants.dart';
+import 'package:ministry_of_minority_affairs/inject.dart';
 import 'app/core/theme/app_theme.dart';
-import 'app/core/constants/app_constants.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
-import 'app/services/storage_service.dart';
-import 'app/services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize GetStorage
-  await GetStorage.init();
-
-  // Initialize and register services
-  await Get.putAsync(() => StorageService().init());
-  await Get.putAsync(() => ApiService().init());
-
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  // Set system UI overlay style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
-
+  // await dotenv.load(
+  //   fileName: ".env.prod",
+  //   //  fileName: "assets/.env.dev",
+  // );
+  await InjectDependencies.inject();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -57,7 +40,7 @@ class MyApp extends StatelessWidget {
         page: () {
           // Redirect unknown routes to home
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Get.offAllNamed(AppRoutes.home);
+            Get.offAllNamed(AppRoutes.splash);
           });
           return const Scaffold(
             body: Center(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 /// Reusable remarks input widget
 /// Text input field with microphone icon for voice input

@@ -16,6 +16,8 @@ abstract class AppRoutes {
   static const completedProjects = '/completed-projects';
   static const notStartedProjects = '/not-started-projects';
   static const workDetail = '/work-detail';
+  static const projectList = '/project-list';
+
   
   // Add more routes as needed
 }

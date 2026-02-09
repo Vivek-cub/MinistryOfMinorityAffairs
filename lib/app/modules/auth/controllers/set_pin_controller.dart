@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
-import 'package:ministry_of_minority_affairs/app/services/storage_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 
 /// Set PIN Controller
 /// Handles PIN creation and validation
 class SetPinController extends GetxController {
-  final StorageService _storageService = Get.find<StorageService>();
+  final AuthService authService;
   
   final List<TextEditingController> pinControllers = List.generate(
     4,
@@ -21,6 +21,8 @@ class SetPinController extends GetxController {
   final RxBool isButtonEnabled = false.obs;
   final RxBool rememberPin = false.obs;
   final RxBool isPinVisible = false.obs;
+
+  SetPinController(this.authService);
   
   @override
   void onInit() {
@@ -97,10 +99,7 @@ class SetPinController extends GetxController {
       return;
     }
     
-    // Save PIN to storage
-    _storageService.savePin(pin);
-    
-    // Show success message
+    authService.setPin(pin);
     Get.snackbar(
       'Success',
       'PIN created successfully',
@@ -109,8 +108,6 @@ class SetPinController extends GetxController {
       colorText: Colors.white,
       duration: const Duration(seconds: 2),
     );
-    
-    // Navigate to PIN login screen
-    Get.offNamed(AppRoutes.pinLogin);
+        Get.offNamed(AppRoutes.pinLogin);
   }
 }

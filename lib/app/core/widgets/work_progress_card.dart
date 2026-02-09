@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'status_tag.dart';
 import 'gradient_button.dart';
 
 /// Reusable card widget for displaying work/project information
 /// Used in Work In Progress screen
 class WorkProgressCard extends StatelessWidget {
-  final ProjectModel project;
+  final UserProject project;
   final VoidCallback? onUpdateProgress;
 
   const WorkProgressCard({
@@ -44,7 +45,7 @@ class WorkProgressCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      project.title,
+                      project.project?.projectName??"",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -54,14 +55,14 @@ class WorkProgressCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    StatusTag(status: project.status),
+                    StatusTag(status: project.project?.status??""),
                   ],
                 ),
               ),
-              if (project.id.isNotEmpty) ...[
+              if (project.project?.id !=null) ...[
                 const SizedBox(width: 8),
                 Text(
-                  project.id,
+                  project.project?.id??"",
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -83,7 +84,7 @@ class WorkProgressCard extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  project.location,
+                  project.project?.address??"",
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -102,7 +103,7 @@ class WorkProgressCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                project.getTimeAgo(),
+                project.project?.createdAt.toString()??"",
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,

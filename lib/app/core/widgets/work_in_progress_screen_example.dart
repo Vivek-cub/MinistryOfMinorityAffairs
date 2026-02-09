@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 
-/// Example implementation of Work In Progress screen
-/// This demonstrates how to use all the reusable widgets together
-/// 
-/// To use this in your app:
-/// 1. Create a controller for managing state (selected filters, search query, etc.)
-/// 2. Replace this example with your actual data source
-/// 3. Implement navigation and business logic in your controller
 class WorkInProgressScreenExample extends StatefulWidget {
   const WorkInProgressScreenExample({super.key});
 
@@ -74,7 +67,7 @@ class _WorkInProgressScreenExampleState
           children: [
             // Header
             WorkProgressHeader(
-              userName: 'User Name',
+              title: "Work in Progress",
               avatarAssetPath: 'assets/images/emblem.png',
             ),
             // Search and Filters Section

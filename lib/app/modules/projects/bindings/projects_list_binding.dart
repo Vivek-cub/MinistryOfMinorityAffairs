@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../controllers/projects_list_controller.dart';
+import '../controllers/projects_list_controllers.dart';
 
 /// Projects list binding
 /// Initializes dependencies for projects list screen
@@ -23,8 +23,8 @@ class ProjectsListBinding extends Bindings {
       status = statusFilter;
     }
     
-    Get.lazyPut<ProjectsListController>(
-      () => ProjectsListController(statusFilter: status),
+    Get.lazyPut<ProjectsListControllers>(
+      () => ProjectsListControllers(statusFilter: status),
     );
   }
 }

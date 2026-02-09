@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/values/app_colors.dart';
-import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import '../theme/theme_constants.dart';
 import 'status_tag.dart';
 
 /// Reusable widget for displaying work detail information
 /// Shows Work ID, Status, State, District, Block, Work Type, Approval Year
 class WorkDetailInfoWidget extends StatelessWidget {
-  final ProjectModel project;
+  final ProjectDetails project;
 
   const WorkDetailInfoWidget({
     super.key,
@@ -38,7 +38,7 @@ class WorkDetailInfoWidget extends StatelessWidget {
         children: [
           // Title
           Text(
-            project.title,
+            project.projectName??"",
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -55,39 +55,28 @@ class WorkDetailInfoWidget extends StatelessWidget {
           _buildDetailRow(
             label: 'Status:',
             value: null,
-            customWidget: StatusTag(status: project.status),
+            customWidget: StatusTag(status: project.status??""),
           ),
           const SizedBox(height: 16),
-          if (project.state != null)
+          if (project.address != null)
             _buildDetailRow(
-              label: 'State:',
-              value: project.state!,
+              label: 'Address:',
+              value: project.address??"",
               showLocationIcon: true,
             ),
-          if (project.state != null) const SizedBox(height: 16),
-          if (project.district != null)
+          if (project.districtId != null) const SizedBox(height: 16),
+          if (project.districtId != null)
             _buildDetailRow(
-              label: 'District:',
-              value: project.district!,
+              label: 'DistrictID:',
+              value: project.districtId,
             ),
-          if (project.district != null) const SizedBox(height: 16),
-          if (project.block != null)
+          if (project.address != null) const SizedBox(height: 16),
+          if (project.address != null)
             _buildDetailRow(
               label: 'Block:',
-              value: project.block!,
+              value: project.address,
             ),
-          if (project.block != null) const SizedBox(height: 16),
-          if (project.workType != null)
-            _buildDetailRow(
-              label: 'Work Type:',
-              value: project.workType!,
-            ),
-          if (project.workType != null) const SizedBox(height: 16),
-          if (project.approvalYear != null)
-            _buildDetailRow(
-              label: 'Approval Year:',
-              value: project.approvalYear!,
-            ),
+          
         ],
       ),
     );
