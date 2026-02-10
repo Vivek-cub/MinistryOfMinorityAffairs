@@ -128,12 +128,12 @@ Future<List<PendingSubmission>> getPendingSubmissions() async {
   return result;
 }
 
-Future<void> markAsSynced(int submissionId) {
+Future<void> markAsSynced(String projectId) {
   return (update(submissions)
-        ..where((t) => t.id.equals(submissionId)))
-      .write(
-    SubmissionsCompanion(isSynced: const Value(true)),
-  );
+        ..where((t) => t.projectId.equals(projectId)))
+      .write(const SubmissionsCompanion(
+        isSynced: Value(true),
+      ));
 }
 
 

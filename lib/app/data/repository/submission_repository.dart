@@ -35,7 +35,7 @@ class SubmissionRepository {
     return dao.getPendingSubmissions();
   }
 
-  Future<void> markAsSynced(int id) {
-    return dao.markAsSynced(id);
+  Future<void> markAsSynced(String projectId) {
+    return dao.markAsSynced(projectId);
   }
 }

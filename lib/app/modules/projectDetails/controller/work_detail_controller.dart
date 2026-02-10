@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
@@ -30,6 +31,7 @@ class WorkDetailController extends GetxController with SnackBarMixin, PopupMixin
   final SubmissionRepository repository;
   final ProjectDetailRepo repo;
   final AuthService authService;
+  ProjectRepository dbRepo;
 
   final photos = <String?>[null, null, null].obs;
 
@@ -39,7 +41,7 @@ class WorkDetailController extends GetxController with SnackBarMixin, PopupMixin
   // Loading state
   final isSubmitting = false.obs;
 
-  WorkDetailController(this.repository,this.repo,this.authService);
+  WorkDetailController(this.repository,this.repo,this.authService,this.dbRepo);
   Rx<ProjectDetails> data = ProjectDetails().obs;
   RxString videoPath ="".obs; 
   String? audioPath="";
@@ -66,14 +68,14 @@ class WorkDetailController extends GetxController with SnackBarMixin, PopupMixin
     if(data.value.milestones !=null || data.value.milestones!.isNotEmpty){
       milestones(data.value.milestones);
     }
-    //saveToLocalDb();
+    saveToLocalDb();
     
   }
 
-  // void saveToLocalDb()async{
-  //       final projectDao = Get.find<ProjectDao>();
-  //       await projectDao.saveProject(data.value);
-  // }
+  void saveToLocalDb()async{
+        
+        await dbRepo.saveProject(data.value);
+  }
   
 
   // Future<void> takePhoto(int index) async {
@@ -195,6 +197,7 @@ class WorkDetailController extends GetxController with SnackBarMixin, PopupMixin
   }
 
   Get.back(result: true);
+  Get.toNamed(AppRoutes.home);
 }
 
   void submitOnline() async{
@@ -302,7 +305,15 @@ if (rawVideoPath != null && rawVideoPath.isNotEmpty) {
   if (hasInternet) {
      submitOnline();
   } else {
-    await saveOffline();
+    showMessageDialog(
+      Get.context!,
+      title: "NO Internet!",
+      message: "Want to save this in Local Database?",
+      onPressed: ()async{
+        await saveOffline();
+      }
+      );
+    
   }
 
   isSubmitting.value = false;

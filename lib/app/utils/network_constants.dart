@@ -7,5 +7,7 @@ sealed class NetworkConstants {
   static final String projectList = "mobile/getProjectByStatus";
   static final String uploadMilestoneFiles = "mobile/uploadMilestoneFiles";
   static final String assignedProjectList = "mobile/getAllAssignedProjects";
+  static final String getAllSector = "master/getAllSectors";
 
+  
 }

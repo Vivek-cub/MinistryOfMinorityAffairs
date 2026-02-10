@@ -27,7 +27,7 @@ class SyncService extends GetxService {
       );
 
       if (response.statusCode == '200') {
-        await repository.markAsSynced(item.submission.id);
+        await repository.markAsSynced(item.submission.projectId);
       }
     } catch (_) {
       

@@ -6,6 +6,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/data/model/home_resp_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_response.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
@@ -23,6 +24,27 @@ class HomeRepoImpl extends HomeRepo with PopupMixin,SnackBarMixin{
         return HomeRespModel.fromJson(resp.data);
       }else{
         HomeRespModel modelData = HomeRespModel();
+        showErrorDialog(
+          Get.context!,
+            title: "Error",
+            message: modelData.statusMessage??"Something Went Wrong",);
+        return modelData;
+      }
+    }catch(e){
+        throw Exception(e);
+    }
+  }
+
+  @override
+  Future<ProjectResponse?> getAssignedProjects() async{
+    try{
+      final resp = await apiService.get(
+        NetworkConstants.assignedProjectList,
+      );
+      if (resp.statusCode == HttpStatus.ok) {
+        return ProjectResponse.fromJson(resp.data);
+      }else{
+        ProjectResponse modelData = ProjectResponse();
         showErrorDialog(
           Get.context!,
             title: "Error",

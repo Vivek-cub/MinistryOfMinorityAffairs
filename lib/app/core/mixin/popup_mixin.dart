@@ -103,6 +103,7 @@ mixin class PopupMixin {
     showDialog(
       barrierDismissible: false,
       context: context,
+      
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(
@@ -112,8 +113,9 @@ mixin class PopupMixin {
             clipBehavior: Clip.none,
             children: [
               Container(
+                
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                    const EdgeInsets.symmetric(horizontal: AppDimensions.sm, vertical: AppDimensions.lg),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
@@ -132,17 +134,42 @@ mixin class PopupMixin {
                     TitleText(
                       text: message??"",
                       color: AppColors.textPrimary,
+                      textAlign: TextAlign.center,
                       ),
                     
                     const SizedBox(height: 20),
-                    AuthSubmitButton(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 40,
+                          width: 120,
+                          child: AuthSubmitButton(
                       title: "OK",
                       isEnabled: true,
                       onPressed: () {
                         Navigator.pop(context);
                         onPressed?.call();
                       },
+                    ),
+                        ),
+                    SizedBox(width: 8,),
+                    SizedBox(
+                      height: 40,
+                      width: 120,
+                      child: AuthSubmitButton(
+                        title: "Cancel",
+                        isEnabled: false,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onPressedOnCancel?.call();
+                        },
+                      ),
                     )
+                      ],
+                    ),
                     // Button
                   ],
                 ),

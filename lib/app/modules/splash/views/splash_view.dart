@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 import '../controllers/splash_controller.dart';
 
 /// Splash screen view
@@ -13,6 +14,7 @@ class SplashView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Container(
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -23,22 +25,9 @@ class SplashView extends StatelessWidget {
             ],
           ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Ministry Logo and Splash Image
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Splash Image
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Image.asset(
-                          'assets/images/splash_screen.jpg',
-                          fit: BoxFit.contain,
+                    child: Image.asset(
+                          ImageAssets.splashImage,
+                          fit: BoxFit.fill,
                           errorBuilder: (context, error, stackTrace) {
                             // Fallback UI if image not found
                             return Column(
@@ -72,22 +61,6 @@ class SplashView extends StatelessWidget {
                             );
                           },
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              // Loading Indicator
-              const Padding(
-                padding: EdgeInsets.only(bottom: 50),
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

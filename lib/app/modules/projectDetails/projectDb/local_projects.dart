@@ -8,4 +8,10 @@ class LocalProjects extends Table {
   TextColumn get status => text()();
   RealColumn get lat => real().nullable()();
   RealColumn get lng => real().nullable()();
+  TextColumn get address => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  TextColumn get districtId => text().nullable()();
+  TextColumn get projectUniqueId => text()();
+
 }

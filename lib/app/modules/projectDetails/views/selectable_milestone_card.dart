@@ -67,8 +67,8 @@ class SelectableMilestoneCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (milestone.status == "Completed")
-              const Icon(Icons.check_circle, color: Colors.green),
+            // if (milestone.status == "Completed")
+            //   const Icon(Icons.check_circle, color: Colors.green),
           ],
         ),
       ),

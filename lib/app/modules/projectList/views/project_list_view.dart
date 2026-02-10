@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/project_list_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 
 /// Work In Progress view
@@ -33,7 +35,7 @@ class ProjectListView extends GetView<ProjectsListController> {
                     // Header
                     WorkProgressHeader(
                       //title: controller.screenTitle,
-                      title: "title",
+                      title: "Project List",
 
                       subtitle: 'Track Progress of works in real-time',
                       avatarAssetPath: 'assets/images/emblem.png',
@@ -57,12 +59,17 @@ class ProjectListView extends GetView<ProjectsListController> {
                           // Sector Wise Dropdown
                           SizedBox(
                             width: MediaQuery.of(context).size.width*0.40,
-                            child: FilterDropdown<String>(
+                            child: FilterDropdown<Category>(
                               label: 'Sector Wise',
-                              selectedValue: controller.selectedSector.value,
-                              items: controller.sectors,
+                              selectedValue: controller.selectedCategory.value,
+                              items: controller.category,
                               isOpen: controller.isSectorDropdownOpen.value,
                               onTap: controller.toggleSectorDropdown,
+                              itemBuilder: (category) => category.name,
+                              onChanged: (value){
+                                controller.selectedCategory.value = value;
+                                controller.isSectorDropdownOpen.value = false;
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -94,7 +101,7 @@ class ProjectListView extends GetView<ProjectsListController> {
                           onRefresh: ()async{
                             controller.loadProjects();
                           },
-                          child: ListView.builder(
+                          child: controller.projects.isNotEmpty?ListView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             itemCount: controller.projects.length,
                             itemBuilder: (context, index) {
@@ -108,6 +115,10 @@ class ProjectListView extends GetView<ProjectsListController> {
                                     },
                               );
                             },
+                          )
+                          :
+                          Center(
+                            child: TitleText(text: "No Data Found"),
                           ),
                         );
                         }                        
@@ -120,10 +131,15 @@ class ProjectListView extends GetView<ProjectsListController> {
                   Positioned(
                     top: 220, // Header height + padding + dropdown height
                     left: 120, // 16 (padding) + 120 (search) + 12 (spacing)
-                    child: FilterDropdownMenu<String>(
+                    child: FilterDropdownMenu<Category>(
                       width: 200,
-                      items: controller.sectors,
-                      onItemSelected: controller.onSectorSelected,
+                      items: controller.category,
+                      itemBuilder: (category) => category.name,
+                      onItemSelected: (value){
+                        controller.selectedCategory.value = value;
+                                controller.isSectorDropdownOpen.value = false;
+                                controller.checkParamToLoadProject();
+                      },
                     ),
                   ),
                 // Year Wise Dropdown Menu

@@ -1450,6 +1450,50 @@ class $LocalProjectsTable extends LocalProjects
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
+  );
+  @override
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _districtIdMeta = const VerificationMeta(
+    'districtId',
+  );
+  @override
+  late final GeneratedColumn<String> districtId = GeneratedColumn<String>(
+    'district_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _projectUniqueIdMeta = const VerificationMeta(
+    'projectUniqueId',
+  );
+  @override
+  late final GeneratedColumn<String> projectUniqueId = GeneratedColumn<String>(
+    'project_unique_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1458,6 +1502,10 @@ class $LocalProjectsTable extends LocalProjects
     status,
     lat,
     lng,
+    address,
+    createdAt,
+    districtId,
+    projectUniqueId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1513,6 +1561,37 @@ class $LocalProjectsTable extends LocalProjects
         lng.isAcceptableOrUnknown(data['lng']!, _lngMeta),
       );
     }
+    if (data.containsKey('address')) {
+      context.handle(
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('district_id')) {
+      context.handle(
+        _districtIdMeta,
+        districtId.isAcceptableOrUnknown(data['district_id']!, _districtIdMeta),
+      );
+    }
+    if (data.containsKey('project_unique_id')) {
+      context.handle(
+        _projectUniqueIdMeta,
+        projectUniqueId.isAcceptableOrUnknown(
+          data['project_unique_id']!,
+          _projectUniqueIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_projectUniqueIdMeta);
+    }
     return context;
   }
 
@@ -1550,6 +1629,24 @@ class $LocalProjectsTable extends LocalProjects
         DriftSqlType.double,
         data['${effectivePrefix}lng'],
       ),
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      ),
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}created_at'],
+          )!,
+      districtId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}district_id'],
+      ),
+      projectUniqueId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}project_unique_id'],
+          )!,
     );
   }
 
@@ -1566,6 +1663,10 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
   final String status;
   final double? lat;
   final double? lng;
+  final String? address;
+  final DateTime createdAt;
+  final String? districtId;
+  final String projectUniqueId;
   const LocalProject({
     required this.id,
     required this.projectId,
@@ -1573,6 +1674,10 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
     required this.status,
     this.lat,
     this.lng,
+    this.address,
+    required this.createdAt,
+    this.districtId,
+    required this.projectUniqueId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1587,6 +1692,14 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
     if (!nullToAbsent || lng != null) {
       map['lng'] = Variable<double>(lng);
     }
+    if (!nullToAbsent || address != null) {
+      map['address'] = Variable<String>(address);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || districtId != null) {
+      map['district_id'] = Variable<String>(districtId);
+    }
+    map['project_unique_id'] = Variable<String>(projectUniqueId);
     return map;
   }
 
@@ -1598,6 +1711,16 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
       status: Value(status),
       lat: lat == null && nullToAbsent ? const Value.absent() : Value(lat),
       lng: lng == null && nullToAbsent ? const Value.absent() : Value(lng),
+      address:
+          address == null && nullToAbsent
+              ? const Value.absent()
+              : Value(address),
+      createdAt: Value(createdAt),
+      districtId:
+          districtId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(districtId),
+      projectUniqueId: Value(projectUniqueId),
     );
   }
 
@@ -1613,6 +1736,10 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
       status: serializer.fromJson<String>(json['status']),
       lat: serializer.fromJson<double?>(json['lat']),
       lng: serializer.fromJson<double?>(json['lng']),
+      address: serializer.fromJson<String?>(json['address']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      districtId: serializer.fromJson<String?>(json['districtId']),
+      projectUniqueId: serializer.fromJson<String>(json['projectUniqueId']),
     );
   }
   @override
@@ -1625,6 +1752,10 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
       'status': serializer.toJson<String>(status),
       'lat': serializer.toJson<double?>(lat),
       'lng': serializer.toJson<double?>(lng),
+      'address': serializer.toJson<String?>(address),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'districtId': serializer.toJson<String?>(districtId),
+      'projectUniqueId': serializer.toJson<String>(projectUniqueId),
     };
   }
 
@@ -1635,6 +1766,10 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
     String? status,
     Value<double?> lat = const Value.absent(),
     Value<double?> lng = const Value.absent(),
+    Value<String?> address = const Value.absent(),
+    DateTime? createdAt,
+    Value<String?> districtId = const Value.absent(),
+    String? projectUniqueId,
   }) => LocalProject(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -1642,6 +1777,10 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
     status: status ?? this.status,
     lat: lat.present ? lat.value : this.lat,
     lng: lng.present ? lng.value : this.lng,
+    address: address.present ? address.value : this.address,
+    createdAt: createdAt ?? this.createdAt,
+    districtId: districtId.present ? districtId.value : this.districtId,
+    projectUniqueId: projectUniqueId ?? this.projectUniqueId,
   );
   LocalProject copyWithCompanion(LocalProjectsCompanion data) {
     return LocalProject(
@@ -1652,6 +1791,14 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
       status: data.status.present ? data.status.value : this.status,
       lat: data.lat.present ? data.lat.value : this.lat,
       lng: data.lng.present ? data.lng.value : this.lng,
+      address: data.address.present ? data.address.value : this.address,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      districtId:
+          data.districtId.present ? data.districtId.value : this.districtId,
+      projectUniqueId:
+          data.projectUniqueId.present
+              ? data.projectUniqueId.value
+              : this.projectUniqueId,
     );
   }
 
@@ -1663,13 +1810,28 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
           ..write('projectName: $projectName, ')
           ..write('status: $status, ')
           ..write('lat: $lat, ')
-          ..write('lng: $lng')
+          ..write('lng: $lng, ')
+          ..write('address: $address, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('districtId: $districtId, ')
+          ..write('projectUniqueId: $projectUniqueId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, projectId, projectName, status, lat, lng);
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    projectName,
+    status,
+    lat,
+    lng,
+    address,
+    createdAt,
+    districtId,
+    projectUniqueId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1679,7 +1841,11 @@ class LocalProject extends DataClass implements Insertable<LocalProject> {
           other.projectName == this.projectName &&
           other.status == this.status &&
           other.lat == this.lat &&
-          other.lng == this.lng);
+          other.lng == this.lng &&
+          other.address == this.address &&
+          other.createdAt == this.createdAt &&
+          other.districtId == this.districtId &&
+          other.projectUniqueId == this.projectUniqueId);
 }
 
 class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
@@ -1689,6 +1855,10 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
   final Value<String> status;
   final Value<double?> lat;
   final Value<double?> lng;
+  final Value<String?> address;
+  final Value<DateTime> createdAt;
+  final Value<String?> districtId;
+  final Value<String> projectUniqueId;
   const LocalProjectsCompanion({
     this.id = const Value.absent(),
     this.projectId = const Value.absent(),
@@ -1696,6 +1866,10 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
     this.status = const Value.absent(),
     this.lat = const Value.absent(),
     this.lng = const Value.absent(),
+    this.address = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.districtId = const Value.absent(),
+    this.projectUniqueId = const Value.absent(),
   });
   LocalProjectsCompanion.insert({
     this.id = const Value.absent(),
@@ -1704,9 +1878,15 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
     required String status,
     this.lat = const Value.absent(),
     this.lng = const Value.absent(),
+    this.address = const Value.absent(),
+    required DateTime createdAt,
+    this.districtId = const Value.absent(),
+    required String projectUniqueId,
   }) : projectId = Value(projectId),
        projectName = Value(projectName),
-       status = Value(status);
+       status = Value(status),
+       createdAt = Value(createdAt),
+       projectUniqueId = Value(projectUniqueId);
   static Insertable<LocalProject> custom({
     Expression<int>? id,
     Expression<String>? projectId,
@@ -1714,6 +1894,10 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
     Expression<String>? status,
     Expression<double>? lat,
     Expression<double>? lng,
+    Expression<String>? address,
+    Expression<DateTime>? createdAt,
+    Expression<String>? districtId,
+    Expression<String>? projectUniqueId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1722,6 +1906,10 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
       if (status != null) 'status': status,
       if (lat != null) 'lat': lat,
       if (lng != null) 'lng': lng,
+      if (address != null) 'address': address,
+      if (createdAt != null) 'created_at': createdAt,
+      if (districtId != null) 'district_id': districtId,
+      if (projectUniqueId != null) 'project_unique_id': projectUniqueId,
     });
   }
 
@@ -1732,6 +1920,10 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
     Value<String>? status,
     Value<double?>? lat,
     Value<double?>? lng,
+    Value<String?>? address,
+    Value<DateTime>? createdAt,
+    Value<String?>? districtId,
+    Value<String>? projectUniqueId,
   }) {
     return LocalProjectsCompanion(
       id: id ?? this.id,
@@ -1740,6 +1932,10 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
       status: status ?? this.status,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
+      address: address ?? this.address,
+      createdAt: createdAt ?? this.createdAt,
+      districtId: districtId ?? this.districtId,
+      projectUniqueId: projectUniqueId ?? this.projectUniqueId,
     );
   }
 
@@ -1764,6 +1960,18 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
     if (lng.present) {
       map['lng'] = Variable<double>(lng.value);
     }
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (districtId.present) {
+      map['district_id'] = Variable<String>(districtId.value);
+    }
+    if (projectUniqueId.present) {
+      map['project_unique_id'] = Variable<String>(projectUniqueId.value);
+    }
     return map;
   }
 
@@ -1775,7 +1983,11 @@ class LocalProjectsCompanion extends UpdateCompanion<LocalProject> {
           ..write('projectName: $projectName, ')
           ..write('status: $status, ')
           ..write('lat: $lat, ')
-          ..write('lng: $lng')
+          ..write('lng: $lng, ')
+          ..write('address: $address, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('districtId: $districtId, ')
+          ..write('projectUniqueId: $projectUniqueId')
           ..write(')'))
         .toString();
   }
@@ -4503,6 +4715,10 @@ typedef $$LocalProjectsTableCreateCompanionBuilder =
       required String status,
       Value<double?> lat,
       Value<double?> lng,
+      Value<String?> address,
+      required DateTime createdAt,
+      Value<String?> districtId,
+      required String projectUniqueId,
     });
 typedef $$LocalProjectsTableUpdateCompanionBuilder =
     LocalProjectsCompanion Function({
@@ -4512,6 +4728,10 @@ typedef $$LocalProjectsTableUpdateCompanionBuilder =
       Value<String> status,
       Value<double?> lat,
       Value<double?> lng,
+      Value<String?> address,
+      Value<DateTime> createdAt,
+      Value<String?> districtId,
+      Value<String> projectUniqueId,
     });
 
 class $$LocalProjectsTableFilterComposer
@@ -4550,6 +4770,26 @@ class $$LocalProjectsTableFilterComposer
 
   ColumnFilters<double> get lng => $composableBuilder(
     column: $table.lng,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get districtId => $composableBuilder(
+    column: $table.districtId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectUniqueId => $composableBuilder(
+    column: $table.projectUniqueId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4592,6 +4832,26 @@ class $$LocalProjectsTableOrderingComposer
     column: $table.lng,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get districtId => $composableBuilder(
+    column: $table.districtId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectUniqueId => $composableBuilder(
+    column: $table.projectUniqueId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalProjectsTableAnnotationComposer
@@ -4622,6 +4882,22 @@ class $$LocalProjectsTableAnnotationComposer
 
   GeneratedColumn<double> get lng =>
       $composableBuilder(column: $table.lng, builder: (column) => column);
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get districtId => $composableBuilder(
+    column: $table.districtId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get projectUniqueId => $composableBuilder(
+    column: $table.projectUniqueId,
+    builder: (column) => column,
+  );
 }
 
 class $$LocalProjectsTableTableManager
@@ -4665,6 +4941,10 @@ class $$LocalProjectsTableTableManager
                 Value<String> status = const Value.absent(),
                 Value<double?> lat = const Value.absent(),
                 Value<double?> lng = const Value.absent(),
+                Value<String?> address = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> districtId = const Value.absent(),
+                Value<String> projectUniqueId = const Value.absent(),
               }) => LocalProjectsCompanion(
                 id: id,
                 projectId: projectId,
@@ -4672,6 +4952,10 @@ class $$LocalProjectsTableTableManager
                 status: status,
                 lat: lat,
                 lng: lng,
+                address: address,
+                createdAt: createdAt,
+                districtId: districtId,
+                projectUniqueId: projectUniqueId,
               ),
           createCompanionCallback:
               ({
@@ -4681,6 +4965,10 @@ class $$LocalProjectsTableTableManager
                 required String status,
                 Value<double?> lat = const Value.absent(),
                 Value<double?> lng = const Value.absent(),
+                Value<String?> address = const Value.absent(),
+                required DateTime createdAt,
+                Value<String?> districtId = const Value.absent(),
+                required String projectUniqueId,
               }) => LocalProjectsCompanion.insert(
                 id: id,
                 projectId: projectId,
@@ -4688,6 +4976,10 @@ class $$LocalProjectsTableTableManager
                 status: status,
                 lat: lat,
                 lng: lng,
+                address: address,
+                createdAt: createdAt,
+                districtId: districtId,
+                projectUniqueId: projectUniqueId,
               ),
           withReferenceMapper:
               (p0) =>

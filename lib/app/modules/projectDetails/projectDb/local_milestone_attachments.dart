@@ -19,4 +19,5 @@ class LocalMilestoneAttachments extends Table {
 
   DateTimeColumn get createdAt =>
       dateTime().withDefault(currentDateAndTime)();
+
 }

@@ -5,8 +5,8 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
-import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import '../controllers/home_controller.dart';
 
@@ -29,7 +29,9 @@ class HomeView extends GetView<HomeController> {
         body: SafeArea(
           top: false,
           bottom: true,
-          child: controller.hasInternet.value==true? SingleChildScrollView(
+          child: Obx(
+            (){
+            return controller.hasInternet.value==true? SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,6 +46,8 @@ class HomeView extends GetView<HomeController> {
           )
           : Center(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TitleText(text: "No Intenet"),
                 const SizedBox(height: 24,),
@@ -63,7 +67,9 @@ class HomeView extends GetView<HomeController> {
                   )
               ],
             ),
-            ),
+            );
+            }
+          ),
         ),
       ),
     );
@@ -158,7 +164,7 @@ class HomeView extends GetView<HomeController> {
               children: [
                 _buildStatCard(
                   title: 'Total Assigned Projects',
-                  value: data.inProgress.toString(),
+                  value: data.totalAssigned??0,
                   icon: Icons.business,
                   backgroundColor: Colors.blue.withOpacity(0.1),
                   iconColor: Colors.blue,
@@ -170,7 +176,7 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Work in Progress',
-                        value: controller.data.value.inProgress.toString(),
+                        value: controller.data.value.inProgress??0,
                         icon: Icons.access_time,
                         backgroundColor: Colors.orange.withOpacity(0.1),
                         iconColor: Colors.orange,
@@ -190,7 +196,7 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Not Started',
-                        value: controller.data.value.notStarted.toString(),
+                        value: controller.data.value.notStarted??0,
                         icon: Icons.cancel_outlined,
                         backgroundColor: Colors.red.withOpacity(0.1),
                         iconColor: Colors.red,
@@ -210,7 +216,7 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Completed',
-                        value: controller.data.value.totalCompleted.toString(),
+                        value: controller.data.value.totalCompleted??0,
                         icon: Icons.check_circle,
                         backgroundColor: Colors.green.withOpacity(0.1),
                         iconColor: Colors.green,
@@ -232,7 +238,7 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Geotagged',
-                        value: controller.data.value.geoTagged.toString(),
+                        value: controller.data.value.geoTagged??0,
                         icon: Icons.location_on,
                         backgroundColor: Colors.blue.withOpacity(0.1),
                         iconColor: Colors.blue,
@@ -252,7 +258,7 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: _buildStatCard(
                         title: 'Non-Geotagged',
-                        value: controller.data.value.nonGeoTagged.toString(),
+                        value: controller.data.value.nonGeoTagged??0,
                         icon: Icons.location_off,
                         backgroundColor: Colors.brown.withOpacity(0.1),
                         iconColor: Colors.brown,
@@ -280,7 +286,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildStatCard({
     required String title,
-    required String value,
+    required int value,
     required IconData icon,
     required Color backgroundColor,
     required Color iconColor,
@@ -314,7 +320,7 @@ class HomeView extends GetView<HomeController> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        value,
+                        value.toString(),
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -348,7 +354,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  value,
+                  value.toString(),
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -416,13 +422,13 @@ class HomeView extends GetView<HomeController> {
           ),
           const SizedBox(height: 12),
           Obx(() {
-            final projects = controller.workList.take(3).toList();
+            final projects = controller.projects.take(3).toList();
             return Column(
               children:
                   projects.map((project) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildProjectCard(project),
+                      child: _buildProjectCard(project.project??ProjectDetails()),
                     );
                   }).toList(),
             );
@@ -432,7 +438,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildProjectCard(ProjectModel project) {
+  Widget _buildProjectCard(ProjectDetails project) {
     Color statusColor;
     Color statusBgColor;
 
@@ -479,7 +485,7 @@ class HomeView extends GetView<HomeController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      project.title,
+                      project.projectName??"",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -490,7 +496,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      project.id,
+                      project.projectUniqueId??"",
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
@@ -523,7 +529,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      project.statusLabel,
+                      project.status??"",
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -541,7 +547,7 @@ class HomeView extends GetView<HomeController> {
               Icon(Icons.location_on, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 4),
               Text(
-                project.location,
+                project.address??"",
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -552,7 +558,7 @@ class HomeView extends GetView<HomeController> {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  project.getTimeAgo(),
+                  project.createdAt?.toIso8601String()??"",
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -561,14 +567,14 @@ class HomeView extends GetView<HomeController> {
               ),
             ],
           ),
-          if (project.department != null) ...[
+          if (project.districtId != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
                 Icon(Icons.business, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
-                  project.department!,
+                  project.districtId??"",
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,

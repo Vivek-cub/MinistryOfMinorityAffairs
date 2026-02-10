@@ -4,6 +4,8 @@ import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart
 import 'package:ministry_of_minority_affairs/app/data/local/dao/submission_dao.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_detail_repo_impl.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/controllers/audio_recorder_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/work_detail_controller.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
@@ -46,16 +48,18 @@ class WorkDetailBinding extends Bindings {
     final repo = SubmissionRepository(dao);
 
 
-    Get.put<AppDatabase>(
-      AppDatabase(),
-      permanent: true,
-    );
-
+    // Get.put<AppDatabase>(
+    //   AppDatabase(),
+    //   permanent: true,
+    // );
+    final projectDao = ProjectDao(db);
+    final projectRepo = ProjectRepository(projectDao);
 
     Get.put(WorkDetailController(
       repo,
       ProjectDetailRepoImpl(Get.find<ApiService>()),
-        Get.find<AuthService>()         
+        Get.find<AuthService>(),
+        projectRepo         
       ));
 
       

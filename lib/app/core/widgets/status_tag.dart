@@ -21,7 +21,7 @@ class StatusTag extends StatelessWidget {
         return 'Work In Progress';
       case 'not_started':
         return 'Not Started';
-      case 'completed':
+      case 'Completed':
         return 'Completed';
       default:
         return 'Unknown';
@@ -34,7 +34,7 @@ class StatusTag extends StatelessWidget {
         return const Color(0xFFFFC107); // Yellow/Gold
       case 'not_started':
         return Colors.red;
-      case 'completed':
+      case 'Completed':
         return Colors.green;
       default:
         return Colors.grey;

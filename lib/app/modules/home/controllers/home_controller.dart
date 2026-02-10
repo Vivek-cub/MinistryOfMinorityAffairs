@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
@@ -7,6 +8,8 @@ import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
@@ -18,11 +21,11 @@ class HomeController extends GetxController with SnackBarMixin{
   final AuthService authService;
   final SubmissionRepository submissionRepo;
   final ProjectDetailRepo projectRepo;
-  //final ProjectDao projectDao;
+  
 
   HomeController(this.repo,this.authService,this.submissionRepo,this.projectRepo);
   // User info
-  final userName = 'Ramesh'.obs;
+  final userName = ''.obs;
   
   // Dashboard statistics
   final dashboardStats = Rx<DashboardStats>(
@@ -37,119 +40,68 @@ class HomeController extends GetxController with SnackBarMixin{
   );
 
   // Work list
-  final workList = <ProjectModel>[].obs;
   final isLoading = false.obs;
   Rx<HomeData> data = HomeData().obs;
   RxBool hasInternet=true.obs;
+  final RxList<UserProject> projects = <UserProject>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-   //checkInternet();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-    getDashboardCount();
-    });
-    _loadStaticData();
-    _syncPendingSubmissions();
+   checkInternet();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    // getDashboardCount();
+    // });
+    // _loadStaticData();
+    // _syncPendingSubmissions();
     
   }
 
   Future<void> checkInternet()async{
      hasInternet.value = await NetworkService.hasInternet();
     if(hasInternet.value==true){
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-    getDashboardCount();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await getDashboardCount();
+    await loadProjects();
     });
-    _loadStaticData();
-    _syncPendingSubmissions();
+    
     }
   }
 
-  void _loadStaticData() {
-    // Static data for demonstration
-    workList.value = [
-      ProjectModel(
-        id: 'UPDW20090274',
-        title: 'Installation of hand pumps at various locations',
-        location: 'SHAHJAHANPUR',
-        status: 'in_progress',
-        updatedAt: DateTime.now().subtract(const Duration(days: 90)),
-        isGeotagged: true,
-        department: 'Govt. Boys School',
-      ),
-      ProjectModel(
-        id: 'UPDW20090275',
-        title: 'Construction of community hall',
-        location: 'AMETHI',
-        status: 'not_started',
-        updatedAt: DateTime.now().subtract(const Duration(days: 45)),
-        isGeotagged: false,
-        department: 'Community Center',
-      ),
-      ProjectModel(
-        id: 'UPDW20090276',
-        title: 'Electrification of minority area villages',
-        location: 'LUCKNOW',
-        status: 'in_progress',
-        updatedAt: DateTime.now().subtract(const Duration(days: 15)),
-        isGeotagged: true,
-        department: 'Power Department',
-      ),
-      ProjectModel(
-        id: 'UPDW20090277',
-        title: 'Construction of toilets in schools',
-        location: 'BAREILLY',
-        status: 'completed',
-        updatedAt: DateTime.now().subtract(const Duration(days: 5)),
-        isGeotagged: true,
-        department: 'Education Department',
-      ),
-      ProjectModel(
-        id: 'UPDW20090278',
-        title: 'Road construction and maintenance',
-        location: 'MORADABAD',
-        status: 'in_progress',
-        updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-        isGeotagged: false,
-        department: 'PWD',
-      ),
-      ProjectModel(
-        id: 'UPDW20090279',
-        title: 'Drinking water supply scheme',
-        location: 'ALIGARH',
-        status: 'not_started',
-        updatedAt: DateTime.now().subtract(const Duration(days: 60)),
-        isGeotagged: true,
-        department: 'Jal Nigam',
-      ),
-      ProjectModel(
-        id: 'UPDW20090280',
-        title: 'Skill development center establishment',
-        location: 'RAMPUR',
-        status: 'in_progress',
-        updatedAt: DateTime.now().subtract(const Duration(days: 20)),
-        isGeotagged: false,
-        department: 'Skill Development',
-      ),
-      ProjectModel(
-        id: 'UPDW20090281',
-        title: 'Anganwadi center renovation',
-        location: 'PILIBHIT',
-        status: 'completed',
-        updatedAt: DateTime.now().subtract(const Duration(days: 10)),
-        isGeotagged: true,
-        department: 'Women & Child',
-      ),
-    ];
+  
+
+  Future<void> loadProjects() async{
+    try {
+      showAlertCustom(
+        backBtnDisable: true,
+        title: "Fetching..."
+      );
+      final modelData = await repo.getAssignedProjects();
+      
+      if (modelData?.statusCode == "200") {
+        Get.back();
+        if (modelData?.data != null && modelData?.data?.projects !=null) {
+          projects.value = modelData!.data?.projects??[];
+        }
+      } else {
+        Get.back();
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      
+      Get.back();
+     
+    } finally {
+      isLoading(false);
+    }
+    //_syncPendingSubmissions();
   }
 
-  void onUpdateProgressTap(ProjectModel project) {
+  void onUpdateProgressTap(ProjectDetails project) {
     // Navigate to project detail/update page
-    Get.snackbar(
-      'Update Progress',
-      'Navigating to update progress for ${project.id}',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Get.toNamed(AppRoutes.workDetail,arguments: {
+      "project":project
+    });
   }
 
   void onViewAllTap() {
@@ -194,7 +146,7 @@ class HomeController extends GetxController with SnackBarMixin{
   }
 
 
-  void getDashboardCount() async{
+  Future<void> getDashboardCount() async{
     
     try {
       showAlertCustom(
@@ -207,6 +159,7 @@ class HomeController extends GetxController with SnackBarMixin{
         Get.back();
         if (modelData?.data != null) {
           data.value = modelData!.data!;
+          userName(data.value.user?.name??"");
         }
       } else {
         Get.back();
@@ -239,9 +192,15 @@ Future<void> _syncPendingSubmissions() async {
   }
 
   debugPrint('Syncing ${pendingList.length} pending submissions');
+    final uniquePendingList = _uniqueByProjectId(pendingList);
+
+debugPrint(
+    'Syncing ${uniquePendingList.length} '
+    'unique projects (from ${pendingList.length})',
+  );
 
   //Upload one by one
-  for (final item in pendingList) {
+  for (final item in uniquePendingList) {
     try {
       showAlertCustom(
         backBtnDisable: true,
@@ -257,7 +216,7 @@ Future<void> _syncPendingSubmissions() async {
 
       //Mark as synced on success
       if (response.statusCode == '200') {
-        await submissionRepo.markAsSynced(item.submission.id);
+        await submissionRepo.markAsSynced(item.submission.projectId);
         debugPrint('Synced submission ${item.submission.id}');
         Get.back();
       }
@@ -267,6 +226,23 @@ Future<void> _syncPendingSubmissions() async {
     }
   }
 }
+
+List<PendingSubmission> _uniqueByProjectId(
+    List<PendingSubmission> list) {
+
+  final seen = <String>{};
+  final result = <PendingSubmission>[];
+
+  for (final item in list) {
+    final projectId = item.submission.projectId;
+    if (seen.add(projectId)) {
+      result.add(item); // first occurrence kept
+    }
+  }
+
+  return result;
+}
+
 
 
 

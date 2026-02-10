@@ -9,7 +9,8 @@ class HeaderText extends StatelessWidget {
   final String text;
   final Color color;
   final TextAlign textAlign;
-  const HeaderText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start});
+  final FontWeight fontWeight;
+  const HeaderText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start,this.fontWeight=FontWeight.w700});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,8 @@ class HeaderText extends StatelessWidget {
       textAlign: textAlign,
       style: Get.textTheme.headlineMedium?.copyWith(
         color: color,
-        fontWeight: FontWeight.w700,
+        fontWeight: fontWeight,
+        fontFamily: "Montserrat"
       ),
     );
   }

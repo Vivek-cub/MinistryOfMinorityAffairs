@@ -205,7 +205,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
         // Footer with Submit Button
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF8B4513), // Brown color from screenshot
+           // color: const Color(0xFF8B4513), // Brown color from screenshot
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -218,6 +218,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
           child: SafeArea(
             child: AuthSubmitButton(
                 title: "Submit",
+                isEnabled: true,
                // isEnabled: controller.isSubmitting.value,
                 onPressed: () {
                     controller.submitData();

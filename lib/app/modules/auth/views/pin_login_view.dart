@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/controllers/pin_login_controller.dart';
+import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 
 /// PIN Login View
 /// Allows users to login using their 4-digit PIN
@@ -39,62 +42,47 @@ class PinLoginView extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Title
-                const Text(
-                  'PRADHAN MANTRI JAN VIKAS KARYAKRAM (PMJVK)',
+                CustomText(
+                  text: LanuageConstant.appTitle,
+                  fontWeight: FontWeight.bold,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    letterSpacing: 0.5,
                   ),
-                ),
 
+                
                 const SizedBox(height: 4),
 
                 const Text(
-                  'अल्पसंख्यक कार्य मंत्रालय',
+                  LanuageConstant.appTitleHindi,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 10, color: AppColors.textSecondary,
+                    fontFamily: "Montserrat"
+                    ),
                 ),
 
                 const SizedBox(height: 2),
-
-                const Text(
-                  'MINISTRY OF MINORITY AFFAIRS',
+                CustomText(
+                  text: LanuageConstant.moma,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
 
-                const SizedBox(height: 60),
+                  ),
+               
+
+                const SizedBox(height: AppDimensions.gigantic),
 
                 // Main Heading
-                const Text(
-                  'Please Enter Your PIN',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                HeaderText(
+                  text: LanuageConstant.enterPinText,
                   ),
-                ),
+                
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppDimensions.xs),
 
                 // Subtitle
-                const Text(
-                  'Use your 4-digit PIN to login',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                CustomText(
+                  text: 'Use your 4-digit PIN to login',
                   ),
-                ),
+                
 
                 const SizedBox(height: 40),
 

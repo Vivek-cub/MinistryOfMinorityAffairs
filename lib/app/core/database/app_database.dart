@@ -34,13 +34,27 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase._internal() : super(_openConnection());
+
+  static final AppDatabase instance = AppDatabase._internal();
+  factory AppDatabase() => instance;
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 7;
 
-  
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+        if (from < 7) {
+          await m.addColumn(localProjects, localProjects.projectUniqueId);
+        }
+      },
+      );
 }
+
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
@@ -48,4 +62,6 @@ LazyDatabase _openConnection() {
     final file = File('${dir.path}/app.db');
     return NativeDatabase(file);
   });
+
+  
 }

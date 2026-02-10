@@ -59,10 +59,10 @@ class WorkProgressCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (project.project?.id !=null) ...[
+              if (project.project?.projectUniqueId !=null) ...[
                 const SizedBox(width: 8),
                 Text(
-                  project.project?.id??"",
+                  project.project?.projectUniqueId??"",
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -103,7 +103,7 @@ class WorkProgressCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                project.project?.createdAt.toString()??"",
+                project.project?.createdAt !=null? project.project?.createdAt.toString()??"":"",
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,

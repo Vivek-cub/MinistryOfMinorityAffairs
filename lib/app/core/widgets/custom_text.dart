@@ -9,7 +9,8 @@ class CustomText extends StatelessWidget {
   final String text;
   final Color color;
   final TextAlign textAlign;
-  const CustomText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start});
+  final FontWeight fontWeight;
+  const CustomText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start,this.fontWeight=FontWeight.w500});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,8 @@ class CustomText extends StatelessWidget {
       textAlign: textAlign,
       style: AppTextTheme.bodySmall1.copyWith(
         color: color,
-        fontWeight: FontWeight.w500,
+        fontWeight: fontWeight,
+        fontFamily: "Montserrat"
       ),
     );
   }
