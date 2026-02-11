@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
 
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/controllers/mobile_number_controller.dart';
 
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/data/repo/send_mobile_otp_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_header.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 
 /// Mobile Number Entry Screen
 /// Allows users to enter their mobile number for authentication
@@ -32,17 +35,13 @@ class MobileNumberView extends GetView<MobileNumberController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                
+                const SizedBox(height: AppDimensions.sideIndicator2Height),
                 AuthHeader(),
                 // Main Heading
-                const Text(
-                  'Enter Your Mobile Number',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                HeaderText(
+                  text: LanuageConstant.enterPhoneText
                   ),
-                ),
+                
 
                 const SizedBox(height: AppDimensions.md),
                     
@@ -71,6 +70,7 @@ class MobileNumberView extends GetView<MobileNumberController> {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
+                            fontFamily: "Montserrat"
                           ),
                         ),
                       ),
@@ -105,15 +105,33 @@ class MobileNumberView extends GetView<MobileNumberController> {
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(10),
                           ],
+                          style: TextStyle(
+                            fontFamily: "Montserrat"
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                     
-                const SizedBox(height: 32),
+                const SizedBox(height: AppDimensions.gigantic),
                     
                 // Next Button
+                Obx(
+                (){
+                  final isEnabled = controller.isButtonEnabled.value;
+                  return AuthSubmitButton(
+                    title: "Next",
+                    isEnabled: isEnabled,
+                    onPressed: (){
+                        if (isEnabled) {
+                          controller.sendOTP(controller.phoneController.text.trim());
+                        }
+                      },
+                    ); 
+                }
+              ),
+              /*
                 Obx(() {
                   final isEnabled = controller.isButtonEnabled.value;
                   return SizedBox(
@@ -156,6 +174,7 @@ class MobileNumberView extends GetView<MobileNumberController> {
                     ),
                   );
                 }),
+                */
               ],
             ),
           ),

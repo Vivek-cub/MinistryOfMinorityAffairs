@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 
 /// Reusable photo upload widget
 /// Displays a dashed border box with camera icon for photo upload
@@ -52,14 +53,15 @@ class PhotoUploadWidget extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.camera_alt_outlined,
-                              size: 40,
+                              size: 30,
                               color: AppColors.textHint,
                             ),
                             const SizedBox(height: 8),
+                            
                             Text(
                               label ?? 'Tap to take a photo',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 10,
                                 color: AppColors.textHint,
                               ),
                               textAlign: TextAlign.center,

@@ -12,6 +12,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/mi
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/selectable_milestone_card.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/controllers/audio_recorder_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projects/views/audio_recorder_widget.dart';
+import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 import '../controller/work_detail_controller.dart';
 
 /// Work Detail view
@@ -25,7 +26,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: AppColors.primary,
+        statusBarColor: Colors.transparent,
         systemNavigationBarColor: AppColors.background,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
@@ -39,27 +40,13 @@ class WorkDetailView extends GetView<WorkDetailController> {
               Column(
                 children: [
                   // Header with search icon
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      WorkProgressHeader(
-                        title: 'Work Detail',
-                        subtitle: 'Track Progress of works in real-time',
-                        avatarAssetPath: 'assets/images/emblem.png',
-                      ),
-                      // Search icon in header
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + 20,
-                        right: 20,
-                        child: IconButton(
-                          icon: const Icon(Icons.search, color: Colors.white),
-                          onPressed: () {
-                            // TODO: Implement search functionality
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                   WorkProgressHeader(
+                      //title: controller.screenTitle,
+                      title: "Work Detail",
+                      subtitle: 'Track Progress of works in real-time',
+                      avatarAssetPath: ImageAssets.emblemImage,
+                    ),
+                  
                   // Content
                   Expanded(
                     child: SingleChildScrollView(
@@ -101,32 +88,38 @@ class WorkDetailView extends GetView<WorkDetailController> {
                           ),
                           const SizedBox(height: 12),
                           Obx(
-                            () => Row( 
-                              children: List.generate(3, (index) {
-                                return Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      right: index < 2 ? 12 : 0,
-                                    ),
+                            () => SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(3, (index) {
+                                  return Container(
+                                    width: MediaQuery.of(context).size.width * 0.30,
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
                                     child: PhotoUploadWidget(
                                       imagePath: controller.photos[index],
-                                      onTap:
-                                          ()async{
-                                            final insideGeofence= await controller.checkGeoFence(controller.data.value.lat??0.0,controller.data.value.lng??0.0);
-                                            if(insideGeofence==true){
-                                              controller
-                                              .showPhotoSourceDialog(index);
-                                            }else{
-                                              PopupMixin().showErrorDialog(context,message: "You are outside the loaction");
-                                            }
-                                          },
+                                      onTap: () async {
+                                        final insideGeofence = await controller.checkGeoFence(
+                                          controller.data.value.lat ?? 0.0,
+                                          controller.data.value.lng ?? 0.0,
+                                        );
+
+                                        if (insideGeofence) {
+                                          controller.showPhotoSourceDialog(index);
+                                        } else {
+                                          PopupMixin().showErrorDialog(
+                                            Get.context!,
+                                            message: "You are outside the location",
+                                          );
+                                        }
+                                      },
                                       label: 'Tap to take a photo',
                                     ),
-                                  ),
-                                );
-                              }),
+                                  );
+                                }),
+                              ),
                             ),
                           ),
+
                           const SizedBox(height: 24),
                           Obx(() {
                             return CapturedVideoPreview(
@@ -217,6 +210,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: SafeArea(
             child: AuthSubmitButton(
+              height: 44,
                 title: "Submit",
                 isEnabled: true,
                // isEnabled: controller.isSubmitting.value,

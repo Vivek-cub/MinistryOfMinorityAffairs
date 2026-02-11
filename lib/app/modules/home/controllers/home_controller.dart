@@ -60,10 +60,11 @@ class HomeController extends GetxController with SnackBarMixin{
   Future<void> checkInternet()async{
      hasInternet.value = await NetworkService.hasInternet();
     if(hasInternet.value==true){
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await getDashboardCount();
+       await getDashboardCount();
     await loadProjects();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+   
+    // });
     
     }
   }
@@ -94,7 +95,7 @@ class HomeController extends GetxController with SnackBarMixin{
     } finally {
       isLoading(false);
     }
-    //_syncPendingSubmissions();
+    _syncPendingSubmissions();
   }
 
   void onUpdateProgressTap(ProjectDetails project) {
@@ -106,7 +107,14 @@ class HomeController extends GetxController with SnackBarMixin{
 
   void onViewAllTap() {
     // Navigate to work in progress screen
-    Get.toNamed(AppRoutes.workInProgress);
+    Get.toNamed(
+      AppRoutes.projectList,
+      arguments: {
+                  'status': "get_assigned",
+                  'paramName': "get_assigned",
+                  'statusFilter': "",
+                  },
+      );
   }
 
   void onChangePinTap() {

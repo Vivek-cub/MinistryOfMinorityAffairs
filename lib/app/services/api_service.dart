@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/dio_error_handler.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/interceptor/network_interceptor.dart';
-import 'package:ministry_of_minority_affairs/curl_interceptor.dart';
+import 'package:ministry_of_minority_affairs/app/services/interceptor/curl_interceptor.dart';
 
 
 class ApiService extends GetxService {

@@ -9,7 +9,8 @@ class TitleText extends StatelessWidget {
   final Color color;
   final TextAlign textAlign;
   final FontWeight fontWeight;
-  const TitleText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start,this.fontWeight=FontWeight.w500});
+  final int maxLines;
+  const TitleText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start,this.fontWeight=FontWeight.w500,this.maxLines=1});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +20,9 @@ class TitleText extends StatelessWidget {
       style: Get.textTheme.headlineSmall?.copyWith(
         color: color,
         fontWeight: fontWeight,
-        fontFamily: "Montserrat"
+        fontFamily: "Montserrat",
       ),
+      maxLines: maxLines,
     );
   }
 }

@@ -6,5 +6,6 @@ abstract class ProjectListRepo {
   Future<ProjectResponse?> getProjectList({required String status,required String paramName,required String sectorId});
   Future<ProjectResponse?> getProjectListByGeoTagged({required bool status,required String paramName, required String sectorId});
   Future<CategoryResponse?> getAllSector();
+  Future<ProjectResponse?> getAssignedProjects();
 
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
+import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 import '../controllers/not_started_controller.dart';
 
 /// Not Started view
@@ -29,7 +30,7 @@ class NotStartedView extends GetView<NotStartedController> {
               WorkProgressHeader(
                 title: controller.screenTitle,
                 subtitle: 'Track Progress of works in real-time',
-                avatarAssetPath: 'assets/images/emblem.png',
+                avatarAssetPath: ImageAssets.emblemImage,
               ),
               // Search and Filters Section
               Padding(

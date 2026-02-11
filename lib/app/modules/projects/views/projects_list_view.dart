@@ -29,7 +29,7 @@ class ProjectsListView extends GetView<ProjectsListController> {
             children: [
               // Header
               WorkProgressHeader(
-                title: controller.screenTitle,
+                //title: controller.screenTitle,
                 subtitle: 'Track Progress of works in real-time',
                 avatarAssetPath: 'assets/images/emblem.png',
               ),

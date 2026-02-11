@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
+import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
 class AuthHeader extends StatelessWidget {
   const AuthHeader({super.key});
@@ -11,11 +12,9 @@ class AuthHeader extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: AppDimensions.lg),
-                    
                 // Government Logo
                 Image.asset(
-                  'assets/images/emblem.png',
+                  ImageAssets.emblemImage,
                   color: AppColors.governmentBlue,
                   height: 100,
                   errorBuilder: (context, error, stackTrace) {
@@ -34,6 +33,8 @@ class AuthHeader extends StatelessWidget {
                     text: 'PRADHAN MANTRI JAN VIKAS KARYAKRAM (PMJVK)',
                   textAlign: TextAlign.center,
                   color: AppColors.textPrimary,
+                  maxLines: 3,
+                  fontWeight: FontWeight.w600,
                 ),
 
                     
@@ -59,7 +60,7 @@ class AuthHeader extends StatelessWidget {
                   ),
                 ),
                     
-                const SizedBox(height: AppDimensions.lg),
+                const SizedBox(height: AppDimensions.xxxl),
       ],
     );
   }

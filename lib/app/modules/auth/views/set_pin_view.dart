@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/controllers/set_pin_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_header.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 
 /// Set PIN View
 /// Allows users to create a 4-digit PIN for quick login
@@ -20,83 +25,21 @@ class SetPinView extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: AppDimensions.gigantic),
             
-                // Government Logo
-                Image.asset(
-                  'assets/images/emblem.png',
-                  color: AppColors.governmentBlue,
-                  height: 80,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.account_balance,
-                      size: 80,
-                      color: AppColors.governmentBlue,
-                    );
-                  },
-                ),
+                AuthHeader(),
             
-                const SizedBox(height: 16),
-            
-                // Title
-                const Text(
-                  'PRADHAN MANTRI JAN VIKAS KARYAKRAM (PMJVK)',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-            
-                const SizedBox(height: 4),
-            
-                const Text(
-                  'अल्पसंख्यक कार्य मंत्रालय',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
-                ),
-            
-                const SizedBox(height: 2),
-            
-                const Text(
-                  'MINISTRY OF MINORITY AFFAIRS',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-            
-                const SizedBox(height: 50),
             
                 // Main Heading
-                const Text(
-                  'Set Your 4-Digit PIN',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+                HeaderText(text: "Set Your 4-Digit PIN"),
+                
             
-                const SizedBox(height: 16),
             
                 // Subtitle
-                const Text(
-                  'This PIN will be used for quick logins in\nthe future. Keep it confidential.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
+                CustomText(text: "This PIN will be used for quick logins in\nthe future. Keep it confidential.",textAlign: TextAlign.center,),
+                
             
-                const SizedBox(height: 40),
+                const SizedBox(height: AppDimensions.md),
             
                 // PIN Input Fields
               Wrap(
@@ -141,7 +84,7 @@ class SetPinView extends StatelessWidget {
               ),
 
 
-              const SizedBox(height: 40),
+              const SizedBox(height: AppDimensions.md),
             
                 // Remember PIN Checkbox
                 Obx(
@@ -194,53 +137,21 @@ class SetPinView extends StatelessWidget {
                 const SizedBox(height: 32),
             
                 // Create PIN Button
-                Obx(() {
+                Obx(
+                (){
                   final isEnabled = controller.isButtonEnabled.value;
-                  return Container(
-                    width: double.infinity,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      gradient:
-                          isEnabled
-                              ? const LinearGradient(
-                                colors: [Color(0xFFFFA726), Color(0xFFEF5350)],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              )
-                              : null,
-                      color: isEnabled ? null : const Color(0xFFCCCCCC),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: isEnabled ? controller.createPin : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.transparent,
-                        disabledForegroundColor: Colors.white,
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Create your PIN',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, size: 20),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+                  return AuthSubmitButton(
+                    title: 'Create your PIN',
+                    isEnabled: isEnabled,
+                    onPressed: (){
+                        if (isEnabled) {
+                          controller.createPin();
+                        }
+                      },
+                    ); 
+                }
+              ),
+                
                 
               ],
             ),

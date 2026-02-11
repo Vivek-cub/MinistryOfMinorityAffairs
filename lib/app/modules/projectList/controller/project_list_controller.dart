@@ -34,20 +34,7 @@ class ProjectsListController extends GetxController with SnackBarMixin,PopupMixi
   // Loading state
   final isLoading = false.obs;
   
-  // Screen title based on status
-  String get screenTitle {
-    switch (statusFilter.value) {
-      case 'in_progress':
-        return 'Work In Progress';
-      case 'completed':
-        return 'Completed Tasks';
-      case 'not_started':
-        return 'Not Started';
-      default:
-        return 'Projects';
-    }
-  }
-
+  
   RxString status="".obs;
   RxBool geoStatus=false.obs;
 
@@ -87,6 +74,8 @@ if(paramName.value=="geoTagged"){
         loadProjectsbyGeoTagged();
       }else if(paramName.value=="noInternet"){
           loadOfflineProjects();
+      }else if(paramName.value=="get_assigned"){
+        loadProjectsbyAssigned();
       }
       else{
         loadProjects();
@@ -170,6 +159,33 @@ projects.value = localProjects
     isLoading(false);
   }
 }
+
+Future<void> loadProjectsbyAssigned() async{
+    try {
+      showAlertCustom(
+        backBtnDisable: true,
+        title: "Fetching..."
+      );
+      final modelData = await repo.getAssignedProjects();
+      
+      if (modelData?.statusCode == "200") {
+        Get.back();
+        if (modelData?.data != null && modelData?.data?.projects !=null) {
+          projects.value = modelData!.data?.projects??[];
+        }
+      } else {
+        Get.back();
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      
+      Get.back();
+     
+    } finally {
+      isLoading(false);
+    }
+    //_syncPendingSubmissions();
+  }
 
 
 

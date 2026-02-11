@@ -5,6 +5,8 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/controllers/pin_login_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_header.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 
 /// PIN Login View
@@ -23,52 +25,10 @@ class PinLoginView extends StatelessWidget {
           child: SingleChildScrollView(
             child:  Column(
               children: [
-                const SizedBox(height: 40),
-
-                // Government Logo
-                Image.asset(
-                  'assets/images/emblem.png',
-                  color: AppColors.governmentBlue,
-                  height: 80,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.account_balance,
-                      size: 80,
-                      color: AppColors.governmentBlue,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // Title
-                CustomText(
-                  text: LanuageConstant.appTitle,
-                  fontWeight: FontWeight.bold,
-                  textAlign: TextAlign.center,
-                  ),
-
-                
-                const SizedBox(height: 4),
-
-                const Text(
-                  LanuageConstant.appTitleHindi,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 10, color: AppColors.textSecondary,
-                    fontFamily: "Montserrat"
-                    ),
-                ),
-
-                const SizedBox(height: 2),
-                CustomText(
-                  text: LanuageConstant.moma,
-                  textAlign: TextAlign.center,
-
-                  ),
-               
 
                 const SizedBox(height: AppDimensions.gigantic),
+            
+                AuthHeader(),
 
                 // Main Heading
                 HeaderText(
@@ -76,7 +36,7 @@ class PinLoginView extends StatelessWidget {
                   ),
                 
 
-                const SizedBox(height: AppDimensions.xs),
+               
 
                 // Subtitle
                 CustomText(
@@ -84,7 +44,7 @@ class PinLoginView extends StatelessWidget {
                   ),
                 
 
-                const SizedBox(height: 40),
+                const SizedBox(height: AppDimensions.md),
 
                 // PIN Input Fields
 
@@ -129,7 +89,7 @@ class PinLoginView extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                
 
                 // Forgot PIN Link
                 TextButton(
@@ -140,6 +100,7 @@ class PinLoginView extends StatelessWidget {
                       fontSize: 14,
                       color: Color(0xFF2196F3),
                       fontWeight: FontWeight.w500,
+                      fontFamily: "Montserrat"
                     ),
                   ),
                 ),
@@ -147,6 +108,21 @@ class PinLoginView extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Login Button
+                Obx(
+                (){
+                  final isEnabled = controller.isButtonEnabled.value;
+                  return AuthSubmitButton(
+                    title: "Enter OTP",
+                    isEnabled: isEnabled,
+                    onPressed: (){
+                        if (isEnabled) {
+                          controller.login();
+                        }
+                      },
+                    ); 
+                }
+              ),
+              /*
                 Obx(() {
                   final isEnabled = controller.isButtonEnabled.value;
                   return Container(
@@ -196,6 +172,7 @@ class PinLoginView extends StatelessWidget {
                     ),
                   );
                 }),
+                */
               ],
             ),
           ),

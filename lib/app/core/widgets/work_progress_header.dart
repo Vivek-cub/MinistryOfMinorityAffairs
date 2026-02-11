@@ -14,8 +14,8 @@ class WorkProgressHeader extends StatelessWidget {
 
   const WorkProgressHeader({
     super.key,
-    this.title = 'Work In Progress',
-    this.subtitle = 'Track Progress of works in real-time',
+    this.title = '',
+    this.subtitle = '',
     this.avatarAssetPath,
     this.onAvatarTap,
   });
@@ -27,14 +27,14 @@ class WorkProgressHeader extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
+                  colors: [
+                    Color(0xFFFFB84D),
+                    Color(0xFFFF6B6B),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+        
       ),
       padding: EdgeInsets.fromLTRB(20, statusBarHeight + 20, 20, 20),
       child: Row(
@@ -45,13 +45,12 @@ class WorkProgressHeader extends StatelessWidget {
               width: 54,
               height: 54,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+               
                 image:
                     avatarAssetPath != null
                         ? DecorationImage(
                           image: AssetImage(avatarAssetPath!),
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill,
                         )
                         : null,
                 color:
@@ -71,8 +70,7 @@ class WorkProgressHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TitleText(text: title,color: AppColors.textWhite,),
-              
+                TitleText(text: title,color: AppColors.textWhite,fontWeight: FontWeight.bold,),
                 CustomText(
                   text: subtitle,color: AppColors.textWhite,
                   ),

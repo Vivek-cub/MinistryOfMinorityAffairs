@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 class AuthSubmitButton extends StatelessWidget {
   final String title;
    bool isEnabled;
    VoidCallback? onPressed;
-   AuthSubmitButton({super.key,required this.title,this.isEnabled=false,this.onPressed});
+   double height;
+   AuthSubmitButton({super.key,required this.title,this.isEnabled=false,this.onPressed,this.height=56});
 
   @override
   Widget build(BuildContext context) {
    return Container(
       width: double.infinity,
-      height: 56,
-      margin: EdgeInsets.symmetric(horizontal: AppDimensions.sm),
+      height: height,
+     // margin: EdgeInsets.symmetric(horizontal: AppDimensions.sm),
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: isEnabled
