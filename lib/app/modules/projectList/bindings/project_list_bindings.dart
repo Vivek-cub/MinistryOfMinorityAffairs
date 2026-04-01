@@ -17,7 +17,7 @@ class ProjectListBindings extends Bindings {
     final db = Get.find<AppDatabase>();
     final dao = ProjectDao(db);
     final repo = ProjectRepository(dao);
-    Get.lazyPut<ProjectsListController>(() => ProjectsListController(
+    Get.lazyPut<ProjectListController>(() => ProjectListController(
         ProjectListRepoImpl(Get.find<ApiService>()),
         Get.find<AuthService>(),
         repo

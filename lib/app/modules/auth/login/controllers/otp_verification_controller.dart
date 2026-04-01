@@ -24,6 +24,9 @@ class OtpVerificationController extends GetxController with SnackBarMixin,PopupM
   
   final RxBool isButtonEnabled = false.obs;
   final RxString phoneNumber = ''.obs;
+  RxBool isVerifying = false.obs;
+  RxString otp="".obs;
+
   
   @override
   void onInit() {
@@ -32,62 +35,83 @@ class OtpVerificationController extends GetxController with SnackBarMixin,PopupM
     phoneNumber.value = Get.arguments['phoneNumber'] ?? '';
     
     // Add listeners to all OTP fields
-    for (var controller in otpControllers) {
-      controller.addListener(_validateOTP);
-    }
+    // for (var controller in otpControllers) {
+    //   controller.addListener(validateOTP);
+    // }
   }
   
   @override
   void onClose() {
-    for (var controller in otpControllers) {
-      controller.dispose();
-    }
-    for (var node in focusNodes) {
-      node.dispose();
-    }
+    // for (var controller in otpControllers) {
+    //   controller.dispose();
+    // }
+    // for (var node in focusNodes) {
+    //   node.dispose();
+    // }
     super.onClose();
   }
   
-  /// Validate OTP and enable/disable button
-  void _validateOTP() {
-    // Enable button if all 4 digits are filled
-    bool allFilled = otpControllers.every((controller) => controller.text.isNotEmpty);
-    isButtonEnabled.value = allFilled;
-  }
+  // /// Validate OTP and enable/disable button
+  // void validateOTP() {
+  //   // Enable button if all 4 digits are filled
+  //   bool allFilled = otpControllers.every((controller) => controller.text.isNotEmpty);
+  //   isButtonEnabled.value = allFilled;
+  //   if (allFilled && !isVerifying.value) {
+  //   verifyOTP();
+  // }
+  // }
   
   /// Handle text change in OTP field
-  void onOtpChanged(String value, int index) {
-    if (value.isNotEmpty && index < 3) {
-      // Move to next field
-      focusNodes[index + 1].requestFocus();
-    }
-    _validateOTP();
-  }
+
+//   void onOtpChanged(String value, int index) {
+//   if (value.isNotEmpty) {
+//     // Move to next field
+//     if (index < otpControllers.length - 1) {
+//       focusNodes[index + 1].requestFocus();
+//     } else {
+//       focusNodes[index].unfocus();
+//       validateOTP(); // Optional auto-submit
+//     }
+//   } else {
+//     // If backspace pressed and field is empty
+//     if (index > 0) {
+//       otpControllers[index - 1].clear();
+//       focusNodes[index - 1].requestFocus();
+//     }
+//   }
+// }
+
   
   /// Handle backspace in OTP field
-  void onOtpBackspace(int index) {
-    if (index > 0) {
-      // Move to previous field
-      focusNodes[index - 1].requestFocus();
-    }
-  }
+  // void onOtpBackspace(int index) {
+  //   if (index > 0) {
+  //     // Move to previous field
+  //     focusNodes[index - 1].requestFocus();
+  //   }
+  // }
   
-  /// Get complete OTP
-  String getOTP() {
-    return otpControllers.map((controller) => controller.text).join();
-  }
+  // /// Get complete OTP
+  // String getOTP() {
+  //   return otpControllers.map((controller) => controller.text).join();
+  // }
   
   /// Verify OTP
-  void verifyOTP() async{
-    if (!isButtonEnabled.value) return;
-    String enteredOtp=getOTP();
+  void verifyOTP(String otp) async{
+    // if (!isButtonEnabled.value) return;
+    // String enteredOtp=getOTP();
+    if(otp.length !=4){
+      showErrorDialog(Get.context!,message: "Please fill correct otp");
+    }
     
 try {
+      if (isVerifying.value) return;
+
+      isVerifying.value = true;
       showAlertCustom(
         backBtnDisable: true,
         title: "Login..."
       );
-      final modelData = await sendMobileOtpRepo.verifyOTP(mobileNo: phoneNumber.value,otp: enteredOtp);
+      final modelData = await sendMobileOtpRepo.verifyOTP(mobileNo: phoneNumber.value,otp: otp);
       if (modelData?.data != null) {
         
         if (modelData?.statusCode == '200') {
@@ -113,7 +137,7 @@ try {
       Get.back();
       //debugPrint(e.toString());
     } finally {
-      
+      isVerifying.value = false;
     }
   }
   
@@ -122,12 +146,12 @@ try {
     // TODO: Integrate with actual OTP resend API
     
     // Clear all OTP fields
-    for (var controller in otpControllers) {
-      controller.clear();
-    }
+    // for (var controller in otpControllers) {
+    //   controller.clear();
+    // }
     
-    // Focus on first field
-    focusNodes[0].requestFocus();
+    // // Focus on first field
+    // focusNodes[0].requestFocus();
     
     // Show success message
     Get.snackbar(

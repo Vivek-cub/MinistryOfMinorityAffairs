@@ -5,6 +5,7 @@ enum SStorageKeys {
   token,
   userId,
   mobilePin,
+  simFingerprint,
 
 }
 

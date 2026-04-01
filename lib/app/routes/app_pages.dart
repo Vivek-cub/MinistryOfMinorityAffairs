@@ -1,4 +1,10 @@
 import 'package:get/get.dart';
+import 'package:ministry_of_minority_affairs/app/modules/calender/bindings/calendar_project_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/calender/views/calendar_project.dart';
+import 'package:ministry_of_minority_affairs/app/modules/pin/bindings/check_old_pin_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/pin/views/check_old_pin.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/upload_project_details_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/upload_project_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/bindings/project_list_bindings.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/views/project_list_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/splash/bindings/splash_binding.dart';
@@ -13,13 +19,8 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/views/mobile_numbe
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/otp_verification_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/set_pin_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/pin_login_view.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/work_in_progress_binding.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/completed_projects_binding.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/bindings/not_started_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/work_detail_binding.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/views/work_in_progress_view.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/views/completed_projects_view.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/views/not_started_view.dart';
+
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/work_detail_view.dart';
 import 'app_routes.dart';
 
@@ -65,6 +66,13 @@ class AppPages {
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
+      name: AppRoutes.oldPinCheck,
+      page: () =>  CheckOldPin(),
+      binding: CheckOldPinBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
       name: AppRoutes.home,
       page: () => HomeView(),
       binding: HomeBinding(),
@@ -72,27 +80,7 @@ class AppPages {
       transitionDuration: const Duration(milliseconds: 300),
     ),
     // Projects routes
-    GetPage(
-      name: AppRoutes.workInProgress,
-      page: () => const WorkInProgressView(),
-      binding: WorkInProgressBinding(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    GetPage(
-      name: AppRoutes.completedProjects,
-      page: () => const CompletedProjectsView(),
-      binding: CompletedProjectsBinding(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-    GetPage(
-      name: AppRoutes.notStartedProjects,
-      page: () => const NotStartedView(),
-      binding: NotStartedBinding(),
-      transition: Transition.rightToLeft,
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
+    
     GetPage(
       name: AppRoutes.workDetail,
       page: () =>  WorkDetailView(),
@@ -104,6 +92,20 @@ class AppPages {
       name: AppRoutes.projectList,
       page: () =>  ProjectListView(),
       binding: ProjectListBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.uploadProjectDetails,
+      page: () =>  UploadProjectDetails(),
+      binding: UploadProjectDetailsBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.calendarProject,
+      page: () =>  CalendarProject(),
+      binding: CalendarProjectBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

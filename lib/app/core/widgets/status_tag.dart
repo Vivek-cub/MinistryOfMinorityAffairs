@@ -15,24 +15,13 @@ class StatusTag extends StatelessWidget {
     this.dotColor,
   });
 
-  String get _statusLabel {
-    switch (status) {
-      case 'in_progress':
-        return 'Work In Progress';
-      case 'not_started':
-        return 'Not Started';
-      case 'Completed':
-        return 'Completed';
-      default:
-        return 'Unknown';
-    }
-  }
+  
 
   Color get _statusColor {
     switch (status) {
-      case 'in_progress':
+      case 'Assigned':
         return const Color(0xFFFFC107); // Yellow/Gold
-      case 'not_started':
+      case 'In Progress':
         return Colors.red;
       case 'Completed':
         return Colors.green;
@@ -78,7 +67,7 @@ class StatusTag extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            _statusLabel,
+            status,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,

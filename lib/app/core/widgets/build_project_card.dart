@@ -6,7 +6,7 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
-class BuildProjectCard extends StatelessWidget{
+class BuildProjectCard extends StatelessWidget {
   final ProjectDetails project;
   final VoidCallback? onPressed;
   BuildProjectCard(this.project, this.onPressed);
@@ -15,95 +15,78 @@ class BuildProjectCard extends StatelessWidget{
     return buildProjectCard(project, onPressed);
   }
 
-  Widget buildProjectCard(ProjectDetails project,VoidCallback? onPressed) {
+  Widget buildProjectCard(ProjectDetails project, VoidCallback? onPressed) {
     Color statusColor;
     Color statusBgColor;
 
     switch (project.status) {
       case 'In Progress':
         statusColor = Colors.orange;
-        statusBgColor = Colors.orange.withOpacity(0.1);
+        statusBgColor = Colors.orange.withValues(alpha: 0.1);
         break;
       case 'Assigned':
         statusColor = Colors.red;
-        statusBgColor = Colors.red.withOpacity(0.1);
+        statusBgColor = Colors.red.withValues(alpha: 0.1);
         break;
       case 'Completed':
         statusColor = Colors.green;
-        statusBgColor = Colors.green.withOpacity(0.1);
+        statusBgColor = Colors.green.withValues(alpha: 0.1);
         break;
       default:
         statusColor = Colors.grey;
-        statusBgColor = Colors.grey.withOpacity(0.1);
+        statusBgColor = Colors.grey.withValues(alpha: 0.1);
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.textHint),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 4,
             offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 4,
+            offset: const Offset(2, 0),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          TitleText(
+            text: project.projectName ?? "",
+            fontWeight: FontWeight.bold,
+            maxLines: 2,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TitleText(
-                      text: project.projectName??"",
-                      fontWeight: FontWeight.bold,
-                      maxLines: 2,
-                      ),
-                    
-                    const SizedBox(height: 8),
-                    CustomText(
-                      text: project.projectUniqueId??"",
-                      fontWeight: FontWeight.w500,
-                      ),
-                    
-                  ],
+                child: CustomText(
+                  text: "${project.projectUniqueId}" ?? "",
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 6,
+                  vertical: 3,
                 ),
                 decoration: BoxDecoration(
                   color: statusBgColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    CustomText(
-                      text: project.status??"",
-                      color: statusColor,
-                      ),
-                    
-                  ],
+                child: CustomText(
+                  text: project.status ?? "",
+                  color: statusColor,
                 ),
               ),
             ],
@@ -114,34 +97,41 @@ class BuildProjectCard extends StatelessWidget{
               Expanded(
                 child: Row(
                   children: [
-                Icon(Icons.location_on, size: 16, color: AppColors.textPrimary),
-              const SizedBox(width: 4),
-              CustomText(
-                text: project.address??"",
-                ),
-              
-                ],
-                )
-                ),
-              
-              const SizedBox(width: 16),
-              
-              
-              Expanded(
-                child: Row(
-                  
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: AppColors.textPrimary),
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: AppColors.textPrimary,
+                    ),
                     const SizedBox(width: 4),
-                    CustomText(
-                    text: Helpers.formatDateMedium(project.createdAt??DateTime.now()),
-                    
+                    Expanded(
+                      child: CustomText(
+                        text: project.address ?? "",
+                        maxLines: 2,
+                      ),
                     ),
                   ],
                 ),
-                ),
-              
+              ),
+
+              const SizedBox(width: 16),
+
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                  const SizedBox(width: 4),
+                  CustomText(
+                    text: Helpers.formatDateMedium(
+                      project.createdAt ?? DateTime.now(),
+                    ),
+                    maxLines: 1,
+                  ),
+                ],
+              ),
             ],
           ),
           if (project.districtId != null) ...[
@@ -150,24 +140,19 @@ class BuildProjectCard extends StatelessWidget{
               children: [
                 Icon(Icons.business, size: 16, color: AppColors.textPrimary),
                 const SizedBox(width: 4),
-                CustomText(
-                text: project.districtId??"",
-                
-                ),
-                
+                CustomText(text: project.districtId ?? ""),
               ],
             ),
           ],
           const SizedBox(height: 16),
           AuthSubmitButton(
-            title: "Update progress",
+            title: "Update Progress",
             isEnabled: true,
             height: 44,
             onPressed: onPressed,
-            ),
+          ),
         ],
       ),
     );
   }
-
 }

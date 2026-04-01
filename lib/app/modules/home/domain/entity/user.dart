@@ -1,28 +1,31 @@
 class User {
-  final String id;
-  final String phoneNumber;
-  final String name;
-  final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+   String? id;
+   String? phoneNumber;
+   String? name;
+   bool? isActive;
+   DateTime? createdAt;
+   DateTime? updatedAt;
+   String? profilePath;
 
   User({
-    required this.id,
-    required this.phoneNumber,
-    required this.name,
-    required this.isActive,
-    required this.createdAt,
-    required this.updatedAt,
+     this.id,
+     this.phoneNumber,
+     this.name,
+     this.isActive,
+     this.createdAt,
+     this.updatedAt,
+    this.profilePath
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['Id'] as String,
-      phoneNumber: json['phoneNumber'] as String,
-      name: json['name'] as String,
+      id: json['Id'],
+      phoneNumber: json['phoneNumber'],
+      name: json['name'],
       isActive: json['isActive'] as bool,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      profilePath: json["profilePath"],
     );
   }
 
@@ -32,8 +35,9 @@ class User {
       'phoneNumber': phoneNumber,
       'name': name,
       'isActive': isActive,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      "profilePath":profilePath
     };
   }
 }

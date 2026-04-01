@@ -6,7 +6,7 @@ import 'package:ministry_of_minority_affairs/app/data/repository/submission_repo
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_detail_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projects/controllers/audio_recorder_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/audio_recorder_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/work_detail_controller.dart';
 import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';

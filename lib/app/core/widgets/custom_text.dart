@@ -10,18 +10,21 @@ class CustomText extends StatelessWidget {
   final Color color;
   final TextAlign textAlign;
   final FontWeight fontWeight;
-  const CustomText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start,this.fontWeight=FontWeight.w500});
+  final int maxLines;
+  const CustomText({super.key,required this.text,this.color=AppColors.textPrimary,this.textAlign=TextAlign.start,this.fontWeight=FontWeight.w500,this.maxLines=1});
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
       textAlign: textAlign,
-      style: AppTextTheme.bodySmall1.copyWith(
+      style: Get.textTheme.bodySmall?.copyWith(
         color: color,
         fontWeight: fontWeight,
         fontFamily: "Montserrat"
       ),
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

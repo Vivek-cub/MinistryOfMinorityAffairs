@@ -7,12 +7,13 @@ class PendingSubmission {
   final List<SubmissionImage> images;
   final SubmissionAudioData? audio;
   final SubmissionVideoData? video;
+  final SubmissionRemark? remark;
 
   PendingSubmission({
     required this.submission,
     required this.images,
     this.audio,
     this.video,
+    this.remark,
   });
 }
-

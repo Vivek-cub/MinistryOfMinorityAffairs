@@ -27,23 +27,21 @@ class FilterDropdown<T> extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 48,
         padding: const EdgeInsets.symmetric(
           horizontal: 12,
-        ), // 👈 slightly reduced
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Row(
-          // ❌ REMOVE mainAxisSize.min
           children: [
             Icon(
               Icons.arrow_drop_down,
@@ -52,7 +50,6 @@ class FilterDropdown<T> extends StatelessWidget {
             ),
             const SizedBox(width: 6),
 
-            // ✅ THIS IS THE FIX
             Expanded(
               child: Text(
                 selectedValue != null && selectedValue.toString().isNotEmpty
@@ -99,13 +96,13 @@ class FilterDropdownMenu<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      margin: const EdgeInsets.only(top: 8),
+     
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -121,7 +118,7 @@ class FilterDropdownMenu<T> extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 12,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     border:

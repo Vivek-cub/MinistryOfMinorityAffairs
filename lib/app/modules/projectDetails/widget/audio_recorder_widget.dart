@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/audio_recorder_controller.dart';
+import '../controller/audio_recorder_controller.dart';
 
 class AudioRecorderWidget extends StatelessWidget {
   AudioRecorderWidget({super.key});

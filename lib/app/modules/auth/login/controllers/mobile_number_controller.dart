@@ -24,7 +24,7 @@ class MobileNumberController extends GetxController with SnackBarMixin,PopupMixi
   
   @override
   void onClose() {
-    phoneController.dispose();
+  //  phoneController.dispose();
     super.onClose();
   }
   

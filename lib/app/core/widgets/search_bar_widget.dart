@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/typography.dart';
 
 /// Reusable search bar widget
 /// Rounded search input field with magnifying glass icon
@@ -20,39 +21,48 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: 40,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+
         onTap: onTap,
+        style: AppTextTheme.bodySmall1.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.normal,
+          fontFamily: "Montserrat",
+        ),
         decoration: InputDecoration(
           hintText: hintText ?? 'Search',
-          hintStyle: TextStyle(color: AppColors.textHint, fontSize: 14),
+          hintStyle: AppTextTheme.bodySmall1.copyWith(
+            color: AppColors.textHint,
+            fontWeight: FontWeight.normal,
+            fontFamily: "Montserrat",
+          ),
           prefixIcon: Icon(
             Icons.search,
             color: AppColors.textSecondary,
-            size: 20,
+            size: 24,
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColors.textWhite,
 
-          // 👇 THIS makes it elliptical
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(100),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.textHint),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(100),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.textHint),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(100),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.textHint),
           ),
 
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 12,
+            horizontal: 12,
+            vertical: 8,
           ),
         ),
       ),

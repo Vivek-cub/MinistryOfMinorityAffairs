@@ -23,120 +23,230 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
   SubmissionDao(AppDatabase db) : super(db);
 
   Future<void> saveSubmission({
-  required String projectId,
-  required String milestoneId,
-  required List<String> images,
-  String? audioPath,
-  int? audioDuration,
-  String? videoPath,
-  int? videoDuration,
-  required String remarks,
-  bool isSynced = false,
-}) async {
-  await transaction(() async {
-    final submissionId = await into(submissions).insert(
-      SubmissionsCompanion(
-        projectId: Value(projectId),
-        milestoneId: Value(milestoneId),
-        isSynced: Value(isSynced),
-      ),
-    );
+    required String userId,
+    required String projectId,
+    required String milestoneId,
+    required List<String> images,
+    String? audioPath,
+    int? audioDuration,
+    String? videoPath,
+    int? videoDuration,
+    required String remarks,
+    bool isSynced = false,
+    String? userLat,
+    String? userLng,
+    String? progress,
+    String? projectStatus,
+  }) async {
+    await transaction(() async {
+      final existing =
+          await (select(submissions)..where(
+            (t) =>
+                t.userId.equals(userId) &
+                t.projectId.equals(projectId) &
+                t.milestoneId.equals(milestoneId),
+          )).getSingleOrNull();
 
-    await into(submissionRemarks).insert(
-      SubmissionRemarksCompanion(
-        submissionId: Value(submissionId),
-        remarks: Value(remarks),
-      ),
-    );
+      int submissionId;
 
-    for (final img in images) {
-      await into(submissionImages).insert(
-        SubmissionImagesCompanion(
+      if (existing == null) {
+        submissionId = await into(submissions).insert(
+          SubmissionsCompanion.insert(
+            userId: userId,
+            projectId: projectId,
+            milestoneId: milestoneId,
+            isSynced: Value(isSynced),
+            userLat: userLat ?? "",
+            userLng: userLng ?? "",
+            progress: progress ?? "",
+            projectStatus: projectStatus ?? "",
+          ),
+        );
+      } else {
+        submissionId = existing.id;
+
+        await (update(submissions)
+          ..where((t) => t.id.equals(submissionId))).write(
+          SubmissionsCompanion(
+            isSynced: Value(isSynced),
+            userLat: Value(userLat ?? ""),
+            userLng: Value(userLng ?? ""),
+            progress: Value(progress ?? ""),
+            projectStatus: Value(projectStatus ?? ""),
+          ),
+        );
+
+        await (delete(submissionImages)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+        await (delete(submissionAudio)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+        await (delete(submissionVideo)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+        await (delete(submissionRemarks)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+      }
+
+      await into(submissionRemarks).insert(
+        SubmissionRemarksCompanion(
           submissionId: Value(submissionId),
-          filePath: Value(img),
+          remarks: Value(remarks),
+        ),
+      );
+
+      for (final img in images.toSet()) {
+        await into(submissionImages).insert(
+          SubmissionImagesCompanion(
+            submissionId: Value(submissionId),
+            filePath: Value(img),
+          ),
+        );
+      }
+
+      if (audioPath != null && audioPath.isNotEmpty) {
+        await into(submissionAudio).insertOnConflictUpdate(
+          SubmissionAudioCompanion(
+            submissionId: Value(submissionId),
+            filePath: Value(audioPath),
+            durationMs: Value(audioDuration ?? 0),
+          ),
+        );
+      }
+
+      if (videoPath != null && videoPath.isNotEmpty) {
+        await into(submissionVideo).insertOnConflictUpdate(
+          SubmissionVideoCompanion(
+            submissionId: Value(submissionId),
+            filePath: Value(videoPath),
+            durationMs: Value(videoDuration),
+          ),
+        );
+      }
+    });
+  }
+
+  // Future<List<Submission>> getPendingSubmissions() {
+  //   return (select(submissions)
+  //         ..where((tbl) => tbl.isSynced.equals(false)))
+  //       .get();
+  // }
+  // Future<void> markAsSynced(int submissionId) {
+  //   return (update(submissions)
+  //         ..where((tbl) => tbl.id.equals(submissionId)))
+  //       .write(
+  //     SubmissionsCompanion(
+  //       isSynced: const Value(true),
+  //     ),
+  //   );
+  // }
+
+  Future<List<PendingSubmission>> getPendingSubmissions(String userId) async {
+    final pending =
+        await (select(submissions)
+          ..where(
+            (tbl) => tbl.isSynced.equals(false) & tbl.userId.equals(userId),
+          )).get();
+
+    final result = <PendingSubmission>[];
+
+    for (final sub in pending) {
+      final images =
+          await (select(submissionImages)
+            ..where((t) => t.submissionId.equals(sub.id))).get();
+
+      final audio =
+          await (select(submissionAudio)
+            ..where((t) => t.submissionId.equals(sub.id))).getSingleOrNull();
+
+      final video =
+          await (select(submissionVideo)
+            ..where((t) => t.submissionId.equals(sub.id))).getSingleOrNull();
+
+      final remark =
+          await (select(submissionRemarks)
+            ..where((t) => t.submissionId.equals(sub.id))).getSingleOrNull();
+
+      result.add(
+        PendingSubmission(
+          submission: sub,
+          images: images,
+          audio: audio,
+          video: video,
+          remark: remark,
         ),
       );
     }
 
-    if (audioPath != null) {
-      await into(submissionAudio).insert(
-        SubmissionAudioCompanion(
-          submissionId: Value(submissionId),
-          filePath: Value(audioPath),
-          durationMs: Value(audioDuration ?? 0),
-        ),
-      );
-    }
+    return result;
+  }
 
-    if (videoPath != null) {
-      await into(submissionVideo).insert(
-        SubmissionVideoCompanion(
-          submissionId: Value(submissionId),
-          filePath: Value(videoPath),
-          durationMs: Value(videoDuration),
-        ),
-      );
-    }
-  });
-}
+  Future<void> markAsSynced(int submissionId, String userId) {
+    return (update(submissions)..where(
+      (t) => t.id.equals(submissionId) & t.userId.equals(userId),
+    )).write(const SubmissionsCompanion(isSynced: Value(true)));
+  }
 
-// Future<List<Submission>> getPendingSubmissions() {
-//   return (select(submissions)
-//         ..where((tbl) => tbl.isSynced.equals(false)))
-//       .get();
-// }
-// Future<void> markAsSynced(int submissionId) {
-//   return (update(submissions)
-//         ..where((tbl) => tbl.id.equals(submissionId)))
-//       .write(
-//     SubmissionsCompanion(
-//       isSynced: const Value(true),
-//     ),
-//   );
-// }
+  Future<PendingSubmission?> getDraftByProjectAndMilestone({
+    required String userId,
+    required String projectId,
+    required String milestoneId,
+  }) async {
+    final sub =
+        await (select(submissions)..where(
+          (t) =>
+              t.userId.equals(userId) &
+              t.projectId.equals(projectId) &
+              t.milestoneId.equals(milestoneId) &
+              t.isSynced.equals(false),
+        )).getSingleOrNull();
 
-Future<List<PendingSubmission>> getPendingSubmissions() async {
-  final pending = await (select(submissions)
-        ..where((tbl) => tbl.isSynced.equals(false)))
-      .get();
+    if (sub == null) return null;
 
-  final result = <PendingSubmission>[];
+    final images =
+        await (select(submissionImages)
+          ..where((t) => t.submissionId.equals(sub.id))).get();
 
-  for (final sub in pending) {
-    final images = await (select(submissionImages)
-          ..where((t) => t.submissionId.equals(sub.id)))
-        .get();
+    final audio =
+        await (select(submissionAudio)
+          ..where((t) => t.submissionId.equals(sub.id))).getSingleOrNull();
 
-    final audio = await (select(submissionAudio)
-          ..where((t) => t.submissionId.equals(sub.id)))
-        .getSingleOrNull();
+    final video =
+        await (select(submissionVideo)
+          ..where((t) => t.submissionId.equals(sub.id))).getSingleOrNull();
 
-    final video = await (select(submissionVideo)
-          ..where((t) => t.submissionId.equals(sub.id)))
-        .getSingleOrNull();
+    final remark =
+        await (select(submissionRemarks)
+          ..where((t) => t.submissionId.equals(sub.id))).getSingleOrNull();
 
-    result.add(
-      PendingSubmission(
-        submission: sub,
-        images: images,
-        audio: audio,
-        video: video,
-      ),
+    return PendingSubmission(
+      submission: sub,
+      images: images,
+      audio: audio,
+      video: video,
+      remark: remark,
     );
   }
 
-  return result;
-}
+  Future<void> clearLocalDataForUser(String userId) async {
+    final userSubmissionIds =
+        await (selectOnly(submissions)
+              ..addColumns([submissions.id])
+              ..where(submissions.userId.equals(userId)))
+            .map((row) => row.read(submissions.id))
+            .get();
 
-Future<void> markAsSynced(String projectId) {
-  return (update(submissions)
-        ..where((t) => t.projectId.equals(projectId)))
-      .write(const SubmissionsCompanion(
-        isSynced: Value(true),
-      ));
-}
+    await transaction(() async {
+      for (final submissionId in userSubmissionIds.whereType<int>()) {
+        await (delete(submissionImages)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+        await (delete(submissionAudio)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+        await (delete(submissionVideo)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+        await (delete(submissionRemarks)
+          ..where((t) => t.submissionId.equals(submissionId))).go();
+      }
 
-
-
-
+      await (delete(submissions)..where((t) => t.userId.equals(userId))).go();
+    });
+  }
 }

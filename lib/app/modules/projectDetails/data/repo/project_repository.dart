@@ -8,12 +8,12 @@ class ProjectRepository {
   final ProjectDao dao;
   ProjectRepository(this.dao);
 
-  Future<void> saveProject(ProjectDetails project) {
-    return dao.saveProject(project);
+  Future<void> saveProject(ProjectDetails project, String userId) {
+    return dao.saveProject(project, userId);
   }
 
-  Future<List<ProjectDetails>> getLocalProjects() async {
-  final data = await dao.getAllProjectsFull();
+  Future<List<ProjectDetails>> getLocalProjects(String userId) async {
+  final data = await dao.getAllProjectsFull(userId);
   return data.map(mapToProjectDetails).toList();
 }
 
@@ -37,10 +37,13 @@ ProjectDetails mapToProjectDetails(LocalProjectFull local) {
         imageAtt: m.images,
         audioAtt: m.audio,
         videoAtt: m.video,
+        progress: m.milestone.progress
       );
     }).toList(),
   );
 }
 
-  
+  Future<void> clearLocalDataForUser(String userId) {
+    return dao.clearLocalDataForUser(userId);
+  }
 }

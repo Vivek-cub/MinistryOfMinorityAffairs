@@ -1,8 +1,8 @@
-
 import 'package:drift/drift.dart';
 
 class LocalProjects extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get userId => text()();
   TextColumn get projectId => text()();
   TextColumn get projectName => text()();
   TextColumn get status => text()();
@@ -14,4 +14,8 @@ class LocalProjects extends Table {
   TextColumn get districtId => text().nullable()();
   TextColumn get projectUniqueId => text()();
 
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {userId, projectId},
+  ];
 }

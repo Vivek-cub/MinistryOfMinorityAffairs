@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 class AuthSubmitButton extends StatelessWidget {
   final String title;
-   bool isEnabled;
-   VoidCallback? onPressed;
-   double height;
-   AuthSubmitButton({super.key,required this.title,this.isEnabled=false,this.onPressed,this.height=56});
+  bool isEnabled;
+  VoidCallback? onPressed;
+  double height;
+  bool isAuthButton;
+  AuthSubmitButton({
+    super.key,
+    required this.title,
+    this.isEnabled = false,
+    this.onPressed,
+    this.height = 56,
+    this.isAuthButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-   return Container(
+    return Container(
       width: double.infinity,
       height: height,
-     // margin: EdgeInsets.symmetric(horizontal: AppDimensions.sm),
+      // margin: EdgeInsets.symmetric(horizontal: AppDimensions.sm),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: isEnabled
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xFFFFB84D),
-                    Color(0xFFFF6B6B),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                )
-              : null,
-          color: isEnabled ? null : const Color(0xFFCCCCCC),
-          borderRadius: BorderRadius.circular(12),
+          gradient: isAuthButton == false ? AppGradientColor.gradient : null,
+          color: isAuthButton == false ? null : AppColors.textWhite,
+          borderRadius: BorderRadius.circular(AppDimensions.xxs),
         ),
         child: Material(
           color: Colors.transparent,
@@ -39,10 +39,12 @@ class AuthSubmitButton extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color:
+                          isAuthButton
+                              ? AppColors.textPrimary
+                              : AppColors.textWhite,
                     ),
                   ),
                   // const SizedBox(width: 8),
@@ -54,7 +56,5 @@ class AuthSubmitButton extends StatelessWidget {
         ),
       ),
     );
- 
-  
   }
 }

@@ -17,7 +17,7 @@ import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 /// Allows users to enter their mobile number for authentication
 class MobileNumberView extends GetView<MobileNumberController> {
   const MobileNumberView({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     // final MobileNumberController controller = Get.put(
@@ -27,9 +27,10 @@ class MobileNumberView extends GetView<MobileNumberController> {
     //   )
     // );
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: Padding(
+        child: Container(
+          decoration: BoxDecoration(gradient: AppGradientColor.gradient),
+          height: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: SingleChildScrollView(
             child: Column(
@@ -39,18 +40,18 @@ class MobileNumberView extends GetView<MobileNumberController> {
                 AuthHeader(),
                 // Main Heading
                 HeaderText(
-                  text: LanuageConstant.enterPhoneText
-                  ),
-                
+                  text: LanuageConstant.enterPhoneText,
+                  color: AppColors.textWhite,
+                ),
 
                 const SizedBox(height: AppDimensions.md),
-                    
+
                 // Phone Number Input
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.05),
@@ -70,14 +71,14 @@ class MobileNumberView extends GetView<MobileNumberController> {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
-                            fontFamily: "Montserrat"
+                            fontFamily: "Montserrat",
                           ),
                         ),
                       ),
-                    
+
                       // Divider
                       Container(width: 1, height: 30, color: AppColors.divider),
-                    
+
                       // Phone Number Field
                       Expanded(
                         child: TextField(
@@ -85,7 +86,7 @@ class MobileNumberView extends GetView<MobileNumberController> {
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           decoration: const InputDecoration(
-                            hintText: 'Please Enter your Mobile Number',
+                            hintText: 'Mobile Number',
                             hintStyle: TextStyle(
                               color: Color(0xFFCCCCCC),
                               fontSize: 14,
@@ -105,33 +106,32 @@ class MobileNumberView extends GetView<MobileNumberController> {
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(10),
                           ],
-                          style: TextStyle(
-                            fontFamily: "Montserrat"
-                          ),
+                          style: TextStyle(fontFamily: "Montserrat"),
                         ),
                       ),
                     ],
                   ),
                 ),
-                    
+
                 const SizedBox(height: AppDimensions.gigantic),
-                    
+
                 // Next Button
-                Obx(
-                (){
+                Obx(() {
                   final isEnabled = controller.isButtonEnabled.value;
                   return AuthSubmitButton(
                     title: "Next",
                     isEnabled: isEnabled,
-                    onPressed: (){
-                        if (isEnabled) {
-                          controller.sendOTP(controller.phoneController.text.trim());
-                        }
-                      },
-                    ); 
-                }
-              ),
-              /*
+                    isAuthButton: true,
+                    onPressed: () {
+                      if (isEnabled) {
+                        controller.sendOTP(
+                          controller.phoneController.text.trim(),
+                        );
+                      }
+                    },
+                  );
+                }),
+                /*
                 Obx(() {
                   final isEnabled = controller.isButtonEnabled.value;
                   return SizedBox(

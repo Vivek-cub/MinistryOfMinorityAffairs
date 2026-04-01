@@ -23,6 +23,7 @@ class TitleText extends StatelessWidget {
         fontFamily: "Montserrat",
       ),
       maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

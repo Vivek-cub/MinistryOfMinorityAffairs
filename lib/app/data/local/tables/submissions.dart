@@ -2,15 +2,20 @@ import 'package:drift/drift.dart';
 
 class Submissions extends Table {
   IntColumn get id => integer().autoIncrement()();
-
+  TextColumn get userId => text()();
   TextColumn get projectId => text()();
 
   TextColumn get milestoneId => text()();
 
-  BoolColumn get isSynced =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
-  DateTimeColumn get createdAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get userLat => text()();
+  TextColumn get userLng => text()();
+  TextColumn get progress => text()();
+  TextColumn get projectStatus => text()();
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {userId, projectId, milestoneId},
+  ];
 }
-

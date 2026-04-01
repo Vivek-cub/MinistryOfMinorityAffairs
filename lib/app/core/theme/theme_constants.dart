@@ -1,4 +1,3 @@
-
 import 'package:flutter/widgets.dart';
 
 /// Application color palette
@@ -39,6 +38,8 @@ sealed class AppColors {
   // Government specific colors
   static const Color governmentBlue = Color(0xFF003366);
   static const Color governmentGold = Color(0xFFFFD700);
+
+  static const Color lightGrey = Color(0xFFD3D3D3);
 }
 
 sealed class AppDimensions {
@@ -72,5 +73,13 @@ sealed class CardShadow {
     spreadRadius: 1,
     blurRadius: 5,
     offset: Offset(0, 3),
+  );
+}
+
+sealed class AppGradientColor {
+  static Gradient get gradient => LinearGradient(
+    colors: [Color(0xFF0F4C81), Color(0xFF205B5F)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
 }

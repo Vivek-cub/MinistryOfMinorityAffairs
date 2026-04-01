@@ -5,6 +5,7 @@ class ProjectMilestone {
   final String? milestoneDescription;
   final DateTime? milestoneDate;
   final String? status;
+  final int? progress;
   final String? createdBy;
   final String? updatedBy;
   final DateTime? createdAt;
@@ -20,6 +21,7 @@ class ProjectMilestone {
     this.milestoneDescription,
     this.milestoneDate,
     this.status,
+    this.progress,
     this.createdBy,
     this.updatedBy,
     this.createdAt,
@@ -37,6 +39,7 @@ class ProjectMilestone {
       milestoneDescription: json['milestoneDescription'],
       milestoneDate: DateTime.tryParse(json['milestoneDate'] ?? ''),
       status: json['status'],
+      progress: json['progress'],
       createdBy: json['createdBy'],
       updatedBy: json['updatedBy'],
       createdAt: DateTime.tryParse(json['createdAt'] ?? ''),

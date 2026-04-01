@@ -7,8 +7,10 @@ class ProjectDetails {
   final String? sectorId;
   final String? projectTypeId;
   final String? status;
-  final int? unitCount;
+  final String? unitCount;
+  final int? visitCount;
   final String? projectName;
+  final String? year;
   final double? lat;
   final double? lng;
   final String? address;
@@ -26,7 +28,9 @@ class ProjectDetails {
     this.projectTypeId,
     this.status,
     this.unitCount,
+    this.visitCount,
     this.projectName,
+    this.year,
     this.lat,
     this.lng,
     this.address,
@@ -34,7 +38,7 @@ class ProjectDetails {
     this.updatedBy,
     this.createdAt,
     this.updatedAt,
-     this.milestones=const [],
+    this.milestones = const [],
   });
 
   factory ProjectDetails.fromJson(Map<String, dynamic> json) {
@@ -46,7 +50,9 @@ class ProjectDetails {
       projectTypeId: json['projectTypeId'],
       status: json['status'],
       unitCount: json['unitCount'],
+      visitCount: json['visitCount'],
       projectName: json['projectName'],
+      year: json['year'],
       lat: _parseDouble(json['lat']),
       lng: _parseDouble(json['lng']),
       address: json['address'],
@@ -54,9 +60,10 @@ class ProjectDetails {
       updatedBy: json['updatedBy'],
       createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? ''),
-      milestones: (json['projectMilestones'] as List<dynamic>? ?? [])
-          .map((e) => ProjectMilestone.fromJson(e))
-          .toList(),
+      milestones:
+          (json['projectMilestones'] as List<dynamic>? ?? [])
+              .map((e) => ProjectMilestone.fromJson(e))
+              .toList(),
     );
   }
 
@@ -66,5 +73,4 @@ class ProjectDetails {
     if (value is String) return double.tryParse(value);
     return null;
   }
-
 }

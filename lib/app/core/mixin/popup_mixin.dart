@@ -40,7 +40,7 @@ mixin class PopupMixin {
                   children: [
                     // Success Icon
                     Image.asset(
-                      'assets/images/success.png',
+                      ImageAssets.successImage,
                       height: AppDimensions.sideIndicator2Height,
                       width: AppDimensions.sideIndicator2Height,
                     ),

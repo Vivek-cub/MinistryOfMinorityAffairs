@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -7,6 +6,8 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
+import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
+import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 
 class BuildDrawer extends StatelessWidget {
   HomeController controller;
@@ -21,52 +22,151 @@ class BuildDrawer extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
+              padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFFFB84D),
-                    Color(0xFFFF6B6B),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  colors: [Color(0xFF0F4C81), Color(0xFF205B5F)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
-                ),
-              
+              ),
+
               child: Column(
                 children: [
                   Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/emblem.png'),
-                        fit: BoxFit.cover,
+                      image: DecorationImage(
+                        image: AssetImage(ImageAssets.emblemImage),
+                        fit: BoxFit.fill,
+                        colorFilter: ColorFilter.mode(
+                          AppColors.textWhite,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Obx(
-                    () => 
-                    TitleText(
-                      text: controller.userName.value,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(height: AppDimensions.xxs),
+                  CustomText(
+                    text: LanuageConstant.appTitle,
+                    color: AppColors.background,
+                    textAlign: TextAlign.center,
+                    fontWeight: FontWeight.w600,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: AppDimensions.s),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppDimensions.xs,
+                      vertical: AppDimensions.xxs,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppDimensions.sm),
                       color: AppColors.textWhite,
+                      border: Border.all(color: AppColors.governmentGold),
+                    ),
+                    child: Row(
+                      children: [
+                        Obx(() {
+                          final profilePath =
+                              controller.data.value.user?.profilePath;
+                          return InkWell(
+                            onTap: () {
+                              controller.closDrawer();
+                              controller.takePhoto();
+                            },
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.border),
+                                    image: DecorationImage(
+                                      image:
+                                          profilePath != null &&
+                                                  profilePath.isNotEmpty
+                                              ? NetworkImage(profilePath)
+                                              : AssetImage(IconAssets.user)
+                                                  as ImageProvider,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+
+                                /// 🔹 Edit Icon
+                                Positioned(
+                                  bottom: -2,
+                                  right: -2,
+                                  child: Container(
+                                    height: 26,
+                                    width: 26,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.textHint,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.edit,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(width: AppDimensions.xs),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Obx(
+                              () => TitleText(
+                                text: controller.userName.value,
+                                maxLines: 2,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+
+                            CustomText(
+                              text:
+                                  controller.data.value.user?.phoneNumber ?? "",
+                              color: AppColors.textSecondary,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 4),
-                  CustomText(
-                    text: controller.data.value.user?.phoneNumber??"",
-                    color: AppColors.textWhite,
-                    )
-                  
                 ],
               ),
             ),
             const SizedBox(height: 8),
+            _buildDrawerItem(
+              icon: Icons.dashboard,
+              title: 'Dashboard',
+              onTap: () {
+                Get.back();
+                controller.onDashboardTap();
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.task,
+              title: 'Project',
+              onTap: () {
+                Get.back();
+                controller.onProjetTap();
+              },
+            ),
             _buildDrawerItem(
               icon: Icons.lock_outline,
               title: 'Change PIN',
@@ -75,14 +175,14 @@ class BuildDrawer extends StatelessWidget {
                 controller.onChangePinTap();
               },
             ),
-            _buildDrawerItem(
-              icon: Icons.settings_outlined,
-              title: 'Settings',
-              onTap: () {
-                Get.back();
-                controller.onSettingsTap();
-              },
-            ),
+            // _buildDrawerItem(
+            //   icon: Icons.settings_outlined,
+            //   title: 'Calender',
+            //   onTap: () {
+            //     Get.back();
+            //     controller.onCalendarTap();
+            //   },
+            // ),
             const Spacer(),
             const Divider(),
             _buildDrawerItem(
@@ -92,7 +192,7 @@ class BuildDrawer extends StatelessWidget {
                 Get.back();
                 controller.onLogoutTap();
               },
-              textColor: AppColors.error,
+              textColor: AppColors.textPrimary,
             ),
             const SizedBox(height: 8),
             Padding(
@@ -122,6 +222,7 @@ class BuildDrawer extends StatelessWidget {
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: textColor ?? AppColors.textPrimary,
+          fontFamily: "Montserrat",
         ),
       ),
       onTap: onTap,

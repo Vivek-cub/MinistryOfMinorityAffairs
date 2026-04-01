@@ -1,4 +1,3 @@
-import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/dao/submission_dao.dart';
 
@@ -7,6 +6,7 @@ class SubmissionRepository {
   SubmissionRepository(this.dao);
 
   Future<void> save({
+    required String userId,
     required String projectId,
     required String milestoneId,
     required List<String> images,
@@ -15,9 +15,14 @@ class SubmissionRepository {
     String? videoPath,
     int? videoDuration,
     required String remarks,
-    bool isSynced = false
+    bool isSynced = false,
+    String? userLat,
+    String? userLng,
+    String? progress,
+    String? projectStatus,
   }) {
     return dao.saveSubmission(
+      userId: userId,
       projectId: projectId,
       milestoneId: milestoneId,
       images: images,
@@ -27,15 +32,37 @@ class SubmissionRepository {
       videoDuration: videoDuration,
       remarks: remarks,
       isSynced: isSynced,
+      userLat: userLat,
+      userLng: userLng,
+      progress: progress,
+      projectStatus: projectStatus,
     );
   }
 
   // 🔁 For auto-sync
-  Future<List<PendingSubmission>> getPending() {
-    return dao.getPendingSubmissions();
+  Future<List<PendingSubmission>> getPending({
+    required String userId,
+  }) {
+    return dao.getPendingSubmissions(userId);
   }
 
-  Future<void> markAsSynced(String projectId) {
-    return dao.markAsSynced(projectId);
+  Future<void> markAsSynced(int submissionId, String userId) {
+    return dao.markAsSynced(submissionId, userId);
+  }
+
+  Future<PendingSubmission?> getDraftByProjectAndMilestone({
+    required String userId,
+    required String projectId,
+    required String milestoneId,
+  }) {
+    return dao.getDraftByProjectAndMilestone(
+      userId: userId,
+      projectId: projectId,
+      milestoneId: milestoneId,
+    );
+  }
+
+  Future<void> clearLocalDataForUser(String userId) {
+    return dao.clearLocalDataForUser(userId);
   }
 }

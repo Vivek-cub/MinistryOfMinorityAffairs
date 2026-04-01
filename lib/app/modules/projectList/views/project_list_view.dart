@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/build_project_card.dart';
@@ -8,11 +9,10 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/project_list_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/widget/app_dropdown.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
-/// Work In Progress view
-/// Displays all projects with "in_progress" status
-class ProjectListView extends GetView<ProjectsListController> {
+class ProjectListView extends GetView<ProjectListController> {
   const ProjectListView({super.key});
 
   @override
@@ -33,6 +33,7 @@ class ProjectListView extends GetView<ProjectsListController> {
               clipBehavior: Clip.none,
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header
                     WorkProgressHeader(
@@ -40,56 +41,129 @@ class ProjectListView extends GetView<ProjectsListController> {
                       title: "Project List",
                       subtitle: 'Track Progress of works in real-time',
                       avatarAssetPath: ImageAssets.emblemImage,
-                    ),
-                    // Search and Filters Section
-                    Container(
-                      height: 80,
-                      padding: const EdgeInsets.all(16),
-                      child: ListView(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
+                      backIcon: Icons.arrow_back,
+                      widget: Row(
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width*0.40,
-                            child: SearchBarWidget(
-                              hintText: 'Search',
-                              onChanged: controller.onSearchChanged,
+                          Expanded(
+                            child: Container(
+                              // width: MediaQuery.of(context).size.width * 0.75,
+                              margin: EdgeInsets.only(
+                                top: AppDimensions.md,
+                                left: AppDimensions.sm,
+                                right: AppDimensions.sm,
+                              ),
+
+                              child: SearchBarWidget(
+                                hintText: 'Search',
+                                onChanged: controller.onSearchChanged,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          // Sector Wise Dropdown
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width*0.40,
-                            child: FilterDropdown<Category>(
-                              label: 'Sector Wise',
-                              selectedValue: controller.selectedCategory.value,
-                              items: controller.category,
-                              isOpen: controller.isSectorDropdownOpen.value,
-                              onTap: controller.toggleSectorDropdown,
-                              itemBuilder: (category) => category.name,
-                              onChanged: (value){
-                                controller.selectedCategory.value = value;
-                                controller.isSectorDropdownOpen.value = false;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Year Wise Dropdown
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width*0.40,
-                            child: FilterDropdown<String>(
-                              label: 'Year Wise',
-                              selectedValue: controller.selectedYear.value,
-                              items: controller.years,
-                              isOpen: controller.isYearDropdownOpen.value,
-                              onTap: controller.toggleYearDropdown,
+                          InkWell(
+                            onTap: () {
+                              controller.isFilterSelected.value =
+                                  !controller.isFilterSelected.value;
+                              if (controller.isFilterSelected.value == true) {
+                              } else {
+                                controller.selectedCategory.value = null;
+                                controller.selectedYear.value = "";
+                                controller.searchQuery.value = "";
+                                controller.checkParamToLoadProject();
+                              }
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 44,
+                              padding: EdgeInsets.all(AppDimensions.sm),
+                              margin: EdgeInsets.only(
+                                right: AppDimensions.sm,
+                                top: AppDimensions.sm,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.textWhite,
+                                borderRadius: BorderRadius.circular(
+                                  AppDimensions.sm,
+                                ),
+                              ),
+                              child:
+                                  controller.isFilterSelected.value == false
+                                      ? SvgPicture.asset(
+                                        SvgAssets.filterSvg,
+                                        width: 16,
+                                      )
+                                      : SvgPicture.asset(
+                                        SvgAssets.cancelSvg,
+                                        width: 16,
+                                      ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    // Search and Filters Section
+                    controller.isFilterSelected.value == true
+                        ? Container(
+                          height: 60,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: ListView(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              // Sectorwise Dropdown
+                              Obx(
+                                () => SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  child: AppDropdown<Category>(
+                                    hintText: "Sector Wise",
+                                    value: controller.selectedCategory.value,
+                                    items: controller.category,
+                                    itemLabel: (item) => item.name,
+                                    onChanged: (value) {
+                                      controller.selectedCategory.value = value;
+                                      controller.isSectorDropdownOpen.value =
+                                          false;
+                                      if (controller.paramName.value !=
+                                          "get_assigned") {
+                                        controller.checkParamToLoadProject();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
 
-                    
+                              const SizedBox(width: 12),
+
+                              // Year Wise Dropdown
+                              // Obx(
+                              //   () => SizedBox(
+                              //     width: MediaQuery.of(context).size.width*0.40,
+                              //     child: AppDropdown<String>(
+                              //       hintText: "Year Wise",
+                              //       value: controller.years.contains(controller.selectedYear.value)
+                              //             ? controller.selectedYear.value
+                              //             : null,
+                              //       items: controller.years,
+                              //       itemLabel: (item) => item,
+                              //       onChanged: (value) {
+                              //         controller.selectedYear.value = value;
+                              //         controller.isYearDropdownOpen.value = false;
+                              //         if(controller.paramName.value !="get_assigned"){
+                              //           controller.checkParamToLoadProject();
+                              //         }
+                              //       },
+
+                              //     ),
+                              //   ),
+                              // ),
+                            ],
+                          ),
+                        )
+                        : SizedBox.shrink(),
+
                     // Projects List
                     Expanded(
                       child: Obx(() {
@@ -97,70 +171,78 @@ class ProjectListView extends GetView<ProjectsListController> {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
-                        }else{
+                        } else {
                           return RefreshIndicator(
-                          onRefresh: ()async{
-                            controller.loadProjects();
-                          },
-                          child: controller.projects.isNotEmpty
-                          ?ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: controller.projects.length,
-                            itemBuilder: (context, index) {
-                              final project =
-                                  controller.projects[index];
-                                  return BuildProjectCard(
-                                    project.project??ProjectDetails(),
-                                     (){
-                                      controller.onUpdateProgress(controller.projects[index].project??ProjectDetails());
-                                     }
-                                     );
-                              
+                            onRefresh: () async {
+                              controller.loadProjects();
                             },
-                            separatorBuilder: (context,index){
-                              return SizedBox(height: AppDimensions.s,);
-                            },
-                          )
-                          :Center(
-                            child: TitleText(text: "No Data Found"),
-                          ),
-                        );
-                        }                        
+                            child:
+                                controller.projects.isNotEmpty
+                                    ? Container(
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: AppDimensions.xs,
+                                        vertical: AppDimensions.sm,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppDimensions.sm,
+                                        vertical: AppDimensions.md,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.textWhite,
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimensions.xs,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: const Offset(2, 0),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListView.separated(
+                                        padding: EdgeInsets.zero,
+                                        itemCount: controller.projects.length,
+                                        itemBuilder: (context, index) {
+                                          final project =
+                                              controller.projects[index];
+                                          return BuildProjectCard(
+                                            project.project ?? ProjectDetails(),
+                                            () {
+                                              controller.onUpdateProgress(
+                                                controller
+                                                        .projects[index]
+                                                        .project ??
+                                                    ProjectDetails(),
+                                              );
+                                            },
+                                          );
+                                        },
+                                        separatorBuilder: (context, index) {
+                                          return SizedBox(
+                                            height: AppDimensions.sm,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    : Center(
+                                      child: TitleText(text: "No Data Found"),
+                                    ),
+                          );
+                        }
                       }),
                     ),
                   ],
                 ),
-                // Sector Wise Dropdown Menu
-                if (controller.isSectorDropdownOpen.value)
-                  Positioned(
-                    top: 220, // Header height + padding + dropdown height
-                    left: 120, // 16 (padding) + 120 (search) + 12 (spacing)
-                    child: FilterDropdownMenu<Category>(
-                      width: 200,
-                      items: controller.category,
-                      itemBuilder: (category) => category.name,
-                      onItemSelected: (value){
-                        controller.selectedCategory.value = value;
-                                controller.isSectorDropdownOpen.value = false;
-                                if(controller.paramName.value !="get_assigned"){
-                                  controller.checkParamToLoadProject();
-                                }
-                                
-                      },
-                    ),
-                  ),
-                // Year Wise Dropdown Menu
-                if (controller.isYearDropdownOpen.value)
-                  Positioned(
-                    top: 220, // Header height + padding + dropdown height
-                    left:
-                        250, // 16 (padding) + 120 (search) + 12 (spacing) + 100 (sector) + 12 (spacing)
-                    child: FilterDropdownMenu<String>(
-                      width: 120,
-                      items: controller.years,
-                      onItemSelected: controller.onYearSelected,
-                    ),
-                  ),
               ],
             ),
           ),

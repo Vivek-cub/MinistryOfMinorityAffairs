@@ -9,30 +9,51 @@ import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/
 
 class BuildWorkList extends StatelessWidget {
   HomeController controller;
-  BuildWorkList({super.key,required this.controller});
+  BuildWorkList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: AppDimensions.xs,
+        vertical: AppDimensions.sm,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xs),
+      decoration: BoxDecoration(
+        color: AppColors.textWhite,
+        borderRadius: BorderRadius.circular(AppDimensions.xs),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(2, 0),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TitleText(
-                text: 'Work List',
-                fontWeight: FontWeight.bold,
-              ),
-              
+              TitleText(text: 'Work List', fontWeight: FontWeight.bold),
+
               TextButton(
                 onPressed: controller.onViewAllTap,
-                child: const CustomText(text: "View All",color: AppColors.primaryDark,),
+
+                child: const CustomText(
+                  text: "View More",
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
-          
+
           Obx(() {
             final projects = controller.projects.take(3).toList();
             return Column(
@@ -41,11 +62,13 @@ class BuildWorkList extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: BuildProjectCard(
-                        project.project??ProjectDetails(), 
-                        (){
-                          controller.onUpdateProgressTap(project.project??ProjectDetails());
-                        }
-                        ),
+                        project.project ?? ProjectDetails(),
+                        () {
+                          controller.onUpdateProgressTap(
+                            project.project ?? ProjectDetails(),
+                          );
+                        },
+                      ),
                       //child: _buildProjectCard(project.project??ProjectDetails()),
                     );
                   }).toList(),

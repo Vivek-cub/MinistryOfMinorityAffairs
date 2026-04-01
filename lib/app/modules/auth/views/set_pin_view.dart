@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/otp_section.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/controllers/set_pin_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_header.dart';
@@ -20,77 +21,45 @@ class SetPinView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: Padding(
+        child: Container(
+          decoration: BoxDecoration(gradient: AppGradientColor.gradient),
+          height: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: AppDimensions.gigantic),
-            
                 AuthHeader(),
-            
-            
-                // Main Heading
-                HeaderText(text: "Set Your 4-Digit PIN"),
-                
-            
-            
-                // Subtitle
-                CustomText(text: "This PIN will be used for quick logins in\nthe future. Keep it confidential.",textAlign: TextAlign.center,),
-                
-            
-                const SizedBox(height: AppDimensions.md),
-            
-                // PIN Input Fields
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
-                children: List.generate(
-                  4,
-                      (index) => SizedBox(
-                    width: MediaQuery.of(context).size.width*0.20,
-                    height: 70,
-                    child: TextField(
-                      controller: controller.pinControllers[index],
-                      focusNode: controller.focusNodes[index],
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      maxLength: 1,
-                      obscureText: true,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        counterText: '',
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(1),
-                      ],
-                      onChanged: (value) {
-                        controller.onPinChanged(value, index);
-                      },
-                      onTap: () {
-                        controller.pinControllers[index].clear();
-                      },
-                    ),
-                  ),
+                HeaderText(
+                  text: "Set Your 4-Digit PIN",
+                  color: AppColors.textWhite,
                 ),
-              ),
+                CustomText(
+                  text:
+                      "This PIN will be used for quick logins in\nthe future. Keep it confidential.",
+                  textAlign: TextAlign.center,
+                  color: AppColors.textWhite,
+                ),
+                const SizedBox(height: AppDimensions.md),
+                OtpSection(
+                  length: 4,
+                  boxWidth: 55,
+                  boxHeight: 60,
+                  borderRadius: 12,
+                  onCompleted: (otp) {
+                    controller.otp(otp);
+                    // controller.createPin(otp);
+                  },
+                ),
 
+                const SizedBox(height: AppDimensions.lg),
 
-              const SizedBox(height: AppDimensions.md),
-            
-                // Remember PIN Checkbox
                 Obx(
                   () => InkWell(
                     onTap: () {
-                      controller.toggleRememberPin(!controller.rememberPin.value);
+                      controller.toggleRememberPin(
+                        !controller.rememberPin.value,
+                      );
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -126,33 +95,25 @@ class SetPinView extends StatelessWidget {
                           'Let\'s make sure you remember your PIN.',
                           style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textWhite,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-            
+
                 const SizedBox(height: 32),
-            
+
                 // Create PIN Button
-                Obx(
-                (){
-                  final isEnabled = controller.isButtonEnabled.value;
-                  return AuthSubmitButton(
-                    title: 'Create your PIN',
-                    isEnabled: isEnabled,
-                    onPressed: (){
-                        if (isEnabled) {
-                          controller.createPin();
-                        }
-                      },
-                    ); 
-                }
-              ),
-                
-                
+                AuthSubmitButton(
+                  title: 'Create your PIN',
+                  isEnabled: true,
+                  isAuthButton: true,
+                  onPressed: () {
+                    controller.createPin(controller.otp.value);
+                  },
+                ),
               ],
             ),
           ),

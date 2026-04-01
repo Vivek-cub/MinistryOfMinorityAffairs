@@ -15,13 +15,14 @@ class ProjectListRepoImpl extends ProjectListRepo with SnackBarMixin,PopupMixin{
   final ApiService apiService;
   ProjectListRepoImpl(this.apiService);
   @override
-  Future<ProjectResponse?> getProjectList({required String status,required String paramName,required String sectorId}) async{
+  Future<ProjectResponse?> getProjectList({required String status,required String paramName,required String sectorId,required String year, required String startDate, required String endDate}) async{
     try{
       final resp = await apiService.get(
         NetworkConstants.projectList,
         query: {
           paramName:status,
-          "sectorId":sectorId
+          "sectorId":sectorId,
+          "year":year
           },
       );
       if (resp.statusCode == HttpStatus.ok) {
@@ -39,13 +40,14 @@ class ProjectListRepoImpl extends ProjectListRepo with SnackBarMixin,PopupMixin{
     }
   }
   @override
-  Future<ProjectResponse?> getProjectListByGeoTagged({required bool status,required String paramName,required String sectorId}) async{
+  Future<ProjectResponse?> getProjectListByGeoTagged({required bool status,required String paramName,required String sectorId,required String year, required String startDate, required String endDate}) async{
     try{
       final resp = await apiService.get(
         NetworkConstants.projectList,
         query: {
           paramName:status,
-          "sectorId":sectorId
+          "sectorId":sectorId,
+          "year":year
           },
       );
       if (resp.statusCode == HttpStatus.ok) {

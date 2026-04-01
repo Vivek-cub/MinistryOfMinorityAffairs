@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
+import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 import '../controllers/splash_controller.dart';
 
 /// Splash screen view
@@ -15,52 +18,53 @@ class SplashView extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Container(
         height: double.infinity,
+        width: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primary.withOpacity(0.1),
-              AppColors.background,
-            ],
+          image: DecorationImage(
+            image: AssetImage(ImageAssets.indiaGateImage),
+            fit: BoxFit.fill,
           ),
         ),
-                    child: Image.asset(
-                          ImageAssets.splashImage,
-                          fit: BoxFit.fill,
-                          errorBuilder: (context, error, stackTrace) {
-                            // Fallback UI if image not found
-                            return Column(
-                              children: [
-                                Icon(
-                                  Icons.account_balance,
-                                  size: 100,
-                                  color: AppColors.primary,
-                                ),
-                                const SizedBox(height: 24),
-                                const Text(
-                                  'Ministry of Minority Affairs',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'अल्पसंख्यक कार्य मंत्रालय',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 120,
+              width: 120,
+              child: SvgPicture.asset(SvgAssets.emblemSvg),
+            ),
+            const SizedBox(height: AppDimensions.md),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
+              child: TitleText(
+                text: LanuageConstant.appTitle,
+                color: AppColors.textWhite,
+                maxLines: 3,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.xs),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
+              child: TitleText(
+                text: LanuageConstant.appTitleHindi,
+                color: AppColors.textWhite,
+                maxLines: 3,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.xs),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
+              child: TitleText(
+                text: LanuageConstant.moma,
+                color: AppColors.textWhite,
+                maxLines: 3,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

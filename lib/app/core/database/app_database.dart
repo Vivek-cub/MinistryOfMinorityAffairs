@@ -1,5 +1,3 @@
-
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/dao/submission_dao.dart';
@@ -26,12 +24,9 @@ part 'app_database.g.dart';
     SubmissionRemarks,
     LocalProjects,
     LocalMilestones,
-    LocalMilestoneAttachments
+    LocalMilestoneAttachments,
   ],
-  daos: [
-    SubmissionDao,
-    ProjectDao,
-  ],
+  daos: [SubmissionDao, ProjectDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase._internal() : super(_openConnection());
@@ -40,21 +35,36 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => instance;
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-        },
-        onUpgrade: (m, from, to) async {
-        if (from < 7) {
-          await m.addColumn(localProjects, localProjects.projectUniqueId);
-        }
-      },
-      );
-}
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 12) {
+        await m.deleteTable('submission_images');
+        await m.deleteTable('submission_audio');
+        await m.deleteTable('submission_video');
+        await m.deleteTable('submission_remarks');
+        await m.deleteTable('submissions');
+        await m.deleteTable('local_milestone_attachments');
+        await m.deleteTable('local_milestones');
+        await m.deleteTable('local_projects');
 
+        await m.createTable(submissions);
+        await m.createTable(submissionImages);
+        await m.createTable(submissionAudio);
+        await m.createTable(submissionVideo);
+        await m.createTable(submissionRemarks);
+        await m.createTable(localProjects);
+        await m.createTable(localMilestones);
+        await m.createTable(localMilestoneAttachments);
+      }
+    },
+  );
+}
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
@@ -62,6 +72,4 @@ LazyDatabase _openConnection() {
     final file = File('${dir.path}/app.db');
     return NativeDatabase(file);
   });
-
-  
 }
