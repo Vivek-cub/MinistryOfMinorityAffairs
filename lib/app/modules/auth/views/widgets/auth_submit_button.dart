@@ -26,7 +26,14 @@ class AuthSubmitButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isAuthButton == false ? AppGradientColor.gradient : null,
           color: isAuthButton == false ? null : AppColors.textWhite,
-          borderRadius: BorderRadius.circular(AppDimensions.xxs),
+          borderRadius: BorderRadius.circular(AppDimensions.md),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(12),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Material(
           color: Colors.transparent,
@@ -41,6 +48,7 @@ class AuthSubmitButton extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color:
                           isAuthButton
                               ? AppColors.textPrimary

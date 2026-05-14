@@ -1,7 +1,8 @@
-
 import 'package:dio/dio.dart';
-import 'package:get/get_connect/http/src/multipart/form_data.dart' hide FormData;
-import 'package:get/get_connect/http/src/multipart/multipart_file.dart' hide MultipartFile;
+import 'package:get/get_connect/http/src/multipart/form_data.dart'
+    hide FormData;
+import 'package:get/get_connect/http/src/multipart/multipart_file.dart'
+    hide MultipartFile;
 import 'package:get/get_connect/http/src/status/http_status.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -14,81 +15,76 @@ import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
-class HomeRepoImpl extends HomeRepo with PopupMixin,SnackBarMixin{
+class HomeRepoImpl extends HomeRepo with PopupMixin, SnackBarMixin {
   final ApiService apiService;
   HomeRepoImpl(this.apiService);
-  
+
   @override
-  Future<HomeRespModel?> getHomeData() async{
-    try{
-      final resp = await apiService.get(
-        NetworkConstants.dashboard,
-      );
+  Future<HomeRespModel?> getHomeData() async {
+    try {
+      final resp = await apiService.get(NetworkConstants.dashboard);
       if (resp.statusCode == HttpStatus.ok) {
         return HomeRespModel.fromJson(resp.data);
-      }else{
+      } else {
         HomeRespModel modelData = HomeRespModel();
         showErrorDialog(
           Get.context!,
-            title: "Error",
-            message: modelData.statusMessage??"Something Went Wrong",);
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
         return modelData;
       }
-    }catch(e){
-        throw Exception(e);
+    } catch (e) {
+      throw Exception(e);
     }
   }
 
   @override
-  Future<ProjectResponse?> getAssignedProjects() async{
-    try{
-      final resp = await apiService.get(
-        NetworkConstants.assignedProjectList,
-      );
+  Future<ProjectResponse?> getAssignedProjects() async {
+    try {
+      final resp = await apiService.get(NetworkConstants.assignedProjectList);
       if (resp.statusCode == HttpStatus.ok) {
         return ProjectResponse.fromJson(resp.data);
-      }else{
+      } else {
         ProjectResponse modelData = ProjectResponse();
         showErrorDialog(
           Get.context!,
-            title: "Error",
-            message: modelData.statusMessage??"Something Went Wrong",);
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
         return modelData;
       }
-    }catch(e){
-        throw Exception(e);
+    } catch (e) {
+      throw Exception(e);
     }
   }
 
   @override
-  Future<CommonResponseModel?> uploadProfileImage({required String image}) async{
-    try{
+  Future<CommonResponseModel?> uploadProfileImage({
+    required String image,
+  }) async {
+    try {
       final formData = FormData();
-    
+
       formData.files.add(
         MapEntry(
           'profilePic',
-          await MultipartFile.fromFile(
-            image,
-            filename: image.split('/').last,
-          ),
+          await MultipartFile.fromFile(image, filename: image.split('/').last),
         ),
       );
-    
+
       final response = await apiService.post(
-      NetworkConstants.uploadProfileImage,
-      data: formData,
-      options: Options(
-        contentType: 'multipart/form-data',
-      ),
-    );
-    if(response.statusCode==200){
-      return CommonResponseModel.fromJson(response.data);
-    }else{
-      return CommonResponseModel();
-    }
-    }catch(e){
-        throw Exception(e);
+        NetworkConstants.uploadProfileImage,
+        data: formData,
+        options: Options(contentType: 'multipart/form-data'),
+      );
+      if (response.statusCode == 200) {
+        return CommonResponseModel.fromJson(response.data);
+      } else {
+        return CommonResponseModel();
+      }
+    } catch (e) {
+      throw Exception(e);
     }
   }
 }

@@ -30,74 +30,74 @@ class CalendarProject extends GetView<CalendarProjectController> {
         backgroundColor: AppColors.background,
         body: SafeArea(
           top: false,
-          bottom: true,
+          bottom: false,
           child: Column(
             children: [
               // Header
               WorkProgressHeader(
-                //title: controller.screenTitle,
                 title: "Project List",
                 subtitle: 'Track Progress of works in real-time',
                 avatarAssetPath: ImageAssets.emblemImage,
                 backIcon: Icons.arrow_back,
-                // widget: SizedBox(
-                //   //height: 400,
-                //   child: CustomDateRangePicker(
-                //     minimumDate: DateTime.now().subtract(
-                //       const Duration(days: 30),
-                //     ),
-                //     maximumDate: DateTime.now().add(const Duration(days: 30)),
-                //     backgroundColor: Colors.white,
-                //     primaryColor: Colors.green,
-                //     onApplyClick: (start, end) {
-                //       controller.validateDate();
-                //     },
-                //     onCancelClick: () {},
-                //   ),
-                // ),
+                widget: Column(
+                  children: [
+                    SizedBox(height: AppDimensions.md),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final pickerHeight = (constraints.maxWidth * 0.72)
+                              .clamp(240.0, 280.0);
+                          return SizedBox(
+                            height: pickerHeight,
+                            child: ClipRRect(
+                              borderRadius: BorderRadiusGeometry.circular(
+                                AppDimensions.md,
+                              ),
+                              child: SfDateRangePicker(
+                                showActionButtons: false,
+                                backgroundColor: AppColors.textWhite,
+                                selectionColor: AppColors.primary,
+                                onSelectionChanged:
+                                    controller.onSelectionChanged,
+                                selectionMode:
+                                    DateRangePickerSelectionMode.range,
+                                initialSelectedRange: PickerDateRange(
+                                  DateTime.now().subtract(
+                                    const Duration(days: 4),
+                                  ),
+                                  DateTime.now().add(const Duration(days: 3)),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: AppDimensions.s),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.40,
+                        height: 40,
+                        margin: EdgeInsets.only(right: AppDimensions.sm1),
+                        child: AuthSubmitButton(
+                          title: "Submit Date",
+                          isEnabled: true,
+                          isAuthButton: true,
+                          onPressed: () {
+                            controller.validateDate();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               Expanded(
                 child: ListView(
                   children: [
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(horizontal: 8),
-                    //   child: LayoutBuilder(
-                    //     builder: (context, constraints) {
-                    //       final pickerHeight = (constraints.maxWidth * 0.82)
-                    //           .clamp(280.0, 330.0);
-                    //       return SizedBox(
-                    //         height: pickerHeight,
-                    //         child: SfDateRangePicker(
-                    //           showActionButtons: false,
-                    //           backgroundColor: Colors.transparent,
-                    //           onSelectionChanged: controller.onSelectionChanged,
-                    //           selectionMode: DateRangePickerSelectionMode.range,
-                    //           initialSelectedRange: PickerDateRange(
-                    //             DateTime.now().subtract(const Duration(days: 4)),
-                    //             DateTime.now().add(const Duration(days: 3)),
-                    //           ),
-                    //         ),
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
-                    // Align(
-                    //   alignment: Alignment.centerRight,
-                    //   child: Container(
-                    //     width: MediaQuery.of(context).size.width * 0.40,
-                    //     height: 40,
-                    //     margin: EdgeInsets.only(right: AppDimensions.sm1),
-                    //     child: AuthSubmitButton(
-                    //       title: "Submit Date",
-                    //       isEnabled: true,
-                    //       onPressed: () {
-                    //         controller.validateDate();
-                    //       },
-                    //     ),
-                    //   ),
-                    // ),
-
                     // Projects List
                     Obx(() {
                       if (controller.isLoading.value) {

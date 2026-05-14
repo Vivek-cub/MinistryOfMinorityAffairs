@@ -20,6 +20,15 @@ class BuildProjectCard extends StatelessWidget {
     Color statusBgColor;
 
     switch (project.status) {
+      case 'ACTIVE':
+        statusColor = Colors.blue;
+        statusBgColor = Colors.blue.withValues(alpha: 0.1);
+        break;
+      case 'Pending':
+        statusColor = Colors.amber;
+        statusBgColor = Colors.amber.withValues(alpha: 0.1);
+        break;
+
       case 'In Progress':
         statusColor = Colors.orange;
         statusBgColor = Colors.orange.withValues(alpha: 0.1);

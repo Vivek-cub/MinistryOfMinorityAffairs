@@ -7,6 +7,8 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/upload_project_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/bindings/project_list_bindings.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/views/project_list_view.dart';
+import 'package:ministry_of_minority_affairs/app/modules/proposals/binding/update_proposal_latlng_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/proposals/view/update_proposal_latlng_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/splash/bindings/splash_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/splash/views/splash_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/bindings/home_binding.dart';
@@ -67,7 +69,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.oldPinCheck,
-      page: () =>  CheckOldPin(),
+      page: () => CheckOldPin(),
       binding: CheckOldPinBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
@@ -79,33 +81,40 @@ class AppPages {
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),
+
     // Projects routes
-    
     GetPage(
       name: AppRoutes.workDetail,
-      page: () =>  WorkDetailView(),
+      page: () => WorkDetailView(),
       binding: WorkDetailBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: AppRoutes.projectList,
-      page: () =>  ProjectListView(),
+      page: () => ProjectListView(),
       binding: ProjectListBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: AppRoutes.uploadProjectDetails,
-      page: () =>  UploadProjectDetails(),
+      page: () => UploadProjectDetails(),
       binding: UploadProjectDetailsBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: AppRoutes.calendarProject,
-      page: () =>  CalendarProject(),
+      page: () => CalendarProject(),
       binding: CalendarProjectBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.updateProposalLatlng,
+      page: () => UpdateProposalLatlngView(),
+      binding: UpdateProposalLatlngBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

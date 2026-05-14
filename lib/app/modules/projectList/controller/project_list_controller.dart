@@ -39,6 +39,7 @@ class ProjectListController extends GetxController
   RxString paramName = "".obs;
 
   final RxList<UserProject> projects = <UserProject>[].obs;
+  final RxList<UserProject> allProjects = <UserProject>[].obs;
   final RxList<Category> category = <Category>[].obs;
   final Rx<Category?> selectedCategory = Rx<Category?>(null);
 
@@ -95,11 +96,13 @@ class ProjectListController extends GetxController
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
           projects.value = modelData!.data?.projects ?? [];
+          allProjects.value = List.from(modelData.data?.projects ?? []);
         }
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
     } catch (e) {
+      throw Exception(e);
     } finally {
       isLoading(false);
     }
@@ -124,6 +127,7 @@ class ProjectListController extends GetxController
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
           projects.value = modelData!.data?.projects ?? [];
+          allProjects.value = List.from(modelData.data?.projects ?? []);
         }
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");
@@ -139,7 +143,7 @@ class ProjectListController extends GetxController
     isLoading(true);
 
     try {
-      final userId = await authService.getUserId();
+      final userId = await authService.getUserToken();
       if (userId == null || userId.isEmpty) {
         projects.clear();
         return;
@@ -162,6 +166,8 @@ class ProjectListController extends GetxController
               })
               .values
               .toList();
+
+      allProjects.value = List.from(projects);
     } finally {
       isLoading(false);
     }
@@ -169,63 +175,42 @@ class ProjectListController extends GetxController
 
   void onSearchChanged(String query) {
     searchQuery.value = query;
-    // _applyFilters();
-  }
-
-  void onSectorSelected(String? sector) {
-    selectedSector.value = sector;
-    isSectorDropdownOpen.value = false;
-    // _applyFilters();
-  }
-
-  void onYearSelected(String? year) {
-    selectedYear.value = year;
-    isYearDropdownOpen.value = false;
-    // _applyFilters();
-  }
-
-  void toggleSectorDropdown() {
-    isSectorDropdownOpen.value = !isSectorDropdownOpen.value;
-    if (isSectorDropdownOpen.value) {
-      isYearDropdownOpen.value = false;
+    if (query.length < 4) {
+      projects.value = List.from(allProjects);
+      return;
     }
+    _applyFilters();
   }
 
-  void toggleYearDropdown() {
-    isYearDropdownOpen.value = !isYearDropdownOpen.value;
-    if (isYearDropdownOpen.value) {
-      isSectorDropdownOpen.value = false;
+  void _applyFilters() {
+    final query = searchQuery.value.toLowerCase();
+
+    final filtered =
+        allProjects.where((project) {
+          final name = project.project?.projectName?.toLowerCase() ?? '';
+          final address = project.project?.address?.toLowerCase() ?? '';
+          final id = project.projectId?.toLowerCase() ?? '';
+
+          return name.contains(query) ||
+              address.contains(query) ||
+              id.contains(query);
+        }).toList();
+
+    projects.value = filtered;
+  }
+
+  void onUpdateProgress(ProjectDetails project, String projectStatus) {
+    if (status.value == "Proposal") {
+      Get.toNamed(
+        AppRoutes.updateProposalLatlng,
+        arguments: {"project": project, "status": projectStatus},
+      );
+    } else {
+      Get.toNamed(
+        AppRoutes.workDetail,
+        arguments: {"project": project, "status": projectStatus},
+      );
     }
-  }
-
-  // void _applyFilters() {
-  //   var filtered = projects.where((project) {
-  //     // Filter by status
-  //     if (project.status != statusFilter) {
-  //       return false;
-  //     }
-
-  //     // Filter by search query
-  //     if (searchQuery.value.isNotEmpty) {
-  //       final query = searchQuery.value.toLowerCase();
-  //       if (!project..toLowerCase().contains(query) &&
-  //           !project.location.toLowerCase().contains(query) &&
-  //           !project.id.toLowerCase().contains(query)) {
-  //         return false;
-  //       }
-  //     }
-
-  //     // Filter by sector (if implemented)
-  //     // Filter by year (if implemented)
-
-  //     return true;
-  //   }).toList();
-
-  //   filteredProjects.value = filtered;
-  // }
-
-  void onUpdateProgress(ProjectDetails project) {
-    Get.toNamed(AppRoutes.workDetail, arguments: {"project": project});
   }
 
   List<String> get years => [

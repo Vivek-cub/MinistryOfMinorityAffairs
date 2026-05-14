@@ -49,7 +49,10 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                   subtitle: 'Track Progress of works in real-time',
                   avatarAssetPath: ImageAssets.emblemImage,
                   backIcon: Icons.arrow_back,
-                  widget: WorkDetailInfoWidget(project: controller.data.value),
+                  widget: WorkDetailInfoWidget(
+                    project: controller.data.value,
+                    status: controller.projectStatus.value,
+                  ),
                 ),
 
                 // Content
@@ -102,7 +105,9 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                         ),
                       ),
 
+                      /*
                       const SizedBox(height: AppDimensions.lg),
+
                       Obx(() {
                         if (!controller.isLastPendingMilestone) {
                           return const SizedBox.shrink();
@@ -127,11 +132,11 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                           ],
                         );
                       }),
-
+                      */
                       const SizedBox(height: AppDimensions.lg),
                       // Project Overall Status Section
                       const TitleText(
-                        text: 'Project overall status',
+                        text: 'Milestone overall status',
                         fontWeight: FontWeight.w600,
                       ),
                       const SizedBox(height: AppDimensions.sm),
@@ -184,7 +189,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
 
                       // Project Overall Progress Section
                       const TitleText(
-                        text: 'Project Progress',
+                        text: 'Milestone Progress',
                         fontWeight: FontWeight.w600,
                       ),
                       Obx(

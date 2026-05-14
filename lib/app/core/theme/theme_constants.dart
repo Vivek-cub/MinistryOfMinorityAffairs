@@ -40,6 +40,7 @@ sealed class AppColors {
   static const Color governmentGold = Color(0xFFFFD700);
 
   static const Color lightGrey = Color(0xFFD3D3D3);
+  static const Color transparent = Color(0x4D000000);
 }
 
 sealed class AppDimensions {

@@ -9,11 +9,17 @@ import 'status_tag.dart';
 /// Shows Work ID, Status, State, District, Block, Work Type, Approval Year
 class WorkDetailInfoWidget extends StatelessWidget {
   final ProjectDetails project;
+  final String status;
 
-  const WorkDetailInfoWidget({super.key, required this.project});
+  const WorkDetailInfoWidget({
+    super.key,
+    required this.project,
+    required this.status,
+  });
 
   @override
   Widget build(BuildContext context) {
+    print("Status $status");
     return Container(
       margin: EdgeInsets.only(
         left: AppDimensions.sm,
@@ -67,7 +73,7 @@ class WorkDetailInfoWidget extends StatelessWidget {
               ? _buildDetailRow(
                 label: 'Status',
                 value: null,
-                customWidget: StatusTag(status: project.status ?? ""),
+                customWidget: StatusTag(status: status),
               )
               : SizedBox.shrink(),
           const SizedBox(height: 16),

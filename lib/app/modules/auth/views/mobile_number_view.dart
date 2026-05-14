@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
 
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/controllers/mobile_number_controller.dart';
@@ -20,162 +21,130 @@ class MobileNumberView extends GetView<MobileNumberController> {
 
   @override
   Widget build(BuildContext context) {
-    // final MobileNumberController controller = Get.put(
-    //   MobileNumberController(
-    //     SendMobileOtpRepoImpl(Get.find<ApiService>()),
-    //     Get.find<AuthService>()
-    //   )
-    // );
     return Scaffold(
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(gradient: AppGradientColor.gradient),
           height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: AppDimensions.sideIndicator2Height),
-                AuthHeader(),
-                // Main Heading
-                HeaderText(
-                  text: LanuageConstant.enterPhoneText,
-                  color: AppColors.textWhite,
-                ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: AppDimensions.xxxl),
+                    AuthHeader(),
+                    // Main Heading
+                    HeaderText(
+                      text: LanuageConstant.enterPhoneText,
+                      color: AppColors.textWhite,
+                    ),
 
-                const SizedBox(height: AppDimensions.md),
+                    const SizedBox(height: 6),
+                    CustomText(
+                      text:
+                          "We'll send a verification code to your mobile number",
+                      color: AppColors.textWhite.withValues(alpha: 0.82),
+                      textAlign: TextAlign.center,
+                    ),
 
-                // Phone Number Input
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Country Code
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: const Text(
-                          '+91',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                            fontFamily: "Montserrat",
+                    const SizedBox(height: AppDimensions.md),
+
+                    // Phone Number Input
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                      ),
-
-                      // Divider
-                      Container(width: 1, height: 30, color: AppColors.divider),
-
-                      // Phone Number Field
-                      Expanded(
-                        child: TextField(
-                          controller: controller.phoneController,
-                          keyboardType: TextInputType.phone,
-                          maxLength: 10,
-                          decoration: const InputDecoration(
-                            hintText: 'Mobile Number',
-                            hintStyle: TextStyle(
-                              color: Color(0xFFCCCCCC),
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            counterText: '',
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
-                            ),
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                          style: TextStyle(fontFamily: "Montserrat"),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: AppDimensions.gigantic),
-
-                // Next Button
-                Obx(() {
-                  final isEnabled = controller.isButtonEnabled.value;
-                  return AuthSubmitButton(
-                    title: "Next",
-                    isEnabled: isEnabled,
-                    isAuthButton: true,
-                    onPressed: () {
-                      if (isEnabled) {
-                        controller.sendOTP(
-                          controller.phoneController.text.trim(),
-                        );
-                      }
-                    },
-                  );
-                }),
-                /*
-                Obx(() {
-                  final isEnabled = controller.isButtonEnabled.value;
-                  return SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: (){
-                        
-                        if(isEnabled){
-                          controller.sendOTP(controller.phoneController.text.trim());
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        isEnabled
-                            ? AppColors.primary
-                            : const Color(0xFFCCCCCC),
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: const Color(0xFFCCCCCC),
-                        disabledForegroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        ],
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Next',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                        children: [
+                          // Country Code
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: const Text(
+                              '+91',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                                fontFamily: "Montserrat",
+                              ),
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, size: 20),
+
+                          // Divider
+                          Container(
+                            width: 1,
+                            height: 30,
+                            color: AppColors.divider,
+                          ),
+
+                          // Phone Number Field
+                          Expanded(
+                            child: TextField(
+                              controller: controller.phoneController,
+                              keyboardType: TextInputType.phone,
+                              maxLength: 10,
+
+                              decoration: const InputDecoration(
+                                hintText: 'Mobile Number',
+                                hintStyle: TextStyle(
+                                  color: Color(0xFFCCCCCC),
+                                  fontSize: 14,
+                                ),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                counterText: '',
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 16,
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                              style: TextStyle(fontFamily: "Montserrat"),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  );
-                }),
-                */
-              ],
+
+                    const SizedBox(height: AppDimensions.xxxl),
+
+                    // Next Button
+                    Obx(() {
+                      final isEnabled = controller.isButtonEnabled.value;
+                      return AuthSubmitButton(
+                        title: "Next",
+                        isEnabled: isEnabled,
+                        isAuthButton: true,
+                        onPressed: () {
+                          if (isEnabled) {
+                            controller.sendOTP(
+                              controller.phoneController.text.trim(),
+                            );
+                          }
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

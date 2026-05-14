@@ -6,49 +6,46 @@ import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/interceptor/network_interceptor.dart';
 import 'package:ministry_of_minority_affairs/app/services/interceptor/curl_interceptor.dart';
 
-
 class ApiService extends GetxService {
   final network.Dio _dio = network.Dio();
   RxBool isAlertVisible = RxBool(false);
 
   @override
-void onInit() {
-  _dio.options.baseUrl = "http://49.249.23.234:80/api/v1/";
-  _dio.options.connectTimeout = const Duration(minutes: 3);
-  _dio.options.receiveTimeout = const Duration(minutes: 3);
+  void onInit() {
+    _dio.options.baseUrl = "http://49.249.23.234:80/";
+    _dio.options.connectTimeout = const Duration(minutes: 3);
+    _dio.options.receiveTimeout = const Duration(minutes: 3);
 
-_dio.interceptors.add(NetworkInterceptor());
-  _dio.interceptors.add(
-    RetryInterceptor(
-      dio: _dio,
-      retries: 3,
-      logPrint: print,
-      retryDelays: const [
-        Duration(seconds: 1),
-        Duration(seconds: 5),
-        Duration(seconds: 8),
-      ],
-      retryEvaluator: (error, attempt) {
-        return error.type == network.DioExceptionType.connectionTimeout ||
-            error.type == network.DioExceptionType.receiveTimeout ||
-            error.type == network.DioExceptionType.sendTimeout ||
-            error.type == network.DioExceptionType.connectionError ||
-            (error.response?.statusCode != null &&
-                [500, 502, 503, 504]
-                    .contains(error.response!.statusCode));
-      },
-    ),
-  );
+    _dio.interceptors.add(NetworkInterceptor());
+    _dio.interceptors.add(
+      RetryInterceptor(
+        dio: _dio,
+        retries: 3,
+        logPrint: print,
+        retryDelays: const [
+          Duration(seconds: 1),
+          Duration(seconds: 5),
+          Duration(seconds: 8),
+        ],
+        retryEvaluator: (error, attempt) {
+          return error.type == network.DioExceptionType.connectionTimeout ||
+              error.type == network.DioExceptionType.receiveTimeout ||
+              error.type == network.DioExceptionType.sendTimeout ||
+              error.type == network.DioExceptionType.connectionError ||
+              (error.response?.statusCode != null &&
+                  [500, 502, 503, 504].contains(error.response!.statusCode));
+        },
+      ),
+    );
 
-  // 🧾 cURL SECOND (final request snapshot)
-  _dio.interceptors.add(CurlInterceptor());
+    // 🧾 cURL SECOND (final request snapshot)
+    _dio.interceptors.add(CurlInterceptor());
 
-  // 🪵 Logging / auth / headers LAST
-  _dio.interceptors.add(DioInterceptor());
+    // 🪵 Logging / auth / headers LAST
+    _dio.interceptors.add(DioInterceptor());
 
-  super.onInit();
-}
-
+    super.onInit();
+  }
 
   Future<network.Response<dynamic>> get<T>(
     String path, {
@@ -118,14 +115,12 @@ class DioInterceptor extends network.InterceptorsWrapper with DioErrorHandler {
     network.RequestInterceptorHandler handler,
   ) {
     final token = Get.find<AuthService>().getToken;
+    final userId = Get.find<AuthService>().getUserId();
     if (token != null) {
-      options.headers.addAll({
-        "Authorization": "Bearer $token",
-      });
+      options.headers.addAll({"Authorization": "Bearer $token"});
     }
-    options.headers.addAll({
-      'X-Client': 'mobile',
-    });
+    options.headers.addAll({'X-Client': 'mobile'});
+    // options.headers.addAll({"userId": "2ynan2w0yvl"});
 
     final requestKey = '${options.method}_${options.path}_${options.hashCode}';
 
@@ -156,7 +151,8 @@ class DioInterceptor extends network.InterceptorsWrapper with DioErrorHandler {
       _errorCounts.remove(requestKey);
     } else {
       print(
-          'Retry attempt ${errorCount - 1} for ${err.requestOptions.path}: ${err.message}');
+        'Retry attempt ${errorCount - 1} for ${err.requestOptions.path}: ${err.message}',
+      );
     }
 
     super.onError(err, handler);

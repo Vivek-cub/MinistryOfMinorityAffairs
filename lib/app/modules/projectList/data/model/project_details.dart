@@ -19,6 +19,7 @@ class ProjectDetails {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final List<ProjectMilestone>? milestones;
+  final String? videoAtt;
 
   ProjectDetails({
     this.id,
@@ -39,6 +40,7 @@ class ProjectDetails {
     this.createdAt,
     this.updatedAt,
     this.milestones = const [],
+    this.videoAtt,
   });
 
   factory ProjectDetails.fromJson(Map<String, dynamic> json) {
@@ -64,6 +66,7 @@ class ProjectDetails {
           (json['projectMilestones'] as List<dynamic>? ?? [])
               .map((e) => ProjectMilestone.fromJson(e))
               .toList(),
+      videoAtt: json['videoAtt'],
     );
   }
 

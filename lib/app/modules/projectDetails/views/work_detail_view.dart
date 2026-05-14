@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/capture_video_previews.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/milestone_card.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/selectable_milestone_card.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/audio_recorder_controller.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/audio_recorder_widget.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 import '../controller/work_detail_controller.dart';
@@ -18,8 +14,7 @@ import '../controller/work_detail_controller.dart';
 /// Work Detail view
 /// Displays work details and allows updating progress with photos and remarks
 class WorkDetailView extends GetView<WorkDetailController> {
-  WorkDetailView({super.key});
-  final audioController = Get.find<AudioRecorderController>();
+  const WorkDetailView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +39,10 @@ class WorkDetailView extends GetView<WorkDetailController> {
                   subtitle: 'Track Progress of works in real-time',
                   avatarAssetPath: ImageAssets.emblemImage,
                   backIcon: Icons.arrow_back,
-                  widget: WorkDetailInfoWidget(project: controller.data.value),
+                  widget: WorkDetailInfoWidget(
+                    project: controller.data.value,
+                    status: controller.projectStatus.value,
+                  ),
                 ),
 
                 // Content
@@ -62,16 +60,32 @@ class WorkDetailView extends GetView<WorkDetailController> {
                             child: Text("No milestones found"),
                           );
                         }
-
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: controller.milestones.length,
                           itemBuilder: (context, index) {
                             final milestone = controller.milestones[index];
+                            int firstSelectedIndex = controller.milestones
+                                .indexWhere((m) => m.status != "Completed");
                             return MilestoneCard(
                               milestone: milestone,
                               imageCount: milestone.imageAtt?.length ?? 0,
+                              onPressed: () {
+                                controller.selectMilestone(milestone.id ?? "");
+                                Get.toNamed(
+                                  AppRoutes.uploadProjectDetails,
+                                  arguments: {
+                                    "project": controller.data.value,
+                                    "milestoneId":
+                                        controller.selectedMilestoneId.value,
+                                    "status": controller.projectStatus.value,
+                                  },
+                                );
+                              },
+                              showAddProgress:
+                                  index == firstSelectedIndex &&
+                                  controller.isCompletedProject == false,
                             );
                           },
                         );
@@ -79,18 +93,40 @@ class WorkDetailView extends GetView<WorkDetailController> {
                       const SizedBox(height: 24),
 
                       Obx(() {
-                        return controller.data.value.status != "Completed"
-                            ? Text(
-                              'Select MileStones',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
-                            )
-                            : SizedBox.shrink();
-                      }),
+                        if (!controller.isCompletedProject) {
+                          return const SizedBox.shrink();
+                        }
 
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child: TitleText(
+                                text: 'Project Completion Video',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            CapturedVideoPreview(
+                              videoPath: controller.displayedVideoPath,
+                              onCaptureTap: controller.onCaptureVideo,
+                              onRemoveTap: controller.clearVideoSelection,
+                              showRemoveButton:
+                                  controller.isShowingApiVideoOnly == false,
+                            ),
+                            if (controller.canSubmitCompletedVideo) ...[
+                              const SizedBox(height: 16),
+                              AuthSubmitButton(
+                                title: "Submit Video",
+                                isEnabled: true,
+                                onPressed: controller.submitCompletedVideo,
+                              ),
+                            ],
+                          ],
+                        );
+                      }),
+                      /*
                       Obx(() {
                         return Column(
                           children:
@@ -128,8 +164,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
                       }),
 
                       const SizedBox(height: 24),
-
-                      // Remarks Section
+                      */
                     ],
                   ),
                 ),

@@ -1,9 +1,4 @@
-import 'dart:math';
-
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_disposable.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/services/storage/s_storage_service.dart';
@@ -15,8 +10,10 @@ class AuthService extends GetxService {
 
   final RxBool _loggedIn = false.obs;
   final RxnString _token = RxnString();
+  final RxnString _userId = RxnString();
   final RxnString _pin = RxnString();
   final RxBool _isPinSet = false.obs;
+  final RxBool _isPinVerifiedForSession = false.obs;
 
   @override
   void onInit() {
@@ -50,13 +47,13 @@ class AuthService extends GetxService {
   }
 
   Future<bool> onLogout() async {
-    final userId = await getUserId();
-    if (userId != null && userId.isNotEmpty) {
+    final userToken = await getUserToken();
+    if (userToken != null && userToken.isNotEmpty) {
       if (Get.isRegistered<SubmissionRepository>()) {
-        await Get.find<SubmissionRepository>().clearLocalDataForUser(userId);
+        await Get.find<SubmissionRepository>().clearLocalDataForUser(userToken);
       }
       if (Get.isRegistered<ProjectRepository>()) {
-        await Get.find<ProjectRepository>().clearLocalDataForUser(userId);
+        await Get.find<ProjectRepository>().clearLocalDataForUser(userToken);
       }
     }
 
@@ -65,6 +62,7 @@ class AuthService extends GetxService {
 
     _loggedIn(false);
     _token(null);
+    _isPinVerifiedForSession(false);
     return true;
   }
 
@@ -72,6 +70,7 @@ class AuthService extends GetxService {
     await storage.deleteKey(SStorageKeys.mobilePin);
     _pin(null);
     _isPinSet(false);
+    _isPinVerifiedForSession(false);
   }
 
   //PIN
@@ -89,6 +88,11 @@ class AuthService extends GetxService {
   }
 
   bool get isPinSet => _isPinSet.value;
+  bool get isPinVerifiedForSession => _isPinVerifiedForSession.value;
+
+  void markPinVerifiedForSession() {
+    _isPinVerifiedForSession(true);
+  }
 
   Future<bool> setPin(String pin) async {
     await storage.writeKey(key: SStorageKeys.mobilePin, value: pin);
@@ -96,6 +100,11 @@ class AuthService extends GetxService {
     _pin(pin);
     _isPinSet(true);
     return true;
+  }
+
+  Future<void> setUserId(String userId) async {
+    await storage.writeKey(key: SStorageKeys.userId, value: userId);
+    _userId(userId);
   }
 
   Future<bool> isPinMatched(String pin) async {
@@ -110,5 +119,9 @@ class AuthService extends GetxService {
 
   //USER
 
-  Future<String?> getUserId() async => storage.readKey(key: SStorageKeys.token);
+  Future<String?> getUserToken() async =>
+      storage.readKey(key: SStorageKeys.token);
+
+  Future<String?> getUserId() async =>
+      storage.readKey(key: SStorageKeys.userId);
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/typography.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
@@ -29,7 +31,7 @@ class AppDropdown<T> extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: AppTextTheme.bodyVSmall.copyWith(
+        hintStyle: Get.textTheme.bodySmall?.copyWith(
           color: AppColors.textHint,
           fontWeight: FontWeight.normal,
           fontFamily: "Montserrat",

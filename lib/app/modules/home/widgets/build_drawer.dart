@@ -161,7 +161,7 @@ class BuildDrawer extends StatelessWidget {
             ),
             _buildDrawerItem(
               icon: Icons.task,
-              title: 'Project',
+              title: 'Completed Project',
               onTap: () {
                 Get.back();
                 controller.onProjetTap();
@@ -175,14 +175,14 @@ class BuildDrawer extends StatelessWidget {
                 controller.onChangePinTap();
               },
             ),
-            // _buildDrawerItem(
-            //   icon: Icons.settings_outlined,
-            //   title: 'Calender',
-            //   onTap: () {
-            //     Get.back();
-            //     controller.onCalendarTap();
-            //   },
-            // ),
+            _buildDrawerItem(
+              icon: Icons.calendar_month,
+              title: 'Calender',
+              onTap: () {
+                Get.back();
+                controller.onCalendarTap();
+              },
+            ),
             const Spacer(),
             const Divider(),
             _buildDrawerItem(

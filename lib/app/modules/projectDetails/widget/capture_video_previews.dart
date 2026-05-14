@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -7,12 +6,14 @@ class CapturedVideoPreview extends StatefulWidget {
   final String? videoPath;
   final VoidCallback onCaptureTap;
   final VoidCallback onRemoveTap;
+  final bool showRemoveButton;
 
   const CapturedVideoPreview({
     super.key,
     required this.videoPath,
     required this.onCaptureTap,
     required this.onRemoveTap,
+    this.showRemoveButton = true,
   });
 
   @override
@@ -21,6 +22,14 @@ class CapturedVideoPreview extends StatefulWidget {
 
 class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
   VideoPlayerController? _controller;
+  int _loadId = 0;
+  Object? _loadError;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
 
   @override
   void didUpdateWidget(covariant CapturedVideoPreview oldWidget) {
@@ -31,26 +40,43 @@ class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initializePlayer();
-  }
-
   Future<void> _initializePlayer() async {
+    final currentLoad = ++_loadId;
+
     _controller?.dispose();
     _controller = null;
+    _loadError = null;
 
-    if (widget.videoPath == null || widget.videoPath=="") return;
+    if (widget.videoPath == null || widget.videoPath!.isEmpty) return;
 
-    final controller =
-        VideoPlayerController.file(File(widget.videoPath!));
+    final path = widget.videoPath!;
+    final isRemote = path.startsWith('http://') || path.startsWith('https://');
 
-    await controller.initialize();
+    try {
+      final controller =
+          isRemote
+              ? VideoPlayerController.networkUrl(Uri.parse(path))
+              : VideoPlayerController.file(File(path));
 
-    setState(() {
-      _controller = controller;
-    });
+      await controller.initialize();
+
+      if (!mounted || currentLoad != _loadId) {
+        controller.dispose();
+        return;
+      }
+
+      setState(() {
+        _controller = controller;
+      });
+    } catch (error) {
+      if (!mounted || currentLoad != _loadId) {
+        return;
+      }
+
+      setState(() {
+        _loadError = error;
+      });
+    }
   }
 
   @override
@@ -62,7 +88,7 @@ class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
   @override
   Widget build(BuildContext context) {
     // ---------- No video ----------
-    if (widget.videoPath == null || widget.videoPath=="") {
+    if (widget.videoPath == null || widget.videoPath!.isEmpty) {
       return GestureDetector(
         onTap: widget.onCaptureTap,
         child: Container(
@@ -86,7 +112,20 @@ class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
       );
     }
 
-    // ---------- Video loaded ----------
+    // ---------- Loading ----------
+    if (_loadError != null) {
+      return Container(
+        height: 180,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey.shade200,
+          border: Border.all(color: Colors.grey.shade400),
+        ),
+        child: const Center(child: Text('Unable to load video')),
+      );
+    }
+
     if (_controller == null || !_controller!.value.isInitialized) {
       return const SizedBox(
         height: 180,
@@ -109,7 +148,11 @@ class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
         ),
 
         // Play / Pause
-        Center(
+        Positioned(
+          bottom: 50,
+          top: 50,
+          left: 100,
+          right: 100,
           child: IconButton(
             iconSize: 56,
             color: Colors.white,
@@ -129,25 +172,22 @@ class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
         ),
 
         // Remove button
-        Positioned(
-          top: 8,
-          right: 8,
-          child: InkWell(
-            onTap: widget.onRemoveTap,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black54,
-              ),
-              child: const Icon(
-                Icons.close,
-                size: 18,
-                color: Colors.white,
+        if (widget.showRemoveButton)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: InkWell(
+              onTap: widget.onRemoveTap,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black54,
+                ),
+                child: const Icon(Icons.close, size: 18, color: Colors.white),
               ),
             ),
           ),
-        ),
       ],
     );
   }

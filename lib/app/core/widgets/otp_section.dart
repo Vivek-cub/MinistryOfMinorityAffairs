@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 
 class OtpSection extends StatelessWidget {
   final int length;
   final double boxWidth;
   final double boxHeight;
   final double borderRadius;
-  
+
   final TextStyle? textStyle;
   final Duration maskDuration;
   final ValueChanged<String>? onCompleted;
@@ -19,7 +20,7 @@ class OtpSection extends StatelessWidget {
     this.boxWidth = 55,
     this.boxHeight = 60,
     this.borderRadius = 12,
-    
+
     this.textStyle,
     this.maskDuration = const Duration(seconds: 1),
     this.onCompleted,
@@ -33,7 +34,7 @@ class OtpSection extends StatelessWidget {
       boxWidth: boxWidth,
       boxHeight: boxHeight,
       borderRadius: borderRadius,
-      
+
       textStyle: textStyle,
       maskDuration: maskDuration,
       onCompleted: onCompleted,
@@ -47,7 +48,7 @@ class _MaskedOtpInternal extends StatefulWidget {
   final double boxWidth;
   final double boxHeight;
   final double borderRadius;
-  
+
   final TextStyle? textStyle;
   final Duration maskDuration;
   final ValueChanged<String>? onCompleted;
@@ -58,7 +59,7 @@ class _MaskedOtpInternal extends StatefulWidget {
     required this.boxWidth,
     required this.boxHeight,
     required this.borderRadius,
-    
+
     this.textStyle,
     required this.maskDuration,
     this.onCompleted,
@@ -66,12 +67,10 @@ class _MaskedOtpInternal extends StatefulWidget {
   });
 
   @override
-  State<_MaskedOtpInternal> createState() =>
-      __MaskedOtpInternalState();
+  State<_MaskedOtpInternal> createState() => __MaskedOtpInternalState();
 }
 
-class __MaskedOtpInternalState
-    extends State<_MaskedOtpInternal> {
+class __MaskedOtpInternalState extends State<_MaskedOtpInternal> {
   late List<TextEditingController> controllers;
   late List<FocusNode> focusNodes;
   late List<bool> obscureFlags;
@@ -80,21 +79,19 @@ class __MaskedOtpInternalState
   @override
   void initState() {
     super.initState();
-    controllers =
-        List.generate(widget.length, (_) => TextEditingController());
-    focusNodes =
-        List.generate(widget.length, (_) => FocusNode());
-    obscureFlags =
-        List.generate(widget.length, (_) => true);
+    controllers = List.generate(widget.length, (_) => TextEditingController());
+    focusNodes = List.generate(widget.length, (_) => FocusNode());
+    obscureFlags = List.generate(widget.length, (_) => true);
+    for (var node in focusNodes) {
+      node.addListener(() {
+        setState(() {});
+      });
+    }
   }
 
-  String get otp =>
-      controllers.map((e) => e.text).join();
+  String get otp => controllers.map((e) => e.text).join();
 
-  KeyEventResult _handleKeyEvent(
-    KeyEvent event,
-    int index,
-  ) {
+  KeyEventResult _handleKeyEvent(KeyEvent event, int index) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
 
     if (event.logicalKey == LogicalKeyboardKey.backspace &&
@@ -172,44 +169,91 @@ class __MaskedOtpInternalState
           widget.length,
           (index) => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Container(
-              width: widget.boxWidth,
-              height: widget.boxHeight,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                    BorderRadius.circular(widget.borderRadius),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                ),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(
+                begin: 1,
+                end: focusNodes[index].hasFocus ? 1.05 : 1,
               ),
-              child: Focus(
-                onKeyEvent: (node, event) =>
-                    _handleKeyEvent(event, index),
-                child: TextField(
-                  controller: controllers[index],
-                  focusNode: focusNodes[index],
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  maxLength: 1,
-                  obscureText: true,
-                  style: widget.textStyle ??
-                      const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    counterText: '',
+
+              duration: const Duration(milliseconds: 180),
+
+              builder: (context, scale, child) {
+                return Transform.scale(scale: scale, child: child);
+              },
+
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+
+                width: widget.boxWidth,
+                height: widget.boxHeight,
+
+                decoration: BoxDecoration(
+                  color: Colors.white,
+
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+
+                  border: Border.all(
+                    color:
+                        focusNodes[index].hasFocus
+                            ? Colors.white
+                            : Colors.grey.shade300,
+                    width: 2,
                   ),
-                  autofillHints: const [
-                    AutofillHints.oneTimeCode
+
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          focusNodes[index].hasFocus
+                              ? Colors.white.withValues(alpha: 0.22)
+                              : Colors.black.withValues(alpha: 0.06),
+
+                      blurRadius: focusNodes[index].hasFocus ? 18 : 8,
+
+                      spreadRadius: focusNodes[index].hasFocus ? 2 : 0,
+
+                      offset: const Offset(0, 4),
+                    ),
                   ],
-                  inputFormatters:  [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  onChanged: (value) =>
-                      _handleChange(value, index),
+                ),
+
+                child: Focus(
+                  onKeyEvent: (node, event) => _handleKeyEvent(event, index),
+
+                  child: TextField(
+                    controller: controllers[index],
+                    focusNode: focusNodes[index],
+
+                    autofocus: index == 0,
+
+                    keyboardType: TextInputType.number,
+
+                    textAlign: TextAlign.center,
+
+                    maxLength: 1,
+
+                    obscureText: true,
+
+                    cursorColor: AppColors.textPrimary,
+
+                    style:
+                        widget.textStyle ??
+                        const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textPrimary,
+                        ),
+
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      counterText: '',
+                    ),
+
+                    autofillHints: const [AutofillHints.oneTimeCode],
+
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+
+                    onChanged: (value) => _handleChange(value, index),
+                  ),
                 ),
               ),
             ),

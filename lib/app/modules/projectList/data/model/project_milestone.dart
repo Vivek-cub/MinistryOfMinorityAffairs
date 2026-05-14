@@ -1,3 +1,6 @@
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/audio_attachment.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/image_attachment.dart';
+
 class ProjectMilestone {
   final String? id;
   final String? projectId;
@@ -10,9 +13,10 @@ class ProjectMilestone {
   final String? updatedBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final List<String>? imageAtt;
-  final String? audioAtt;
-  final String? videoAtt;
+  // final List<String>? imageAtt;
+  // final String? audioAtt;
+  final List<ImageAttachment>? imageAtt;
+  final List<AudioAttachment>? audioAtt;
 
   ProjectMilestone({
     this.id,
@@ -26,9 +30,8 @@ class ProjectMilestone {
     this.updatedBy,
     this.createdAt,
     this.updatedAt,
-    required this.imageAtt,
     this.audioAtt,
-    this.videoAtt,
+    this.imageAtt,
   });
 
   factory ProjectMilestone.fromJson(Map<String, dynamic> json) {
@@ -44,9 +47,16 @@ class ProjectMilestone {
       updatedBy: json['updatedBy'],
       createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? ''),
-      imageAtt: List<String>.from(json['imageAtt'] ?? []),
-      audioAtt: json['audioAtt'],
-      videoAtt: json['videoAtt'],
+      // imageAtt: List<String>.from(json['imageAtt'] ?? []),
+      imageAtt:
+          (json['imageAtt'] as List?)
+              ?.map((e) => ImageAttachment.fromJson(e))
+              .toList(),
+      audioAtt:
+          (json['audioAtt'] as List?)
+              ?.map((e) => AudioAttachment.fromJson(e))
+              .toList(),
+      // audioAtt: json['audioAtt'],
     );
   }
 }

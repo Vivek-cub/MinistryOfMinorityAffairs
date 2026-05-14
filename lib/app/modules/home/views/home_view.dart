@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
@@ -128,151 +130,205 @@ class HomeView extends GetView<HomeController> {
             final data = controller.data.value;
 
             return IntrinsicHeight(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Column(
                 children: [
                   Expanded(
-                    child: Column(
-                      children: [
-                        BuildStatCard(
-                          title: 'Assigned Projects',
-                          value: data.totalAssigned ?? 0,
-                          icon: SvgAssets.assignedSvg,
-
-                          onTap: () {
-                            Get.toNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "All",
-                                'paramName': "status",
-                                'statusFilter': "all",
-                              },
-                            );
+                    child: InkWell(
+                      onTap: () {
+                        Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "Proposal",
+                            'paramName': "status",
+                            'statusFilter': "all",
                           },
-                        ),
-                        IntrinsicHeight(
-                          child: Container(
-                            height: 1,
-                            color: AppColors.textWhite,
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            //height: 24,
+                            decoration: BoxDecoration(
+                              // color: backgroundColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: SvgPicture.asset(
+                              SvgAssets.assignedSvg ?? "",
+                              color: AppColors.textWhite,
+                              height: 40,
+                            ),
                           ),
-                        ),
-                        BuildStatCard(
-                          title: 'Completed',
-                          value: controller.data.value.totalCompleted ?? 0,
-                          icon: SvgAssets.completedSvg,
-
-                          onTap: () {
-                            Get.toNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "Completed",
-                                'paramName': "status",
-                                'statusFilter': "completed",
-                              },
-                            );
-                          },
-                        ),
-                      ],
+                          //const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CustomText(
+                                text: "Assigned Proposals",
+                                textAlign: TextAlign.center,
+                                color: AppColors.textWhite,
+                                maxLines: 3,
+                              ),
+                              CustomText(
+                                text: "(${data.totalAssignedProposals ?? 0}) ",
+                                color: AppColors.textWhite,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
-                  const SizedBox(width: AppDimensions.xxsm),
-                  VerticalDivider(color: AppColors.textWhite, width: 1),
-                  const SizedBox(width: AppDimensions.xxsm),
+                  Divider(),
 
-                  Expanded(
-                    child: Column(
-                      children: [
-                        BuildStatCard(
-                          title: 'Not Started',
-                          value: controller.data.value.notStarted ?? 0,
-                          icon: SvgAssets.notStartedSvg,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            BuildStatCard(
+                              title: 'Assigned Projects',
+                              value: data.totalAssigned ?? 0,
+                              icon: SvgAssets.assignedSvg,
 
-                          onTap: () {
-                            Get.toNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "NotStarted",
-                                'paramName': "status",
-                                'statusFilter': "not_started",
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "All",
+                                    'paramName': "status",
+                                    'statusFilter': "all",
+                                  },
+                                );
                               },
-                            );
-                          },
-                        ),
-                        IntrinsicHeight(
-                          child: Container(
-                            height: 1,
-                            color: AppColors.textWhite,
-                          ),
-                        ),
-                        BuildStatCard(
-                          title: 'Geotagged',
-                          value: controller.data.value.geoTagged ?? 0,
-                          icon: SvgAssets.geotaggedSvg,
+                            ),
+                            IntrinsicHeight(
+                              child: Container(
+                                height: 1,
+                                color: AppColors.textWhite,
+                              ),
+                            ),
+                            BuildStatCard(
+                              title: 'Completed',
+                              value: controller.data.value.totalCompleted ?? 0,
+                              icon: SvgAssets.completedSvg,
 
-                          onTap: () {
-                            Get.toNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "",
-                                'paramName': "geoTagged",
-                                'statusFilter': "",
-                                'geoStatus': true,
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "Completed",
+                                    'paramName': "status",
+                                    'statusFilter': "completed",
+                                  },
+                                );
                               },
-                            );
-                          },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
 
-                  const SizedBox(width: AppDimensions.xxsm),
-                  VerticalDivider(color: AppColors.textWhite, width: 1),
-                  const SizedBox(width: AppDimensions.xxsm),
+                      const SizedBox(width: AppDimensions.xxsm),
+                      VerticalDivider(color: AppColors.textWhite, width: 1),
+                      const SizedBox(width: AppDimensions.xxsm),
 
-                  Expanded(
-                    child: Column(
-                      children: [
-                        BuildStatCard(
-                          title: 'Work in Progress',
-                          value: controller.data.value.inProgress ?? 0,
-                          icon: SvgAssets.notStartedSvg,
+                      Expanded(
+                        child: Column(
+                          children: [
+                            BuildStatCard(
+                              title: 'Not Started',
+                              value: controller.data.value.notStarted ?? 0,
+                              icon: SvgAssets.notStartedSvg,
 
-                          onTap: () {
-                            Get.toNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "Assigned",
-                                'paramName': "status",
-                                'statusFilter': "in_progress",
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "NotStarted",
+                                    'paramName': "status",
+                                    'statusFilter': "not_started",
+                                  },
+                                );
                               },
-                            );
-                          },
-                        ),
-                        IntrinsicHeight(
-                          child: Container(
-                            height: 1,
-                            color: AppColors.textWhite,
-                          ),
-                        ),
-                        BuildStatCard(
-                          title: 'Non-Geotagged',
-                          value: controller.data.value.nonGeoTagged ?? 0,
-                          icon: SvgAssets.nonGeotaggedSvg,
-                          onTap: () {
-                            Get.toNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "",
-                                'paramName': "geoTagged",
-                                'statusFilter': "",
-                                'geoStatus': false,
+                            ),
+                            IntrinsicHeight(
+                              child: Container(
+                                height: 1,
+                                color: AppColors.textWhite,
+                              ),
+                            ),
+                            BuildStatCard(
+                              title: 'Geotagged',
+                              value: controller.data.value.geoTagged ?? 0,
+                              icon: SvgAssets.geotaggedSvg,
+
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "",
+                                    'paramName': "geoTagged",
+                                    'statusFilter': "",
+                                    'geoStatus': true,
+                                  },
+                                );
                               },
-                            );
-                          },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+
+                      const SizedBox(width: AppDimensions.xxsm),
+                      VerticalDivider(color: AppColors.textWhite, width: 1),
+                      const SizedBox(width: AppDimensions.xxsm),
+
+                      Expanded(
+                        child: Column(
+                          children: [
+                            BuildStatCard(
+                              title: 'Work in Progress',
+                              value: controller.data.value.inProgress ?? 0,
+                              icon: SvgAssets.notStartedSvg,
+
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "Assigned",
+                                    'paramName': "status",
+                                    'statusFilter': "in_progress",
+                                  },
+                                );
+                              },
+                            ),
+                            IntrinsicHeight(
+                              child: Container(
+                                height: 1,
+                                color: AppColors.textWhite,
+                              ),
+                            ),
+                            BuildStatCard(
+                              title: 'Non-Geotagged',
+                              value: controller.data.value.nonGeoTagged ?? 0,
+                              icon: SvgAssets.nonGeotaggedSvg,
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "",
+                                    'paramName': "geoTagged",
+                                    'statusFilter': "",
+                                    'geoStatus': false,
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

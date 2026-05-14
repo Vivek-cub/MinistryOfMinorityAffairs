@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffmpeg_kit_flutter_minimal/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -21,6 +22,7 @@ import 'package:ministry_of_minority_affairs/app/services/geofence_service.dart'
 import 'package:ministry_of_minority_affairs/app/services/location_permission_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/location_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
+import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -55,6 +57,7 @@ class UploadProjectDetailsController extends GetxController
   RxDouble userLng = 0.0.obs;
   RxString selectedMilestoneId = "".obs;
   RxInt statusProgressValue = 0.obs;
+  RxString projectStatus = "".obs;
 
   @override
   void onInit() {
@@ -67,6 +70,7 @@ class UploadProjectDetailsController extends GetxController
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
       data.value = args['project'] ?? ProjectDetails();
+      projectStatus.value = args['status'];
       selectedMilestoneId.value = args["milestoneId"] ?? "";
       if (data.value.milestones != null) {
         for (int i = 0; i < data.value.milestones!.length; i++) {
@@ -91,7 +95,7 @@ class UploadProjectDetailsController extends GetxController
   Future<void> _loadOfflineDraftIfExists() async {
     final projectId = data.value.id ?? '';
     final milestoneId = selectedMilestoneId.value;
-    final userId = await authService.getUserId();
+    final userId = await authService.getUserToken();
 
     if (projectId.isEmpty || milestoneId.isEmpty) return;
     if (userId == null || userId.isEmpty) return;
@@ -132,7 +136,17 @@ class UploadProjectDetailsController extends GetxController
 
       final File finalFile = await compressIfNeeded(originalFile);
 
+      final position = await LocationService.getAccurateLocation();
+
+      await addExifData(
+        finalFile.path,
+        lat: position.latitude,
+        lng: position.longitude,
+        time: DateTime.now().toString(),
+      );
+
       photos[index] = finalFile.path;
+      readExif(finalFile.path);
 
       final sizeKb = (await finalFile.length()) / 1024;
       debugPrint('📸 Final image size: ${sizeKb.toStringAsFixed(2)} KB');
@@ -189,7 +203,7 @@ class UploadProjectDetailsController extends GetxController
 
   /// Submit work detail update
   Future<void> saveOffline({bool showMessage = true}) async {
-    final userId = await authService.getUserId();
+    final userId = await authService.getUserToken();
     if (userId == null || userId.isEmpty) {
       showErrorDialog(Get.context!, message: "Unable to identify current user");
       return;
@@ -308,21 +322,17 @@ class UploadProjectDetailsController extends GetxController
     }
   }
 
-  Future<bool> isMockLocation(Position position) async {
-    return position.isMocked;
-  }
-
   // Check Internet
   Future<void> submitData() async {
     audioPath = await getAudioPath();
     final rawVideoPath = videoPath.value;
 
-    if (rawVideoPath != null && rawVideoPath.isNotEmpty) {
-      final File originalVideo = File(rawVideoPath);
-      final File compressedVideo = await compressVideoIfNeeded(originalVideo);
+    // if (rawVideoPath != null && rawVideoPath.isNotEmpty) {
+    //   final File originalVideo = File(rawVideoPath);
+    //   final File compressedVideo = await compressVideoIfNeeded(originalVideo);
 
-      finalVideoPath = compressedVideo.path;
-    }
+    //   finalVideoPath = compressedVideo.path;
+    // }
 
     final hasInternet = await NetworkService.hasInternet();
 
@@ -331,11 +341,11 @@ class UploadProjectDetailsController extends GetxController
       return;
     }
 
-    if (isLastPendingMilestone &&
-        (finalVideoPath == null || finalVideoPath!.isEmpty)) {
-      showErrorDialog(Get.context!, message: "Please Upload Video");
-      return;
-    }
+    // if (isLastPendingMilestone &&
+    //     (finalVideoPath == null || finalVideoPath!.isEmpty)) {
+    //   showErrorDialog(Get.context!, message: "Please Upload Video");
+    //   return;
+    // }
 
     if (selectedProgress.value == "") {
       showErrorDialog(Get.context!, message: "Please Select Project Status");
@@ -353,6 +363,8 @@ class UploadProjectDetailsController extends GetxController
     //   showErrorDialog(Get.context!, message: "Please Upload Audio");
     //   return;
     // }
+
+    // await processImagesWithExif();
 
     if (hasInternet) {
       submitOnline();
@@ -537,5 +549,90 @@ class UploadProjectDetailsController extends GetxController
       final homeController = Get.find<HomeController>();
       homeController.checkInternet();
     }
+  }
+
+  // Future<void> addExifData(String path) async {
+  //   final position = await LocationService.getAccurateLocation();
+
+  //   final exif = await Exif.fromPath(path);
+
+  //   await exif.writeAttributes({
+  //     "Make": "PMJVK Nigrani",
+  //     "DateTime": DateTime.now().toString(),
+  //     "GPSLatitude": position.latitude,
+  //     "GPSLongitude": position.longitude,
+  //     "UserId": userId,
+  //   });
+
+  //   await exif.close();
+  // }
+
+  Future<void> addExifData(
+    String path, {
+    double? lat,
+    double? lng,
+    String? time,
+  }) async {
+    final exif = await Exif.fromPath(path);
+
+    String userId = await authService.getUserId() ?? "";
+
+    String formatDate(String? input) {
+      if (input == null || input.isEmpty) return "";
+      final date = DateTime.parse(input);
+      return "${date.year}:${date.month.toString().padLeft(2, '0')}:${date.day.toString().padLeft(2, '0')} "
+          "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    }
+
+    /// Convert decimal to DMS
+    List<String> toDMS(double coord) {
+      final abs = coord.abs();
+      final deg = abs.floor();
+      final minFloat = (abs - deg) * 60;
+      final min = minFloat.floor();
+      final sec = ((minFloat - min) * 60);
+
+      return ["$deg/1", "$min/1", "${(sec * 100).round()}/100"];
+    }
+
+    Map<String, String> attributes = {
+      "DateTimeOriginal": formatDate(time),
+      "UserComment": "UserId:$userId",
+    };
+
+    if (lat != null && lng != null) {
+      attributes.addAll({
+        "GPSLatitude": lat.toString(),
+        "GPSLatitudeRef": lat >= 0 ? "N" : "S",
+        "GPSLongitude": lng.toString(),
+        "GPSLongitudeRef": lng >= 0 ? "E" : "W",
+      });
+    }
+
+    await exif.writeAttributes(attributes);
+    await exif.close();
+  }
+
+  Future<void> processImagesWithExif() async {
+    for (String path in selectedImages) {
+      // await addExifData(path);
+    }
+  }
+
+  Future<void> readExif(String path) async {
+    final exif = await Exif.fromPath(path);
+
+    if (exif == null) {
+      print("No EXIF found");
+      return;
+    }
+
+    final attributes = await exif.getAttributes();
+
+    attributes?.forEach((key, value) {
+      print("print $key : $value");
+    });
+
+    await exif.close();
   }
 }

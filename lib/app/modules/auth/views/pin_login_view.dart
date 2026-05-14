@@ -24,42 +24,54 @@ class PinLoginView extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(gradient: AppGradientColor.gradient),
           height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 36.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: AppDimensions.gigantic),
-                AuthHeader(),
-                HeaderText(
-                  text: LanuageConstant.enterPinText,
-                  color: AppColors.textWhite,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: AppDimensions.xxxl),
+                    AuthHeader(),
+                    HeaderText(
+                      text: "Welcome Back",
+                      color: AppColors.textWhite,
+                    ),
+                    const SizedBox(height: 6),
+                    CustomText(
+                      text: "Secure login for project monitoring",
+                      color: AppColors.textWhite.withValues(alpha: 0.85),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppDimensions.s),
+                    CustomText(
+                      text: 'Use your 4-digit PIN to login',
+                      color: AppColors.textWhite,
+                    ),
+                    const SizedBox(height: AppDimensions.lg),
+                    OtpSection(
+                      length: 4,
+                      boxWidth: 62,
+                      boxHeight: 58,
+                      borderRadius: 16,
+                      onCompleted: (otp) {
+                        controller.pin(otp);
+                        controller.login(otp);
+                      },
+                    ),
+                    const SizedBox(height: AppDimensions.xxl),
+                    AuthSubmitButton(
+                      title: "Login",
+                      isEnabled: true,
+                      isAuthButton: true,
+                      onPressed: () {
+                        controller.login(controller.pin.value);
+                      },
+                    ),
+                  ],
                 ),
-                CustomText(
-                  text: 'Use your 4-digit PIN to login',
-                  color: AppColors.textWhite,
-                ),
-                const SizedBox(height: AppDimensions.md),
-                OtpSection(
-                  length: 4,
-                  boxWidth: 55,
-                  boxHeight: 60,
-                  borderRadius: 12,
-                  onCompleted: (otp) {
-                    controller.pin(otp);
-                    controller.login(otp);
-                  },
-                ),
-
-                const SizedBox(height: AppDimensions.lg),
-                AuthSubmitButton(
-                  title: "Login",
-                  isEnabled: true,
-                  isAuthButton: true,
-                  onPressed: () {
-                    controller.login(controller.pin.value);
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         ),

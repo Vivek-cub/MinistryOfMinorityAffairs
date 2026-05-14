@@ -47,7 +47,11 @@ class SplashController extends GetxController {
       final hasPin = await authService.checkPinFromStorage();
 
       if (hasPin) {
-        Get.offAllNamed(AppRoutes.pinLogin);
+        Get.offAllNamed(
+          authService.isPinVerifiedForSession
+              ? AppRoutes.home
+              : AppRoutes.pinLogin,
+        );
       } else {
         Get.offAllNamed(AppRoutes.setPin);
       }

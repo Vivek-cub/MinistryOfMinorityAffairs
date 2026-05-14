@@ -223,6 +223,10 @@ class ProjectListView extends GetView<ProjectListController> {
                                                         .projects[index]
                                                         .project ??
                                                     ProjectDetails(),
+                                                controller
+                                                        .projects[index]
+                                                        .status ??
+                                                    "",
                                               );
                                             },
                                           );

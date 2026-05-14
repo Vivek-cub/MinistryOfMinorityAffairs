@@ -99,9 +99,12 @@ class HomeController extends GetxController with SnackBarMixin {
     }
   }
 
-  void onUpdateProgressTap(ProjectDetails project) {
+  void onUpdateProgressTap(ProjectDetails project, String status) {
     // Navigate to project detail/update page
-    Get.toNamed(AppRoutes.workDetail, arguments: {"project": project});
+    Get.toNamed(
+      AppRoutes.workDetail,
+      arguments: {"project": project, "status": status},
+    );
   }
 
   void onViewAllTap() {
@@ -132,9 +135,9 @@ class HomeController extends GetxController with SnackBarMixin {
     Get.toNamed(
       AppRoutes.projectList,
       arguments: {
-        'status': "All",
+        'status': "Completed",
         'paramName': "status",
-        'statusFilter': "all",
+        'statusFilter': "completed",
       },
     );
   }
@@ -169,6 +172,7 @@ class HomeController extends GetxController with SnackBarMixin {
         if (modelData?.data != null) {
           data.value = modelData!.data!;
           userName(data.value.user?.name ?? "");
+          await authService.setUserId(modelData.data?.user?.id ?? '');
         }
         loadProjects();
       } else {
@@ -183,7 +187,7 @@ class HomeController extends GetxController with SnackBarMixin {
   Future<void> syncPendingSubmissions() async {
     final hasInternet = await NetworkService.hasInternet();
     if (!hasInternet) return;
-    final userId = await authService.getUserId();
+    final userId = await authService.getUserToken();
     if (userId == null || userId.isEmpty) return;
 
     final pendingList = await submissionRepo.getPending(userId: userId);
@@ -328,6 +332,7 @@ class HomeController extends GetxController with SnackBarMixin {
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
     } catch (e) {
+      throw Exception(e);
     } finally {}
   }
 }

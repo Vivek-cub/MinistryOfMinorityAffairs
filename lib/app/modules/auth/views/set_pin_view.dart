@@ -24,97 +24,105 @@ class SetPinView extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(gradient: AppGradientColor.gradient),
           height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: AppDimensions.gigantic),
-                AuthHeader(),
-                HeaderText(
-                  text: "Set Your 4-Digit PIN",
-                  color: AppColors.textWhite,
-                ),
-                CustomText(
-                  text:
-                      "This PIN will be used for quick logins in\nthe future. Keep it confidential.",
-                  textAlign: TextAlign.center,
-                  color: AppColors.textWhite,
-                ),
-                const SizedBox(height: AppDimensions.md),
-                OtpSection(
-                  length: 4,
-                  boxWidth: 55,
-                  boxHeight: 60,
-                  borderRadius: 12,
-                  onCompleted: (otp) {
-                    controller.otp(otp);
-                    // controller.createPin(otp);
-                  },
-                ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
 
-                const SizedBox(height: AppDimensions.lg),
-
-                Obx(
-                  () => InkWell(
-                    onTap: () {
-                      controller.toggleRememberPin(
-                        !controller.rememberPin.value,
-                      );
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color:
-                                controller.rememberPin.value
-                                    ? const Color(0xFFFFA726)
-                                    : Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color:
-                                  controller.rememberPin.value
-                                      ? const Color(0xFFFFA726)
-                                      : const Color(0xFFE0E0E0),
-                              width: 2,
-                            ),
-                          ),
-                          child:
-                              controller.rememberPin.value
-                                  ? const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16,
-                                  )
-                                  : null,
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Let\'s make sure you remember your PIN.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textWhite,
-                          ),
-                        ),
-                      ],
+                  children: [
+                    const SizedBox(height: AppDimensions.xxxl),
+                    AuthHeader(),
+                    HeaderText(
+                      text: "Set Your 4-Digit PIN",
+                      color: AppColors.textWhite,
                     ),
-                  ),
-                ),
+                    const SizedBox(height: 6),
+                    CustomText(
+                      text:
+                          "This PIN will be used for quick logins in\nthe future. Keep it confidential.",
+                      textAlign: TextAlign.center,
+                      color: AppColors.textWhite.withValues(alpha: 0.85),
+                    ),
+                    const SizedBox(height: AppDimensions.lg),
+                    OtpSection(
+                      length: 4,
+                      boxWidth: 62,
+                      boxHeight: 58,
+                      borderRadius: 16,
+                      onCompleted: (otp) {
+                        controller.otp(otp);
+                        // controller.createPin(otp);
+                      },
+                    ),
 
-                const SizedBox(height: 32),
+                    const SizedBox(height: AppDimensions.lg),
 
-                // Create PIN Button
-                AuthSubmitButton(
-                  title: 'Create your PIN',
-                  isEnabled: true,
-                  isAuthButton: true,
-                  onPressed: () {
-                    controller.createPin(controller.otp.value);
-                  },
+                    Obx(
+                      () => InkWell(
+                        onTap: () {
+                          controller.toggleRememberPin(
+                            !controller.rememberPin.value,
+                          );
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color:
+                                    controller.rememberPin.value
+                                        ? const Color(0xFFFFA726)
+                                        : Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color:
+                                      controller.rememberPin.value
+                                          ? const Color(0xFFFFA726)
+                                          : const Color(0xFFE0E0E0),
+                                  width: 2,
+                                ),
+                              ),
+                              child:
+                                  controller.rememberPin.value
+                                      ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 16,
+                                      )
+                                      : null,
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Let\'s make sure you remember your PIN.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textWhite,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppDimensions.xxl),
+
+                    // Create PIN Button
+                    AuthSubmitButton(
+                      title: 'Create your PIN',
+                      isEnabled: true,
+                      isAuthButton: true,
+                      onPressed: () {
+                        controller.createPin(controller.otp.value);
+                      },
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

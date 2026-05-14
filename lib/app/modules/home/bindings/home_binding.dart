@@ -6,11 +6,9 @@ import 'package:ministry_of_minority_affairs/app/modules/home/data/repo/home_rep
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_detail_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/repo/project_list_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
-import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 import '../controllers/home_controller.dart';
 
 /// Home screen binding

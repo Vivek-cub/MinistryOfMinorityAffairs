@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/typography.dart';
 
@@ -27,14 +29,14 @@ class SearchBarWidget extends StatelessWidget {
         onChanged: onChanged,
 
         onTap: onTap,
-        style: AppTextTheme.bodySmall1.copyWith(
+        style: Get.textTheme.bodySmall?.copyWith(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.normal,
           fontFamily: "Montserrat",
         ),
         decoration: InputDecoration(
           hintText: hintText ?? 'Search',
-          hintStyle: AppTextTheme.bodySmall1.copyWith(
+          hintStyle: Get.textTheme.bodySmall?.copyWith(
             color: AppColors.textHint,
             fontWeight: FontWeight.normal,
             fontFamily: "Montserrat",

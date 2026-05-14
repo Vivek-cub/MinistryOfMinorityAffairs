@@ -6,40 +6,36 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/login/domain/repo/
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 
-class OtpVerificationController extends GetxController with SnackBarMixin,PopupMixin{
-
+class OtpVerificationController extends GetxController
+    with SnackBarMixin, PopupMixin {
   final SendMobileOtpRepo sendMobileOtpRepo;
   final AuthService authService;
-  OtpVerificationController(this.sendMobileOtpRepo,this.authService);
+  OtpVerificationController(this.sendMobileOtpRepo, this.authService);
 
   final List<TextEditingController> otpControllers = List.generate(
     4,
     (index) => TextEditingController(),
   );
-  
-  final List<FocusNode> focusNodes = List.generate(
-    4,
-    (index) => FocusNode(),
-  );
-  
+
+  final List<FocusNode> focusNodes = List.generate(4, (index) => FocusNode());
+
   final RxBool isButtonEnabled = false.obs;
   final RxString phoneNumber = ''.obs;
   RxBool isVerifying = false.obs;
-  RxString otp="".obs;
+  RxString otp = "".obs;
 
-  
   @override
   void onInit() {
     super.onInit();
     // Get phone number from previous screen
     phoneNumber.value = Get.arguments['phoneNumber'] ?? '';
-    
+
     // Add listeners to all OTP fields
     // for (var controller in otpControllers) {
     //   controller.addListener(validateOTP);
     // }
   }
-  
+
   @override
   void onClose() {
     // for (var controller in otpControllers) {
@@ -50,7 +46,7 @@ class OtpVerificationController extends GetxController with SnackBarMixin,PopupM
     // }
     super.onClose();
   }
-  
+
   // /// Validate OTP and enable/disable button
   // void validateOTP() {
   //   // Enable button if all 4 digits are filled
@@ -60,28 +56,27 @@ class OtpVerificationController extends GetxController with SnackBarMixin,PopupM
   //   verifyOTP();
   // }
   // }
-  
+
   /// Handle text change in OTP field
 
-//   void onOtpChanged(String value, int index) {
-//   if (value.isNotEmpty) {
-//     // Move to next field
-//     if (index < otpControllers.length - 1) {
-//       focusNodes[index + 1].requestFocus();
-//     } else {
-//       focusNodes[index].unfocus();
-//       validateOTP(); // Optional auto-submit
-//     }
-//   } else {
-//     // If backspace pressed and field is empty
-//     if (index > 0) {
-//       otpControllers[index - 1].clear();
-//       focusNodes[index - 1].requestFocus();
-//     }
-//   }
-// }
+  //   void onOtpChanged(String value, int index) {
+  //   if (value.isNotEmpty) {
+  //     // Move to next field
+  //     if (index < otpControllers.length - 1) {
+  //       focusNodes[index + 1].requestFocus();
+  //     } else {
+  //       focusNodes[index].unfocus();
+  //       validateOTP(); // Optional auto-submit
+  //     }
+  //   } else {
+  //     // If backspace pressed and field is empty
+  //     if (index > 0) {
+  //       otpControllers[index - 1].clear();
+  //       focusNodes[index - 1].requestFocus();
+  //     }
+  //   }
+  // }
 
-  
   /// Handle backspace in OTP field
   // void onOtpBackspace(int index) {
   //   if (index > 0) {
@@ -89,49 +84,46 @@ class OtpVerificationController extends GetxController with SnackBarMixin,PopupM
   //     focusNodes[index - 1].requestFocus();
   //   }
   // }
-  
+
   // /// Get complete OTP
   // String getOTP() {
   //   return otpControllers.map((controller) => controller.text).join();
   // }
-  
+
   /// Verify OTP
-  void verifyOTP(String otp) async{
+  void verifyOTP(String otp) async {
     // if (!isButtonEnabled.value) return;
     // String enteredOtp=getOTP();
-    if(otp.length !=4){
-      showErrorDialog(Get.context!,message: "Please fill correct otp");
+    if (otp.length != 4) {
+      showErrorDialog(Get.context!, message: "Please fill correct otp");
     }
-    
-try {
+
+    try {
       if (isVerifying.value) return;
 
       isVerifying.value = true;
-      showAlertCustom(
-        backBtnDisable: true,
-        title: "Login..."
+      showAlertCustom(backBtnDisable: true, title: "Login...");
+      final modelData = await sendMobileOtpRepo.verifyOTP(
+        mobileNo: phoneNumber.value,
+        otp: otp,
       );
-      final modelData = await sendMobileOtpRepo.verifyOTP(mobileNo: phoneNumber.value,otp: otp);
       if (modelData?.data != null) {
-        
         if (modelData?.statusCode == '200') {
-        
           Get.back();
-          await authService.onLogin(
-            modelData?.data?.token ?? '',
-          );
+          await authService.onLogin(modelData?.data?.token ?? '');
           final hasPin = await authService.checkPinFromStorage();
-          
+
           Get.offNamed(hasPin ? AppRoutes.pinLogin : AppRoutes.setPin);
-      
-      }
-      }else {
-        showErrorDialog(Get.context!,
-            title: "Error",
-            message: modelData?.error ?? "Something went wrong.",
-            onPressed: () async {
-          Get.back();
-        });
+        }
+      } else {
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: modelData?.error ?? "Something went wrong.",
+          onPressed: () async {
+            Get.back();
+          },
+        );
       }
     } catch (e) {
       Get.back();
@@ -140,19 +132,19 @@ try {
       isVerifying.value = false;
     }
   }
-  
+
   /// Resend OTP
   void resendOTP() {
     // TODO: Integrate with actual OTP resend API
-    
+
     // Clear all OTP fields
     // for (var controller in otpControllers) {
     //   controller.clear();
     // }
-    
+
     // // Focus on first field
     // focusNodes[0].requestFocus();
-    
+
     // Show success message
     Get.snackbar(
       'OTP Sent',

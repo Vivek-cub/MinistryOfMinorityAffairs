@@ -66,6 +66,7 @@ class BuildWorkList extends StatelessWidget {
                         () {
                           controller.onUpdateProgressTap(
                             project.project ?? ProjectDetails(),
+                            project.status ?? "",
                           );
                         },
                       ),

@@ -14,7 +14,7 @@ class SyncService extends GetxService {
   Future<void> _syncPendingSubmissions() async {
     final hasInternet = await NetworkService.hasInternet();
     if (!hasInternet) return;
-    final userId = await Get.find<AuthService>().getUserId();
+    final userId = await Get.find<AuthService>().getUserToken();
     if (userId == null || userId.isEmpty) return;
 
     final pendingList = await repository.getPending(userId: userId);

@@ -5,6 +5,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectD
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/local_milestone_attachments.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/local_projects.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_db_helper.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/milestone_attachment_mapper.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 
 part 'project_dao.g.dart';
@@ -32,17 +33,25 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         ),
       );
 
-      await (delete(localMilestones)
-        ..where(
-          (m) =>
-              m.userId.equals(userId) & m.projectId.equals(project.id ?? ""),
-        )).go();
+      await (delete(localMilestones)..where(
+        (m) => m.userId.equals(userId) & m.projectId.equals(project.id ?? ""),
+      )).go();
 
-      await (delete(localMilestoneAttachments)
-        ..where(
-          (a) =>
-              a.userId.equals(userId) & a.projectId.equals(project.id ?? ""),
-        )).go();
+      await (delete(localMilestoneAttachments)..where(
+        (a) => a.userId.equals(userId) & a.projectId.equals(project.id ?? ""),
+      )).go();
+
+      if (project.videoAtt?.isNotEmpty == true) {
+        await into(localMilestoneAttachments).insert(
+          LocalMilestoneAttachmentsCompanion(
+            userId: Value(userId),
+            projectId: Value(project.id ?? ""),
+            milestoneId: const Value(""),
+            type: const Value('video'),
+            filePath: Value(project.videoAtt!),
+          ),
+        );
+      }
 
       for (final m in project.milestones ?? []) {
         await into(localMilestones).insert(
@@ -57,7 +66,7 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
           ),
         );
 
-        for (final img in m.imageAtt ?? []) {
+        for (final img in MilestoneAttachmentMapper.imagePaths(m)) {
           await into(localMilestoneAttachments).insert(
             LocalMilestoneAttachmentsCompanion(
               userId: Value(userId),
@@ -68,30 +77,30 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
             ),
           );
         }
-
-        if (m.audioAtt?.isNotEmpty == true) {
+        for (final audio in MilestoneAttachmentMapper.audioPaths(m)) {
           await into(localMilestoneAttachments).insert(
             LocalMilestoneAttachmentsCompanion(
               userId: Value(userId),
               projectId: Value(project.id ?? ""),
               milestoneId: Value(m.id ?? ""),
               type: const Value('audio'),
-              filePath: Value(m.audioAtt!),
+              filePath: Value(audio),
             ),
           );
         }
 
-        if (m.videoAtt?.isNotEmpty == true) {
-          await into(localMilestoneAttachments).insert(
-            LocalMilestoneAttachmentsCompanion(
-              userId: Value(userId),
-              projectId: Value(project.id ?? ""),
-              milestoneId: Value(m.id ?? ""),
-              type: const Value('video'),
-              filePath: Value(m.videoAtt!),
-            ),
-          );
-        }
+        // if (m.audioAtt?.isNotEmpty == true) {
+        //   await into(localMilestoneAttachments).insert(
+        //     LocalMilestoneAttachmentsCompanion(
+        //       userId: Value(userId),
+        //       projectId: Value(project.id ?? ""),
+        //       milestoneId: Value(m.id ?? ""),
+        //       type: const Value('audio'),
+        //       filePath: Value(m.audioAtt!),
+        //     ),
+        //   );
+        // }
+
       }
     });
   }
@@ -103,12 +112,19 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
     final result = <LocalProjectFull>[];
 
     for (final p in projects) {
+      final projectVideo =
+          await (select(localMilestoneAttachments)..where(
+            (a) =>
+                a.userId.equals(userId) &
+                a.projectId.equals(p.projectId) &
+                a.milestoneId.equals("") &
+                a.type.equals('video'),
+          )).getSingleOrNull();
+
       final milestones =
-          await (select(localMilestones)
-            ..where(
-              (m) =>
-                  m.userId.equals(userId) & m.projectId.equals(p.projectId),
-            )).get();
+          await (select(localMilestones)..where(
+            (m) => m.userId.equals(userId) & m.projectId.equals(p.projectId),
+          )).get();
 
       final milestoneFullList = <LocalMilestoneFull>[];
 
@@ -133,7 +149,7 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
                 attachments
                     .where((a) => a.type == 'audio')
                     .map((a) => a.filePath)
-                    .firstOrNull,
+                    .toList(),
             video:
                 attachments
                     .where((a) => a.type == 'video')
@@ -143,7 +159,13 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         );
       }
 
-      result.add(LocalProjectFull(project: p, milestones: milestoneFullList));
+      result.add(
+        LocalProjectFull(
+          project: p,
+          milestones: milestoneFullList,
+          video: projectVideo?.filePath,
+        ),
+      );
     }
 
     return result;
@@ -153,8 +175,8 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
     await transaction(() async {
       await (delete(localMilestoneAttachments)
         ..where((a) => a.userId.equals(userId))).go();
-      await (delete(localMilestones)..where((m) => m.userId.equals(userId)))
-          .go();
+      await (delete(localMilestones)
+        ..where((m) => m.userId.equals(userId))).go();
       await (delete(localProjects)..where((p) => p.userId.equals(userId))).go();
     });
   }
