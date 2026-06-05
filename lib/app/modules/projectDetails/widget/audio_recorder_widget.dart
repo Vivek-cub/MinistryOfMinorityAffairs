@@ -60,21 +60,20 @@ class AudioRecorderWidget extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
+            color: Colors.green.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
               IconButton(
                 icon: Icon(
-                  controller.isPlaying.value
-                      ? Icons.stop
-                      : Icons.play_arrow,
+                  controller.isPlaying.value ? Icons.stop : Icons.play_arrow,
                   color: Colors.green,
                 ),
-                onPressed: controller.isPlaying.value
-                    ? controller.stop
-                    : controller.play,
+                onPressed:
+                    controller.isPlaying.value
+                        ? controller.stop
+                        : controller.play,
               ),
               const SizedBox(width: 8),
               const Text(
@@ -84,9 +83,13 @@ class AudioRecorderWidget extends StatelessWidget {
               const Spacer(),
               Text(
                 _formatDuration(controller.durationMs.value),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: 'Delete recording',
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                onPressed: controller.deleteRecording,
               ),
             ],
           ),

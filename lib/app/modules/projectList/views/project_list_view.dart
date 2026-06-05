@@ -8,6 +8,7 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/project_list_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_name.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/widget/app_dropdown.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
@@ -66,7 +67,7 @@ class ProjectListView extends GetView<ProjectListController> {
                               if (controller.isFilterSelected.value == true) {
                               } else {
                                 controller.selectedCategory.value = null;
-                                controller.selectedYear.value = "";
+                                controller.selectedYear.value = null;
                                 controller.searchQuery.value = "";
                                 controller.checkParamToLoadProject();
                               }
@@ -137,28 +138,30 @@ class ProjectListView extends GetView<ProjectListController> {
 
                               const SizedBox(width: 12),
 
-                              // Year Wise Dropdown
-                              // Obx(
-                              //   () => SizedBox(
-                              //     width: MediaQuery.of(context).size.width*0.40,
-                              //     child: AppDropdown<String>(
-                              //       hintText: "Year Wise",
-                              //       value: controller.years.contains(controller.selectedYear.value)
-                              //             ? controller.selectedYear.value
-                              //             : null,
-                              //       items: controller.years,
-                              //       itemLabel: (item) => item,
-                              //       onChanged: (value) {
-                              //         controller.selectedYear.value = value;
-                              //         controller.isYearDropdownOpen.value = false;
-                              //         if(controller.paramName.value !="get_assigned"){
-                              //           controller.checkParamToLoadProject();
-                              //         }
-                              //       },
+                              //Year Wise Dropdown
+                              Obx(
+                                () => SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  child: AppDropdown<FinancialYearName>(
+                                    hintText: "Year Wise",
+                                    value: controller.selectedYear.value,
+                                    items: controller.yearName,
+                                    itemLabel: (item) => item.value ?? "",
+                                    onChanged: (value) {
+                                      controller.selectedYear.value = value;
 
-                              //     ),
-                              //   ),
-                              // ),
+                                      controller.isYearDropdownOpen.value =
+                                          false;
+
+                                      if (controller.paramName.value !=
+                                          "get_assigned") {
+                                        controller.checkParamToLoadProject();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         )
@@ -229,6 +232,7 @@ class ProjectListView extends GetView<ProjectListController> {
                                                     "",
                                               );
                                             },
+                                            false,
                                           );
                                         },
                                         separatorBuilder: (context, index) {

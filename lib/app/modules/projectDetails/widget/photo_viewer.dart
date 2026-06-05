@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:photo_view/photo_view.dart';
@@ -57,8 +59,15 @@ class _PhotoViewerState extends State<PhotoViewer> {
                 setState(() => currentIndex = index);
               },
               builder: (context, index) {
+                final imagePath = widget.images![index];
+                final isLocalFile = imagePath.startsWith('/');
+                final ImageProvider imageProvider =
+                    isLocalFile
+                        ? FileImage(File(imagePath))
+                        : NetworkImage(imagePath);
+
                 return PhotoViewGalleryPageOptions(
-                  imageProvider: NetworkImage(widget.images![index]),
+                  imageProvider: imageProvider,
                   minScale: PhotoViewComputedScale.covered,
                   maxScale: PhotoViewComputedScale.covered * 3,
                   initialScale: PhotoViewComputedScale.covered,

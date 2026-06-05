@@ -125,24 +125,27 @@ class BuildDrawer extends StatelessWidget {
                         }),
 
                         const SizedBox(width: AppDimensions.xs),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Obx(
-                              () => TitleText(
-                                text: controller.userName.value,
-                                maxLines: 2,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Obx(
+                                () => TitleText(
+                                  text: controller.userName.value,
+                                  maxLines: 2,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
-                            ),
 
-                            CustomText(
-                              text:
-                                  controller.data.value.user?.phoneNumber ?? "",
-                              color: AppColors.textSecondary,
-                            ),
-                          ],
+                              CustomText(
+                                text:
+                                    controller.data.value.user?.phoneNumber ??
+                                    "",
+                                color: AppColors.textSecondary,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

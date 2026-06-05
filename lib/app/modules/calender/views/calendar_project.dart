@@ -1,4 +1,3 @@
-import 'package:custom_date_range_picker/custom_date_range_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -47,26 +46,54 @@ class CalendarProject extends GetView<CalendarProjectController> {
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final pickerHeight = (constraints.maxWidth * 0.72)
-                              .clamp(240.0, 280.0);
+                              .clamp(280.0, 320.0);
                           return SizedBox(
                             height: pickerHeight,
                             child: ClipRRect(
-                              borderRadius: BorderRadiusGeometry.circular(
+                              borderRadius: BorderRadius.circular(
                                 AppDimensions.md,
                               ),
-                              child: SfDateRangePicker(
-                                showActionButtons: false,
-                                backgroundColor: AppColors.textWhite,
-                                selectionColor: AppColors.primary,
-                                onSelectionChanged:
-                                    controller.onSelectionChanged,
-                                selectionMode:
-                                    DateRangePickerSelectionMode.range,
-                                initialSelectedRange: PickerDateRange(
-                                  DateTime.now().subtract(
-                                    const Duration(days: 4),
+                              child: Obx(
+                                () => SfDateRangePicker(
+                                  showActionButtons: false,
+                                  backgroundColor: AppColors.textWhite,
+                                  selectionColor: AppColors.primary,
+                                  todayHighlightColor: AppColors.primary,
+
+                                  initialDisplayDate:
+                                      controller.imageAttachmentDates.isNotEmpty
+                                          ? controller
+                                              .imageAttachmentDates
+                                              .first
+                                          : DateTime.now(),
+                                  selectableDayPredicate:
+                                      controller.hasImageAttachmentOnDate,
+                                  monthViewSettings:
+                                      DateRangePickerMonthViewSettings(
+                                        specialDates:
+                                            controller.imageAttachmentDates
+                                                .toList(),
+                                      ),
+                                  monthCellStyle: DateRangePickerMonthCellStyle(
+                                    specialDatesDecoration: BoxDecoration(
+                                      color: AppColors.success,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    specialDatesTextStyle: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+
+                                    disabledDatesTextStyle: TextStyle(
+                                      color: AppColors.textSecondary.withValues(
+                                        alpha: 0.35,
+                                      ),
+                                    ),
                                   ),
-                                  DateTime.now().add(const Duration(days: 3)),
+                                  onSelectionChanged:
+                                      controller.onSelectionChanged,
+                                  selectionMode:
+                                      DateRangePickerSelectionMode.single,
                                 ),
                               ),
                             ),
@@ -75,22 +102,22 @@ class CalendarProject extends GetView<CalendarProjectController> {
                       ),
                     ),
                     SizedBox(height: AppDimensions.s),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.40,
-                        height: 40,
-                        margin: EdgeInsets.only(right: AppDimensions.sm1),
-                        child: AuthSubmitButton(
-                          title: "Submit Date",
-                          isEnabled: true,
-                          isAuthButton: true,
-                          onPressed: () {
-                            controller.validateDate();
-                          },
-                        ),
-                      ),
-                    ),
+                    // Align(
+                    //   alignment: Alignment.centerRight,
+                    //   child: Container(
+                    //     width: MediaQuery.of(context).size.width * 0.40,
+                    //     height: 40,
+                    //     margin: EdgeInsets.only(right: AppDimensions.sm1),
+                    //     child: AuthSubmitButton(
+                    //       title: "Submit Date",
+                    //       isEnabled: true,
+                    //       isAuthButton: true,
+                    //       onPressed: () {
+                    //         controller.validateDate();
+                    //       },
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -130,6 +157,7 @@ class CalendarProject extends GetView<CalendarProjectController> {
                                                 ProjectDetails(),
                                           );
                                         },
+                                        false,
                                       );
                                     },
                                     separatorBuilder: (context, index) {

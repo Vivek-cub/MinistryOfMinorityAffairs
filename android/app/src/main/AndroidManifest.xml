@@ -15,7 +15,7 @@
 
 
     <application
-        android:label="Minority Affairs"
+        android:label="Nigrani"
         android:name="${applicationName}"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"

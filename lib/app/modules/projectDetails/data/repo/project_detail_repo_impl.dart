@@ -14,7 +14,6 @@ class ProjectDetailRepoImpl extends ProjectDetailRepo
   @override
   Future<CommonResponseModel> uploadMilestoneFiles({
     required String projectId,
-    required String milestoneId,
     required List<String> imagePaths,
     String? videoPath,
     String? audioPath,
@@ -29,7 +28,6 @@ class ProjectDetailRepoImpl extends ProjectDetailRepo
 
       formData.fields.addAll([
         MapEntry('projectId', projectId),
-        MapEntry('milestoneId', milestoneId),
         MapEntry('lat', userLat),
         MapEntry('lng', userLng),
         MapEntry('progress', progress),

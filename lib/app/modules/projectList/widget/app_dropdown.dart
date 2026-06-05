@@ -60,7 +60,10 @@ class AppDropdown<T> extends StatelessWidget {
           items.map((item) {
             return DropdownMenuItem<T>(
               value: item,
-              child: CustomText(text: itemLabel(item)),
+              child: CustomText(
+                text: itemLabel(item),
+                color: AppColors.textPrimary,
+              ),
             );
           }).toList(),
       onChanged: onChanged,

@@ -7,6 +7,7 @@ class AuthSubmitButton extends StatelessWidget {
   VoidCallback? onPressed;
   double height;
   bool isAuthButton;
+  bool isUrgent;
   AuthSubmitButton({
     super.key,
     required this.title,
@@ -14,6 +15,7 @@ class AuthSubmitButton extends StatelessWidget {
     this.onPressed,
     this.height = 56,
     this.isAuthButton = false,
+    this.isUrgent = false,
   });
 
   @override
@@ -24,7 +26,12 @@ class AuthSubmitButton extends StatelessWidget {
       // margin: EdgeInsets.symmetric(horizontal: AppDimensions.sm),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: isAuthButton == false ? AppGradientColor.gradient : null,
+          gradient:
+              isAuthButton == false
+                  ? (isUrgent == false
+                      ? AppGradientColor.gradient
+                      : AppRedGradientColor.gradient)
+                  : null,
           color: isAuthButton == false ? null : AppColors.textWhite,
           borderRadius: BorderRadius.circular(AppDimensions.md),
           boxShadow: [

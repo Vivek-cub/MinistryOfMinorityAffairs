@@ -54,7 +54,7 @@ class SetPinView extends StatelessWidget {
                       borderRadius: 16,
                       onCompleted: (otp) {
                         controller.otp(otp);
-                        // controller.createPin(otp);
+                        controller.checkPinAndCheckbox(otp);
                       },
                     ),
 

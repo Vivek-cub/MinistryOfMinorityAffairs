@@ -32,7 +32,6 @@ class ProjectRepository {
       milestones:
           local.milestones.map((m) {
             return ProjectMilestone(
-              id: m.milestone.milestoneId,
               milestoneName: m.milestone.name,
               milestoneDescription: m.milestone.description,
               status: m.milestone.status,
@@ -46,5 +45,17 @@ class ProjectRepository {
 
   Future<void> clearLocalDataForUser(String userId) {
     return dao.clearLocalDataForUser(userId);
+  }
+
+  Future<void> deleteUploadedLocalAttachmentPaths({
+    required String userId,
+    required String projectId,
+    required List<String> filePaths,
+  }) {
+    return dao.deleteUploadedLocalAttachmentPaths(
+      userId: userId,
+      projectId: projectId,
+      filePaths: filePaths,
+    );
   }
 }

@@ -54,6 +54,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
                       // Work Detail Info
                       // const SizedBox(height: 24),
                       // TitleText(text: "Milestones"),
+                      /*
                       Obx(() {
                         if (controller.milestones.isEmpty) {
                           return const Center(
@@ -91,7 +92,7 @@ class WorkDetailView extends GetView<WorkDetailController> {
                         );
                       }),
                       const SizedBox(height: 24),
-
+                      */
                       Obx(() {
                         if (!controller.isCompletedProject) {
                           return const SizedBox.shrink();

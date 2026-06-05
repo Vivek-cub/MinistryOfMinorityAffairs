@@ -73,7 +73,7 @@ class UpdateProposalLatlngController extends GetxController
     }
   }
 
-  void submitLocation() async {
+  Future<void> submitLocation() async {
     try {
       showAlertCustom(backBtnDisable: true, title: "Updating Location");
       final modelData = await repo.updateProposalLatlng(
@@ -83,12 +83,15 @@ class UpdateProposalLatlngController extends GetxController
       );
 
       if (modelData?.statusCode == "200") {
-        Get.back();
-
-        Get.toNamed(AppRoutes.home);
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        await Get.offAllNamed(AppRoutes.home);
       }
     } catch (e) {
-      Get.back();
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
     } finally {}
   }
 }

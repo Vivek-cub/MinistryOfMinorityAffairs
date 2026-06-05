@@ -7,9 +7,9 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 
-class BuildWorkList extends StatelessWidget {
+class BuildUrgentWorkList extends StatelessWidget {
   HomeController controller;
-  BuildWorkList({super.key, required this.controller});
+  BuildUrgentWorkList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -38,29 +38,32 @@ class BuildWorkList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: AppDimensions.sm),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TitleText(text: 'Work List', fontWeight: FontWeight.bold),
-
-              TextButton(
-                onPressed: controller.onViewAllTap,
-
-                child: const CustomText(
-                  text: "View More",
-                  color: AppColors.textPrimary,
-                ),
+              TitleText(
+                text: 'Urgent',
+                fontWeight: FontWeight.bold,
+                color: AppColors.error,
               ),
             ],
           ),
-
+          SizedBox(height: AppDimensions.xxs),
           Obx(() {
-            final projects = controller.projects.take(3).toList();
-            return Column(
-              children:
-                  projects.map((project) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+            return Container(
+              height: 220,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemCount: controller.projects.length,
+                itemBuilder: (context, index) {
+                  final project = controller.projects[index];
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.80,
                       child: BuildProjectCard(
                         project.project ?? ProjectDetails(),
                         () {
@@ -69,13 +72,15 @@ class BuildWorkList extends StatelessWidget {
                             project.status ?? "",
                           );
                         },
-                        false,
+                        true,
                       ),
-                      //child: _buildProjectCard(project.project??ProjectDetails()),
-                    );
-                  }).toList(),
+                    ),
+                  );
+                },
+              ),
             );
           }),
+          SizedBox(height: 12),
         ],
       ),
     );

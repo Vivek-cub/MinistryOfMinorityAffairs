@@ -90,12 +90,12 @@ class WorkDetailInfoWidget extends StatelessWidget {
           if (project.address != null)
             _buildDetailRow(label: 'Block', value: project.address),
 
-          if (project.visitCount != null) const SizedBox(height: 16),
-          if (project.visitCount != null)
-            _buildDetailRow(
-              label: 'Officer Visit Count',
-              value: project.visitCount.toString(),
-            ),
+          // if (project.visitCount != null) const SizedBox(height: 16),
+          // if (project.visitCount != null)
+          //   _buildDetailRow(
+          //     label: 'Officer Visit Count',
+          //     value: project.visitCount.toString(),
+          //   ),
         ],
       ),
     );

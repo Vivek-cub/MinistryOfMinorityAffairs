@@ -1,3 +1,4 @@
+import 'package:blinking_border/blinking_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,6 +10,7 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/widgets/build_drawer.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/widgets/build_stat_card.dart';
+import 'package:ministry_of_minority_affairs/app/modules/home/widgets/build_urgent_work_list.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/widgets/build_work_list.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
@@ -34,79 +36,119 @@ class HomeView extends GetView<HomeController> {
         body: SafeArea(
           top: false,
           bottom: true,
-          child: Obx(() {
-            return controller.hasInternet.value == true
-                ? SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      //_buildHeader(context),
-                      WorkProgressHeader(
-                        title: "Welcome ${controller.userName.value}",
-                        subtitle: "Track Progress of works in real-time",
-                        avatarAssetPath: ImageAssets.emblemImage,
-                        onAvatarTap: () {
-                          controller.openDrawer();
-                        },
-
-                        refreshIcon: Icons.refresh,
-                        onIconPressed: () {
-                          controller.checkInternet();
-                        },
-                        // onBackPress: () => controller.openDrawer(),
-                        widget: _buildQuickOverview(context),
-                      ),
-
-                      BuildWorkList(controller: controller),
-                      const SizedBox(height: AppDimensions.sm),
-                    ],
-                  ),
-                )
-                : Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      WorkProgressHeader(
-                        title: "Welcome Back",
-                        subtitle: "Track Progress of works in real-time",
-                        avatarAssetPath: ImageAssets.emblemImage,
-                        onAvatarTap: () {
-                          // controller.openDrawer();
-                        },
-                        refreshIcon: Icons.refresh,
-                        onIconPressed: () {
-                          controller.checkInternet();
-                        },
-                      ),
-                      SizedBox(height: AppDimensions.sideIndicator2Height),
-                      TitleText(text: "No Intenet"),
-                      const SizedBox(height: AppDimensions.gigantic),
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: AppDimensions.gigantic,
-                          vertical: AppDimensions.xxl,
-                        ),
-                        child: AuthSubmitButton(
-                          title: "Open Project List",
-                          isEnabled: true,
-                          onPressed: () {
-                            Get.offNamed(
-                              AppRoutes.projectList,
-                              arguments: {
-                                'status': "noInternet",
-                                'paramName': "noInternet",
-                                'statusFilter': "",
+          child: Stack(
+            children: [
+              Obx(() {
+                return controller.hasInternet.value == true
+                    ? RefreshIndicator(
+                      onRefresh: controller.checkInternet,
+                      color: AppColors.primary,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            //_buildHeader(context),
+                            WorkProgressHeader(
+                              title: "Welcome ${controller.userName.value}",
+                              subtitle: "Track Progress of works in real-time",
+                              avatarAssetPath: ImageAssets.emblemImage,
+                              onAvatarTap: () {
+                                controller.openDrawer();
                               },
-                            );
-                          },
+
+                              refreshIcon: Icons.refresh,
+                              onIconPressed: () {
+                                controller.checkInternet();
+                              },
+                              // onBackPress: () => controller.openDrawer(),
+                              widget: _buildQuickOverview(context),
+                            ),
+                            (controller
+                                            .data
+                                            .value
+                                            .projectsNotVisitedFor3Months ??
+                                        0) >
+                                    0
+                                ? BuildUrgentWorkList(controller: controller)
+                                : SizedBox.shrink(),
+                            BuildWorkList(controller: controller),
+                            const SizedBox(height: AppDimensions.sm),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                );
-          }),
+                    )
+                    : Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          WorkProgressHeader(
+                            title: "Welcome Back",
+                            subtitle: "Track Progress of works in real-time",
+                            avatarAssetPath: ImageAssets.emblemImage,
+                            onAvatarTap: () {
+                              // controller.openDrawer();
+                            },
+                            refreshIcon: Icons.refresh,
+                            onIconPressed: () {
+                              controller.checkInternet();
+                            },
+                          ),
+                          SizedBox(height: AppDimensions.sideIndicator2Height),
+                          TitleText(text: "No Intenet"),
+                          const SizedBox(height: AppDimensions.gigantic),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: AppDimensions.gigantic,
+                              vertical: AppDimensions.xxl,
+                            ),
+                            child: AuthSubmitButton(
+                              title: "Open Project List",
+                              isEnabled: true,
+                              onPressed: () {
+                                Get.offNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "noInternet",
+                                    'paramName': "noInternet",
+                                    'statusFilter': "",
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+              }),
+              Obx(
+                () =>
+                    controller.isSyncing.value
+                        ? Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        : const SizedBox.shrink(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -132,56 +174,76 @@ class HomeView extends GetView<HomeController> {
             return IntrinsicHeight(
               child: Column(
                 children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        Get.toNamed(
-                          AppRoutes.projectList,
-                          arguments: {
-                            'status': "Proposal",
-                            'paramName': "status",
-                            'statusFilter': "all",
+                  /*
+                  (data.totalAssignedProposals ?? 0) > 0
+                      ? Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "Proposal",
+                                'paramName': "status",
+                                'statusFilter': "all",
+                              },
+                            );
                           },
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            //height: 24,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            margin: EdgeInsets.symmetric(horizontal: 16),
                             decoration: BoxDecoration(
-                              // color: backgroundColor,
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(16),
+                              // color: Colors.cyan.withValues(alpha: 0.15),
                             ),
-                            child: SvgPicture.asset(
-                              SvgAssets.assignedSvg ?? "",
-                              color: AppColors.textWhite,
-                              height: 40,
+                            child: BlinkingBorder(
+                              blinkStyle: BlinkStyle.pulsing,
+                              strokeStyle: StrokeStyle.solid,
+                              borderRadius: BorderRadius.circular(16),
+                              color: AppColors.error,
+                              child: Column(
+                                // crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    //height: 24,
+                                    decoration: BoxDecoration(
+                                      // color: backgroundColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: SvgPicture.asset(
+                                      SvgAssets.assignedSvg ?? "",
+                                      color: AppColors.textWhite,
+                                      height: 40,
+                                    ),
+                                  ),
+                                  //const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CustomText(
+                                        text: "Assigned Proposals",
+                                        textAlign: TextAlign.center,
+                                        color: AppColors.textWhite,
+                                        maxLines: 3,
+                                      ),
+                                      CustomText(
+                                        text:
+                                            "(${data.totalAssignedProposals ?? 0}) ",
+                                        color: AppColors.textWhite,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          //const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CustomText(
-                                text: "Assigned Proposals",
-                                textAlign: TextAlign.center,
-                                color: AppColors.textWhite,
-                                maxLines: 3,
-                              ),
-                              CustomText(
-                                text: "(${data.totalAssignedProposals ?? 0}) ",
-                                color: AppColors.textWhite,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
+                      )
+                      : SizedBox.shrink(),
 
-                  Divider(),
-
+*/
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -204,12 +266,7 @@ class HomeView extends GetView<HomeController> {
                                 );
                               },
                             ),
-                            IntrinsicHeight(
-                              child: Container(
-                                height: 1,
-                                color: AppColors.textWhite,
-                              ),
-                            ),
+
                             BuildStatCard(
                               title: 'Completed',
                               value: controller.data.value.totalCompleted ?? 0,
@@ -231,8 +288,6 @@ class HomeView extends GetView<HomeController> {
                       ),
 
                       const SizedBox(width: AppDimensions.xxsm),
-                      VerticalDivider(color: AppColors.textWhite, width: 1),
-                      const SizedBox(width: AppDimensions.xxsm),
 
                       Expanded(
                         child: Column(
@@ -253,12 +308,7 @@ class HomeView extends GetView<HomeController> {
                                 );
                               },
                             ),
-                            IntrinsicHeight(
-                              child: Container(
-                                height: 1,
-                                color: AppColors.textWhite,
-                              ),
-                            ),
+
                             BuildStatCard(
                               title: 'Geotagged',
                               value: controller.data.value.geoTagged ?? 0,
@@ -281,8 +331,6 @@ class HomeView extends GetView<HomeController> {
                       ),
 
                       const SizedBox(width: AppDimensions.xxsm),
-                      VerticalDivider(color: AppColors.textWhite, width: 1),
-                      const SizedBox(width: AppDimensions.xxsm),
 
                       Expanded(
                         child: Column(
@@ -303,12 +351,7 @@ class HomeView extends GetView<HomeController> {
                                 );
                               },
                             ),
-                            IntrinsicHeight(
-                              child: Container(
-                                height: 1,
-                                color: AppColors.textWhite,
-                              ),
-                            ),
+
                             BuildStatCard(
                               title: 'Non-Geotagged',
                               value: controller.data.value.nonGeoTagged ?? 0,

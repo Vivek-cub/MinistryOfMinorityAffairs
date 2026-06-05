@@ -147,7 +147,7 @@ class DioInterceptor extends network.InterceptorsWrapper with DioErrorHandler {
     final shouldShowError = !isRetryableError || errorCount > 3;
 
     if (shouldShowError) {
-      errorHandler(err, _shouldSkipAlert());
+      errorHandler(err);
       _errorCounts.remove(requestKey);
     } else {
       print(
@@ -177,9 +177,5 @@ class DioInterceptor extends network.InterceptorsWrapper with DioErrorHandler {
         error.type == network.DioExceptionType.connectionError ||
         (error.response?.statusCode != null &&
             [500, 502, 503, 504].contains(error.response!.statusCode));
-  }
-
-  bool _shouldSkipAlert() {
-    return Get.currentRoute.contains("otr");
   }
 }

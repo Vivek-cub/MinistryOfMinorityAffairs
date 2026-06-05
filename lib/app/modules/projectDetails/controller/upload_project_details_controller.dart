@@ -22,6 +22,7 @@ import 'package:ministry_of_minority_affairs/app/services/geofence_service.dart'
 import 'package:ministry_of_minority_affairs/app/services/location_permission_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/location_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
+import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -55,9 +56,10 @@ class UploadProjectDetailsController extends GetxController
   RxBool isSelectedProgress = false.obs;
   RxDouble userLat = 0.0.obs;
   RxDouble userLng = 0.0.obs;
-  RxString selectedMilestoneId = "".obs;
+  // RxString selectedMilestoneId = "".obs;
   RxInt statusProgressValue = 0.obs;
   RxString projectStatus = "".obs;
+  RxBool isLocked = false.obs;
 
   @override
   void onInit() {
@@ -65,6 +67,24 @@ class UploadProjectDetailsController extends GetxController
     _initializeProjectData();
     // checkGeoFence();
   }
+
+  void _initializeProjectData() {
+    final args = Get.arguments;
+    if (args is Map<String, dynamic>) {
+      data.value = args['project'] ?? ProjectDetails();
+      projectStatus.value = args['status'];
+    }
+
+    saveToLocalDb();
+  }
+
+  void saveToLocalDb() async {
+    final userId = await authService.getUserToken();
+    if (userId == null || userId.isEmpty) return;
+    await dbRepo.saveProject(data.value, userId);
+  }
+
+  /*
 
   Future<void> _initializeProjectData() async {
     final args = Get.arguments;
@@ -76,14 +96,7 @@ class UploadProjectDetailsController extends GetxController
         for (int i = 0; i < data.value.milestones!.length; i++) {
           if (selectedMilestoneId.value == data.value.milestones![i].id) {
             statusProgressValue.value = data.value.milestones![i].progress ?? 0;
-            // for (
-            //   int j = 0;
-            //   j < data.value.milestones![i].imageAtt!.length &&
-            //       i < photos.length;
-            //   j++
-            // ) {
-            //   photos[j] = data.value.milestones![i].imageAtt![j];
-            // }
+
           }
         }
       }
@@ -120,6 +133,7 @@ class UploadProjectDetailsController extends GetxController
     selectedProgress.value = draft.submission.projectStatus;
     statusProgressValue.value = int.tryParse(draft.submission.progress) ?? 0;
   }
+  */
 
   Future<void> takePhoto(int index) async {
     try {
@@ -136,17 +150,23 @@ class UploadProjectDetailsController extends GetxController
 
       final File finalFile = await compressIfNeeded(originalFile);
 
-      final position = await LocationService.getAccurateLocation();
-
-      await addExifData(
-        finalFile.path,
-        lat: position.latitude,
-        lng: position.longitude,
-        time: DateTime.now().toString(),
-      );
-
       photos[index] = finalFile.path;
-      readExif(finalFile.path);
+      photos.refresh();
+
+      try {
+        final position = await LocationService.getAccurateLocation();
+
+        await addExifData(
+          finalFile.path,
+          lat: position.latitude,
+          lng: position.longitude,
+          time: DateTime.now().toString(),
+        );
+
+        await readExif(finalFile.path);
+      } catch (e) {
+        debugPrint('Failed to add image EXIF data: $e');
+      }
 
       final sizeKb = (await finalFile.length()) / 1024;
       debugPrint('📸 Final image size: ${sizeKb.toStringAsFixed(2)} KB');
@@ -193,14 +213,6 @@ class UploadProjectDetailsController extends GetxController
     return finalAudio.path;
   }
 
-  void onMicrophoneTap() {
-    Get.snackbar(
-      'Voice Input',
-      'Voice input feature coming soon',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
   /// Submit work detail update
   Future<void> saveOffline({bool showMessage = true}) async {
     final userId = await authService.getUserToken();
@@ -212,7 +224,6 @@ class UploadProjectDetailsController extends GetxController
     await repository.save(
       userId: userId,
       projectId: data.value.id ?? '',
-      milestoneId: selectedMilestoneId.value,
       images: photos.whereType<String>().toList(),
       audioPath: audioPath,
       audioDuration: Get.find<AudioRecorderController>().durationMs.value,
@@ -225,25 +236,31 @@ class UploadProjectDetailsController extends GetxController
       projectStatus: selectedProgress.value,
     );
 
-    if (showMessage) {
-      Get.snackbar(
-        'Saved Offline',
-        'No internet. Data will sync automatically',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-
     _refreshHomeIfAvailable();
-    Get.back(result: true);
-    Get.offAll(AppRoutes.home);
+    Get.offAllNamed(AppRoutes.home);
+
+    if (showMessage) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        Get.snackbar(
+          'Saved Offline',
+          'No internet. Data will sync automatically',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+    }
   }
 
   void submitOnline() async {
     try {
       showAlertCustom(backBtnDisable: true, title: "Uploading...");
+      await _logUploadMediaSizes(
+        imagePaths: selectedImages,
+        audioPath: audioPath,
+        videoPath: finalVideoPath,
+        source: 'direct online upload',
+      );
       final modelData = await repo.uploadMilestoneFiles(
         projectId: data.value.id ?? '',
-        milestoneId: selectedMilestoneId.value,
         imagePaths: selectedImages,
         videoPath: finalVideoPath,
         audioPath: audioPath,
@@ -255,6 +272,7 @@ class UploadProjectDetailsController extends GetxController
       );
 
       if (modelData.statusCode == '200') {
+        await _cleanupUploadedOnlineMedia();
         Get.back();
         showSuccessDialog(
           Get.context!,
@@ -385,146 +403,90 @@ class UploadProjectDetailsController extends GetxController
   Future<File> compressIfNeeded(File file) async {
     final bytes = await file.length();
 
+    // Already below 1 MB
     if (bytes <= 1024 * 1024) {
       return file;
     }
 
     final tempDir = await offlineMediaDir();
-    final targetPath = p.join(
-      tempDir.path,
-      'compressed_${DateTime.now().millisecondsSinceEpoch}.jpg',
-    );
 
-    int quality = 85;
-    File? compressed;
+    File? compressedFile;
 
-    while (quality >= 30) {
+    for (int quality = 85; quality >= 30; quality -= 10) {
+      final targetPath = p.join(
+        tempDir.path,
+        'compressed_${quality}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
       final XFile? result = await FlutterImageCompress.compressAndGetFile(
         file.absolute.path,
         targetPath,
         quality: quality,
+        minWidth: 1280,
+        minHeight: 1280,
         format: CompressFormat.jpeg,
       );
 
-      if (result == null) break;
+      if (result == null) continue;
 
-      final File resultFile = File(result.path);
+      final compressed = File(result.path);
 
-      final size = await resultFile.length();
+      final size = await compressed.length();
+
       if (size <= 1024 * 1024) {
-        compressed = resultFile;
+        compressedFile = compressed;
         break;
       }
 
-      quality -= 10;
+      compressedFile = compressed;
     }
 
-    return compressed ?? file;
+    return compressedFile ?? file;
   }
 
   Future<File> compressAudioIfNeeded(File file) async {
     final bytes = await file.length();
 
-    // ✅ If already <= 1 MB
     if (bytes <= 1024 * 1024) {
       return file;
     }
 
     final tempDir = await offlineMediaDir();
+
     final outputPath = p.join(
       tempDir.path,
       'compressed_audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
     );
 
-    // 🎯 FFmpeg command
-    // - AAC codec
-    // - 64 kbps bitrate (good voice quality, very small size)
     final command =
-        '-y -i "${file.path}" -map 0:a -ac 1 -b:a 64k "$outputPath"';
-
-    await FFmpegKit.execute(command);
-
-    final compressedFile = File(outputPath);
-
-    // fallback if compression failed
-    if (!compressedFile.existsSync()) {
-      return file;
-    }
-
-    final newSize = await compressedFile.length();
-
-    // If still > 1 MB, fallback
-    if (newSize > 1024 * 1024) {
-      return file;
-    }
-
-    return compressedFile;
-  }
-
-  Future<void> onCaptureVideo() async {
-    final picker = ImagePicker();
-    final XFile? video = await picker.pickVideo(
-      source: ImageSource.camera,
-      maxDuration: const Duration(minutes: 1),
-    );
-
-    if (video != null) {
-      videoPath.value = video.path;
-    }
-  }
-
-  Future<File> compressVideoIfNeeded(File file) async {
-    final int maxSize = 2 * 1024 * 1024; // 2 MB
-    final int originalSize = await file.length();
-
-    // ✅ Already small enough
-    if (originalSize <= maxSize) {
-      return file;
-    }
-
-    final tempDir = await offlineMediaDir();
-    final outputPath = p.join(
-      tempDir.path,
-      'compressed_video_${DateTime.now().millisecondsSinceEpoch}.mp4',
-    );
-
-    // 🎯 FFmpeg command
-    // - scale video
-    // - reduce bitrate
-    // - keep reasonable audio
-    final command = '''
--y -i "${file.path}"
--vf scale='min(640,iw)':-2
--c:v libx264 -preset veryfast -b:v 500k
--c:a aac -b:a 64k
--movflags +faststart
-"$outputPath"
-''';
+        '-y -i "${file.path}" -ac 1 -c:a aac -b:a 64k "$outputPath"';
 
     await FFmpegKit.execute(command);
 
     final compressedFile = File(outputPath);
 
     if (!compressedFile.existsSync()) {
-      return file; // fallback
-    }
-
-    final compressedSize = await compressedFile.length();
-
-    // If still > 2 MB, fallback to original
-    if (compressedSize > maxSize) {
       return file;
     }
 
     return compressedFile;
   }
 
-  bool isSelected(String id) {
-    return selectedMilestoneId.value == id;
-  }
+  // bool isSelected(String id) {
+  //   return selectedMilestoneId.value == id;
+  // }
 
   void selectProgress(String value) {
     selectedProgress.value = value;
+    if (selectedProgress.value == "NotStarted") {
+      statusProgressValue(0);
+      isLocked(true);
+    } else if (selectedProgress.value == "Completed") {
+      statusProgressValue(100);
+      isLocked(true);
+    } else {
+      isLocked(false);
+    }
   }
 
   Future<Directory> offlineMediaDir() async {
@@ -536,19 +498,86 @@ class UploadProjectDetailsController extends GetxController
     return mediaDir;
   }
 
-  bool get isLastPendingMilestone {
-    final milestones = data.value.milestones ?? [];
-    final incomplete =
-        milestones.where((m) => m.status != "Completed").toList();
-    if (incomplete.isEmpty) return false;
-    return incomplete.last.id == selectedMilestoneId.value;
-  }
+  // bool get isLastPendingMilestone {
+  //   final milestones = data.value.milestones ?? [];
+  //   final incomplete =
+  //       milestones.where((m) => m.status != "Completed").toList();
+  //   if (incomplete.isEmpty) return false;
+  //   return incomplete.last.id == selectedMilestoneId.value;
+  // }
 
   void _refreshHomeIfAvailable() {
     if (Get.isRegistered<HomeController>()) {
       final homeController = Get.find<HomeController>();
       homeController.checkInternet();
     }
+  }
+
+  Future<void> _cleanupUploadedOnlineMedia() async {
+    final uploadedPaths = <String>[
+      ...selectedImages,
+      if (audioPath?.isNotEmpty == true) audioPath!,
+      if (finalVideoPath?.isNotEmpty == true) finalVideoPath!,
+    ];
+
+    for (final path in uploadedPaths) {
+      try {
+        final file = File(path);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e) {
+        debugPrint('Failed to delete uploaded media file: $e');
+      }
+    }
+
+    final userId = await authService.getUserToken();
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      await dbRepo.deleteUploadedLocalAttachmentPaths(
+        userId: userId,
+        projectId: data.value.id ?? '',
+        filePaths: uploadedPaths,
+      );
+    } catch (e) {
+      debugPrint('Failed to delete uploaded cached attachment paths: $e');
+    }
+  }
+
+  Future<void> _logUploadMediaSizes({
+    required List<String> imagePaths,
+    String? audioPath,
+    String? videoPath,
+    required String source,
+  }) async {
+    final paths = <String>[
+      ...imagePaths,
+      if (audioPath?.isNotEmpty == true) audioPath!,
+      if (videoPath?.isNotEmpty == true) videoPath!,
+    ];
+
+    int totalBytes = 0;
+    debugPrint('Upload size check: $source');
+
+    for (final path in paths) {
+      final file = File(path);
+      if (!await file.exists()) {
+        debugPrint('Missing upload file: $path');
+        continue;
+      }
+
+      final bytes = await file.length();
+      totalBytes += bytes;
+      debugPrint(
+        'Upload file: ${path.split('/').last} | '
+        '${(bytes / 1024).toStringAsFixed(2)} KB | $path',
+      );
+    }
+
+    debugPrint(
+      'Upload total media size: ${(totalBytes / 1024).toStringAsFixed(2)} KB',
+    );
   }
 
   // Future<void> addExifData(String path) async {
@@ -634,5 +663,159 @@ class UploadProjectDetailsController extends GetxController
     });
 
     await exif.close();
+  }
+
+  String? get existingApiVideoPath {
+    final apiVideo = data.value.videoAtt;
+    if (apiVideo == null || apiVideo.isEmpty) {
+      return null;
+    }
+    if (apiVideo.startsWith('http://') || apiVideo.startsWith('https://')) {
+      final normalized = _normalizeVideoUrl(apiVideo);
+      debugPrint('Resolved API video URL: $normalized');
+      return normalized;
+    }
+
+    final rawBaseUrl =
+        NetworkConstants.baseUrl.replaceFirst('baseUrl=', '').trim();
+    final baseUri = Uri.parse(rawBaseUrl);
+    final cleanedPath = apiVideo.replaceAll('\\', '/').trim();
+    final resolved = baseUri.resolve(cleanedPath);
+    final normalized = _normalizeVideoUrl(resolved.toString());
+    debugPrint('Resolved API video URL: $normalized');
+    return normalized;
+  }
+
+  String _normalizeVideoUrl(String value) {
+    final cleaned = value.replaceAll('\\', '/').trim();
+    final parsed = Uri.parse(cleaned);
+
+    final encodedPathSegments =
+        parsed.pathSegments.map(Uri.encodeComponent).toList();
+
+    return parsed.replace(pathSegments: encodedPathSegments).toString();
+  }
+
+  String? get displayedVideoPath {
+    if (videoPath.value.isNotEmpty) {
+      return videoPath.value;
+    }
+    return existingApiVideoPath;
+  }
+
+  bool get isShowingApiVideoOnly =>
+      videoPath.value.isEmpty && (existingApiVideoPath?.isNotEmpty ?? false);
+
+  bool get canSubmitCompletedVideo => finalVideoPath?.isNotEmpty == true;
+
+  Future<void> onCaptureVideo() async {
+    final insideGeofence = await checkGeoFence(
+      data.value.lat ?? 0.0,
+      data.value.lng ?? 0.0,
+    );
+
+    if (!insideGeofence) {
+      showErrorDialog(Get.context!, message: "You are outside the location");
+      return;
+    }
+
+    final picker = ImagePicker();
+    final XFile? video = await picker.pickVideo(
+      source: ImageSource.camera,
+      maxDuration: const Duration(minutes: 2),
+    );
+
+    if (video != null) {
+      showAlertCustom(backBtnDisable: true, title: "Loading...");
+      final compressedFile = await compressVideoIfNeeded(File(video.path));
+
+      videoPath.value = compressedFile.path;
+      finalVideoPath = compressedFile.path;
+      Get.back();
+    }
+  }
+
+  Future<File> compressVideoIfNeeded(File file) async {
+    const int maxSize = 5 * 1024 * 1024;
+
+    final originalSize = await file.length();
+
+    debugPrint(
+      "Original video size: "
+      "${(originalSize / (1024 * 1024)).toStringAsFixed(2)} MB",
+    );
+
+    if (originalSize <= maxSize) {
+      return file;
+    }
+
+    final tempDir = await offlineMediaDir();
+
+    final compressionLevels = [
+      {'width': 960, 'bitrate': '700k', 'audioBitrate': '64k', 'fps': 24},
+      {'width': 720, 'bitrate': '500k', 'audioBitrate': '48k', 'fps': 24},
+      {'width': 640, 'bitrate': '350k', 'audioBitrate': '32k', 'fps': 22},
+      {'width': 480, 'bitrate': '250k', 'audioBitrate': '24k', 'fps': 20},
+    ];
+
+    File? compressedFile;
+
+    for (int i = 0; i < compressionLevels.length; i++) {
+      final level = compressionLevels[i];
+
+      final outputPath = p.join(
+        tempDir.path,
+        'compressed_${i}_${DateTime.now().millisecondsSinceEpoch}.mp4',
+      );
+
+      final command = '''
+-y -i "${file.path}"
+-vf scale='min(${level['width']},iw)':-2,fps=${level['fps']}
+-c:v libx264
+-preset veryfast
+-b:v ${level['bitrate']}
+-maxrate ${level['bitrate']}
+-bufsize 1000k
+-c:a aac
+-b:a ${level['audioBitrate']}
+-movflags +faststart
+"$outputPath"
+''';
+
+      debugPrint(
+        "Original Compressing video "
+        "Level ${i + 1} "
+        "Bitrate ${level['bitrate']}",
+      );
+
+      await FFmpegKit.execute(command);
+
+      final tempFile = File(outputPath);
+
+      if (!tempFile.existsSync()) {
+        continue;
+      }
+
+      final size = await tempFile.length();
+
+      debugPrint(
+        "Original Compressed size: "
+        "${(size / (1024 * 1024)).toStringAsFixed(2)} MB",
+      );
+
+      compressedFile = tempFile;
+
+      if (size <= maxSize) {
+        debugPrint("Original Compression successful below 5 MB");
+        return compressedFile;
+      }
+    }
+
+    return compressedFile ?? file;
+  }
+
+  void clearVideoSelection() {
+    videoPath.value = "";
+    finalVideoPath = "";
   }
 }

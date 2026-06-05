@@ -1,4 +1,3 @@
-
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/dao/submission_dao.dart';
 
@@ -9,7 +8,6 @@ class SubmissionRepository {
   Future<void> save({
     required String userId,
     required String projectId,
-    required String milestoneId,
     required List<String> images,
     String? audioPath,
     int? audioDuration,
@@ -25,7 +23,6 @@ class SubmissionRepository {
     return dao.saveSubmission(
       userId: userId,
       projectId: projectId,
-      milestoneId: milestoneId,
       images: images,
       audioPath: audioPath,
       audioDuration: audioDuration,
@@ -40,9 +37,7 @@ class SubmissionRepository {
     );
   }
 
-  Future<List<PendingSubmission>> getPending({
-    required String userId,
-  }) {
+  Future<List<PendingSubmission>> getPending({required String userId}) {
     return dao.getPendingSubmissions(userId);
   }
 
@@ -50,16 +45,11 @@ class SubmissionRepository {
     return dao.markAsSynced(submissionId, userId);
   }
 
-  Future<PendingSubmission?> getDraftByProjectAndMilestone({
+  Future<PendingSubmission?> getDraftByProject({
     required String userId,
     required String projectId,
-    required String milestoneId,
   }) {
-    return dao.getDraftByProjectAndMilestone(
-      userId: userId,
-      projectId: projectId,
-      milestoneId: milestoneId,
-    );
+    return dao.getDraftByProject(userId: userId, projectId: projectId);
   }
 
   Future<void> clearLocalDataForUser(String userId) {

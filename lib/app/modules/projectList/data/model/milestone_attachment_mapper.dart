@@ -20,9 +20,18 @@ class MilestoneAttachmentMapper {
   }
 
   static List<String> audioPaths(ProjectMilestone milestone) {
-    return (milestone.audioAtt ?? const <AudioAttachment>[])
+    return audioGroups(milestone)
         .expand((group) => group.audios ?? const <String>[])
         .where((path) => path.trim().isNotEmpty)
+        .toList();
+  }
+
+  static List<AudioAttachment> audioGroups(ProjectMilestone milestone) {
+    return (milestone.audioAtt ?? const <AudioAttachment>[])
+        .where(
+          (group) => (group.audios ?? const <String>[])
+              .any((path) => path.trim().isNotEmpty),
+        )
         .toList();
   }
 

@@ -18,7 +18,7 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
 
   Future<void> saveProject(ProjectDetails project, String userId) async {
     await transaction(() async {
-      await into(localProjects).insertOnConflictUpdate(
+      await into(localProjects).insert(
         LocalProjectsCompanion(
           userId: Value(userId),
           projectId: Value(project.id ?? ""),
@@ -31,6 +31,19 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
           districtId: Value(project.districtId ?? ""),
           projectUniqueId: Value(project.projectUniqueId ?? ""),
         ),
+        onConflict: DoUpdate(
+          (old) => LocalProjectsCompanion(
+            projectName: Value(project.projectName ?? ""),
+            status: Value(project.status ?? ""),
+            lat: Value(project.lat),
+            lng: Value(project.lng),
+            address: Value(project.address ?? ""),
+            createdAt: Value(project.createdAt ?? DateTime.now()),
+            districtId: Value(project.districtId ?? ""),
+            projectUniqueId: Value(project.projectUniqueId ?? ""),
+          ),
+          target: [localProjects.userId, localProjects.projectId],
+        ),
       );
 
       await (delete(localMilestones)..where(
@@ -42,11 +55,10 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
       )).go();
 
       if (project.videoAtt?.isNotEmpty == true) {
-        await into(localMilestoneAttachments).insert(
+        await into(localMilestoneAttachments).insertOnConflictUpdate(
           LocalMilestoneAttachmentsCompanion(
             userId: Value(userId),
             projectId: Value(project.id ?? ""),
-            milestoneId: const Value(""),
             type: const Value('video'),
             filePath: Value(project.videoAtt!),
           ),
@@ -57,12 +69,20 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         await into(localMilestones).insert(
           LocalMilestonesCompanion(
             userId: Value(userId),
-            milestoneId: Value(m.id ?? ""),
             projectId: Value(project.id ?? ""),
             name: Value(m.milestoneName ?? ""),
             description: Value(m.milestoneDescription ?? ""),
             status: Value(m.status ?? ""),
             progress: Value(m.progress ?? 0),
+          ),
+          onConflict: DoUpdate(
+            (old) => LocalMilestonesCompanion(
+              name: Value(m.milestoneName ?? ""),
+              description: Value(m.milestoneDescription ?? ""),
+              status: Value(m.status ?? ""),
+              progress: Value(m.progress ?? 0),
+            ),
+            target: [localMilestones.userId, localMilestones.projectId],
           ),
         );
 
@@ -71,9 +91,16 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
             LocalMilestoneAttachmentsCompanion(
               userId: Value(userId),
               projectId: Value(project.id ?? ""),
-              milestoneId: Value(m.id ?? ""),
               type: const Value('image'),
               filePath: Value(img),
+            ),
+            onConflict: DoNothing(
+              target: [
+                localMilestoneAttachments.userId,
+                localMilestoneAttachments.projectId,
+                localMilestoneAttachments.type,
+                localMilestoneAttachments.filePath,
+              ],
             ),
           );
         }
@@ -82,9 +109,16 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
             LocalMilestoneAttachmentsCompanion(
               userId: Value(userId),
               projectId: Value(project.id ?? ""),
-              milestoneId: Value(m.id ?? ""),
               type: const Value('audio'),
               filePath: Value(audio),
+            ),
+            onConflict: DoNothing(
+              target: [
+                localMilestoneAttachments.userId,
+                localMilestoneAttachments.projectId,
+                localMilestoneAttachments.type,
+                localMilestoneAttachments.filePath,
+              ],
             ),
           );
         }
@@ -100,7 +134,6 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         //     ),
         //   );
         // }
-
       }
     });
   }
@@ -117,7 +150,6 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
             (a) =>
                 a.userId.equals(userId) &
                 a.projectId.equals(p.projectId) &
-                a.milestoneId.equals("") &
                 a.type.equals('video'),
           )).getSingleOrNull();
 
@@ -131,10 +163,7 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
       for (final m in milestones) {
         final attachments =
             await (select(localMilestoneAttachments)..where(
-              (a) =>
-                  a.userId.equals(userId) &
-                  a.projectId.equals(p.projectId) &
-                  a.milestoneId.equals(m.milestoneId),
+              (a) => a.userId.equals(userId) & a.projectId.equals(p.projectId),
             )).get();
 
         milestoneFullList.add(
@@ -179,5 +208,20 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         ..where((m) => m.userId.equals(userId))).go();
       await (delete(localProjects)..where((p) => p.userId.equals(userId))).go();
     });
+  }
+
+  Future<void> deleteUploadedLocalAttachmentPaths({
+    required String userId,
+    required String projectId,
+    required List<String> filePaths,
+  }) async {
+    if (filePaths.isEmpty) return;
+
+    await (delete(localMilestoneAttachments)..where(
+      (a) =>
+          a.userId.equals(userId) &
+          a.projectId.equals(projectId) &
+          a.filePath.isIn(filePaths),
+    )).go();
   }
 }

@@ -51,7 +51,25 @@ class UpdateProposalLatlngView extends GetView<UpdateProposalLatlngController> {
                   final location = controller.currentLocation.value;
 
                   if (location == null) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Positioned.fill(
+                      child: IgnorePointer(
+                        child: Container(
+                          // color: Colors.black.withValues(alpha: 0.08),
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                // color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
                   }
 
                   return Column(

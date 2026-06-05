@@ -42,17 +42,6 @@ class $SubmissionsTable extends Submissions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _milestoneIdMeta = const VerificationMeta(
-    'milestoneId',
-  );
-  @override
-  late final GeneratedColumn<String> milestoneId = GeneratedColumn<String>(
-    'milestone_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _isSyncedMeta = const VerificationMeta(
     'isSynced',
   );
@@ -129,7 +118,6 @@ class $SubmissionsTable extends Submissions
     id,
     userId,
     projectId,
-    milestoneId,
     isSynced,
     createdAt,
     userLat,
@@ -167,17 +155,6 @@ class $SubmissionsTable extends Submissions
       );
     } else if (isInserting) {
       context.missing(_projectIdMeta);
-    }
-    if (data.containsKey('milestone_id')) {
-      context.handle(
-        _milestoneIdMeta,
-        milestoneId.isAcceptableOrUnknown(
-          data['milestone_id']!,
-          _milestoneIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_milestoneIdMeta);
     }
     if (data.containsKey('is_synced')) {
       context.handle(
@@ -233,7 +210,7 @@ class $SubmissionsTable extends Submissions
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   List<Set<GeneratedColumn>> get uniqueKeys => [
-    {userId, projectId, milestoneId},
+    {userId, projectId},
   ];
   @override
   Submission map(Map<String, dynamic> data, {String? tablePrefix}) {
@@ -253,11 +230,6 @@ class $SubmissionsTable extends Submissions
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
             data['${effectivePrefix}project_id'],
-          )!,
-      milestoneId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}milestone_id'],
           )!,
       isSynced:
           attachedDatabase.typeMapping.read(
@@ -302,7 +274,6 @@ class Submission extends DataClass implements Insertable<Submission> {
   final int id;
   final String userId;
   final String projectId;
-  final String milestoneId;
   final bool isSynced;
   final DateTime createdAt;
   final String userLat;
@@ -313,7 +284,6 @@ class Submission extends DataClass implements Insertable<Submission> {
     required this.id,
     required this.userId,
     required this.projectId,
-    required this.milestoneId,
     required this.isSynced,
     required this.createdAt,
     required this.userLat,
@@ -327,7 +297,6 @@ class Submission extends DataClass implements Insertable<Submission> {
     map['id'] = Variable<int>(id);
     map['user_id'] = Variable<String>(userId);
     map['project_id'] = Variable<String>(projectId);
-    map['milestone_id'] = Variable<String>(milestoneId);
     map['is_synced'] = Variable<bool>(isSynced);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['user_lat'] = Variable<String>(userLat);
@@ -342,7 +311,6 @@ class Submission extends DataClass implements Insertable<Submission> {
       id: Value(id),
       userId: Value(userId),
       projectId: Value(projectId),
-      milestoneId: Value(milestoneId),
       isSynced: Value(isSynced),
       createdAt: Value(createdAt),
       userLat: Value(userLat),
@@ -361,7 +329,6 @@ class Submission extends DataClass implements Insertable<Submission> {
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
       projectId: serializer.fromJson<String>(json['projectId']),
-      milestoneId: serializer.fromJson<String>(json['milestoneId']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       userLat: serializer.fromJson<String>(json['userLat']),
@@ -377,7 +344,6 @@ class Submission extends DataClass implements Insertable<Submission> {
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<String>(userId),
       'projectId': serializer.toJson<String>(projectId),
-      'milestoneId': serializer.toJson<String>(milestoneId),
       'isSynced': serializer.toJson<bool>(isSynced),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'userLat': serializer.toJson<String>(userLat),
@@ -391,7 +357,6 @@ class Submission extends DataClass implements Insertable<Submission> {
     int? id,
     String? userId,
     String? projectId,
-    String? milestoneId,
     bool? isSynced,
     DateTime? createdAt,
     String? userLat,
@@ -402,7 +367,6 @@ class Submission extends DataClass implements Insertable<Submission> {
     id: id ?? this.id,
     userId: userId ?? this.userId,
     projectId: projectId ?? this.projectId,
-    milestoneId: milestoneId ?? this.milestoneId,
     isSynced: isSynced ?? this.isSynced,
     createdAt: createdAt ?? this.createdAt,
     userLat: userLat ?? this.userLat,
@@ -415,8 +379,6 @@ class Submission extends DataClass implements Insertable<Submission> {
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
       projectId: data.projectId.present ? data.projectId.value : this.projectId,
-      milestoneId:
-          data.milestoneId.present ? data.milestoneId.value : this.milestoneId,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       userLat: data.userLat.present ? data.userLat.value : this.userLat,
@@ -435,7 +397,6 @@ class Submission extends DataClass implements Insertable<Submission> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('projectId: $projectId, ')
-          ..write('milestoneId: $milestoneId, ')
           ..write('isSynced: $isSynced, ')
           ..write('createdAt: $createdAt, ')
           ..write('userLat: $userLat, ')
@@ -451,7 +412,6 @@ class Submission extends DataClass implements Insertable<Submission> {
     id,
     userId,
     projectId,
-    milestoneId,
     isSynced,
     createdAt,
     userLat,
@@ -466,7 +426,6 @@ class Submission extends DataClass implements Insertable<Submission> {
           other.id == this.id &&
           other.userId == this.userId &&
           other.projectId == this.projectId &&
-          other.milestoneId == this.milestoneId &&
           other.isSynced == this.isSynced &&
           other.createdAt == this.createdAt &&
           other.userLat == this.userLat &&
@@ -479,7 +438,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   final Value<int> id;
   final Value<String> userId;
   final Value<String> projectId;
-  final Value<String> milestoneId;
   final Value<bool> isSynced;
   final Value<DateTime> createdAt;
   final Value<String> userLat;
@@ -490,7 +448,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.projectId = const Value.absent(),
-    this.milestoneId = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.userLat = const Value.absent(),
@@ -502,7 +459,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.id = const Value.absent(),
     required String userId,
     required String projectId,
-    required String milestoneId,
     this.isSynced = const Value.absent(),
     this.createdAt = const Value.absent(),
     required String userLat,
@@ -511,7 +467,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     required String projectStatus,
   }) : userId = Value(userId),
        projectId = Value(projectId),
-       milestoneId = Value(milestoneId),
        userLat = Value(userLat),
        userLng = Value(userLng),
        progress = Value(progress),
@@ -520,7 +475,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Expression<int>? id,
     Expression<String>? userId,
     Expression<String>? projectId,
-    Expression<String>? milestoneId,
     Expression<bool>? isSynced,
     Expression<DateTime>? createdAt,
     Expression<String>? userLat,
@@ -532,7 +486,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (projectId != null) 'project_id': projectId,
-      if (milestoneId != null) 'milestone_id': milestoneId,
       if (isSynced != null) 'is_synced': isSynced,
       if (createdAt != null) 'created_at': createdAt,
       if (userLat != null) 'user_lat': userLat,
@@ -546,7 +499,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Value<int>? id,
     Value<String>? userId,
     Value<String>? projectId,
-    Value<String>? milestoneId,
     Value<bool>? isSynced,
     Value<DateTime>? createdAt,
     Value<String>? userLat,
@@ -558,7 +510,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       projectId: projectId ?? this.projectId,
-      milestoneId: milestoneId ?? this.milestoneId,
       isSynced: isSynced ?? this.isSynced,
       createdAt: createdAt ?? this.createdAt,
       userLat: userLat ?? this.userLat,
@@ -579,9 +530,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     }
     if (projectId.present) {
       map['project_id'] = Variable<String>(projectId.value);
-    }
-    if (milestoneId.present) {
-      map['milestone_id'] = Variable<String>(milestoneId.value);
     }
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
@@ -610,7 +558,6 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('projectId: $projectId, ')
-          ..write('milestoneId: $milestoneId, ')
           ..write('isSynced: $isSynced, ')
           ..write('createdAt: $createdAt, ')
           ..write('userLat: $userLat, ')
@@ -2330,17 +2277,6 @@ class $LocalMilestonesTable extends LocalMilestones
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _milestoneIdMeta = const VerificationMeta(
-    'milestoneId',
-  );
-  @override
-  late final GeneratedColumn<String> milestoneId = GeneratedColumn<String>(
-    'milestone_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _projectIdMeta = const VerificationMeta(
     'projectId',
   );
@@ -2396,7 +2332,6 @@ class $LocalMilestonesTable extends LocalMilestones
   List<GeneratedColumn> get $columns => [
     id,
     userId,
-    milestoneId,
     projectId,
     name,
     description,
@@ -2425,17 +2360,6 @@ class $LocalMilestonesTable extends LocalMilestones
       );
     } else if (isInserting) {
       context.missing(_userIdMeta);
-    }
-    if (data.containsKey('milestone_id')) {
-      context.handle(
-        _milestoneIdMeta,
-        milestoneId.isAcceptableOrUnknown(
-          data['milestone_id']!,
-          _milestoneIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_milestoneIdMeta);
     }
     if (data.containsKey('project_id')) {
       context.handle(
@@ -2485,7 +2409,7 @@ class $LocalMilestonesTable extends LocalMilestones
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   List<Set<GeneratedColumn>> get uniqueKeys => [
-    {userId, projectId, milestoneId},
+    {userId, projectId},
   ];
   @override
   LocalMilestone map(Map<String, dynamic> data, {String? tablePrefix}) {
@@ -2500,11 +2424,6 @@ class $LocalMilestonesTable extends LocalMilestones
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
             data['${effectivePrefix}user_id'],
-          )!,
-      milestoneId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}milestone_id'],
           )!,
       projectId:
           attachedDatabase.typeMapping.read(
@@ -2542,7 +2461,6 @@ class $LocalMilestonesTable extends LocalMilestones
 class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
   final int id;
   final String userId;
-  final String milestoneId;
   final String projectId;
   final String name;
   final String description;
@@ -2551,7 +2469,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
   const LocalMilestone({
     required this.id,
     required this.userId,
-    required this.milestoneId,
     required this.projectId,
     required this.name,
     required this.description,
@@ -2563,7 +2480,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['user_id'] = Variable<String>(userId);
-    map['milestone_id'] = Variable<String>(milestoneId);
     map['project_id'] = Variable<String>(projectId);
     map['name'] = Variable<String>(name);
     map['description'] = Variable<String>(description);
@@ -2578,7 +2494,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
     return LocalMilestonesCompanion(
       id: Value(id),
       userId: Value(userId),
-      milestoneId: Value(milestoneId),
       projectId: Value(projectId),
       name: Value(name),
       description: Value(description),
@@ -2598,7 +2513,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
     return LocalMilestone(
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
-      milestoneId: serializer.fromJson<String>(json['milestoneId']),
       projectId: serializer.fromJson<String>(json['projectId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String>(json['description']),
@@ -2612,7 +2526,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<String>(userId),
-      'milestoneId': serializer.toJson<String>(milestoneId),
       'projectId': serializer.toJson<String>(projectId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String>(description),
@@ -2624,7 +2537,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
   LocalMilestone copyWith({
     int? id,
     String? userId,
-    String? milestoneId,
     String? projectId,
     String? name,
     String? description,
@@ -2633,7 +2545,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
   }) => LocalMilestone(
     id: id ?? this.id,
     userId: userId ?? this.userId,
-    milestoneId: milestoneId ?? this.milestoneId,
     projectId: projectId ?? this.projectId,
     name: name ?? this.name,
     description: description ?? this.description,
@@ -2644,8 +2555,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
     return LocalMilestone(
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
-      milestoneId:
-          data.milestoneId.present ? data.milestoneId.value : this.milestoneId,
       projectId: data.projectId.present ? data.projectId.value : this.projectId,
       name: data.name.present ? data.name.value : this.name,
       description:
@@ -2660,7 +2569,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
     return (StringBuffer('LocalMilestone(')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
-          ..write('milestoneId: $milestoneId, ')
           ..write('projectId: $projectId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
@@ -2671,23 +2579,14 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    userId,
-    milestoneId,
-    projectId,
-    name,
-    description,
-    status,
-    progress,
-  );
+  int get hashCode =>
+      Object.hash(id, userId, projectId, name, description, status, progress);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LocalMilestone &&
           other.id == this.id &&
           other.userId == this.userId &&
-          other.milestoneId == this.milestoneId &&
           other.projectId == this.projectId &&
           other.name == this.name &&
           other.description == this.description &&
@@ -2698,7 +2597,6 @@ class LocalMilestone extends DataClass implements Insertable<LocalMilestone> {
 class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
   final Value<int> id;
   final Value<String> userId;
-  final Value<String> milestoneId;
   final Value<String> projectId;
   final Value<String> name;
   final Value<String> description;
@@ -2707,7 +2605,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
   const LocalMilestonesCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
-    this.milestoneId = const Value.absent(),
     this.projectId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
@@ -2717,14 +2614,12 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
   LocalMilestonesCompanion.insert({
     this.id = const Value.absent(),
     required String userId,
-    required String milestoneId,
     required String projectId,
     required String name,
     required String description,
     required String status,
     this.progress = const Value.absent(),
   }) : userId = Value(userId),
-       milestoneId = Value(milestoneId),
        projectId = Value(projectId),
        name = Value(name),
        description = Value(description),
@@ -2732,7 +2627,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
   static Insertable<LocalMilestone> custom({
     Expression<int>? id,
     Expression<String>? userId,
-    Expression<String>? milestoneId,
     Expression<String>? projectId,
     Expression<String>? name,
     Expression<String>? description,
@@ -2742,7 +2636,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
-      if (milestoneId != null) 'milestone_id': milestoneId,
       if (projectId != null) 'project_id': projectId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
@@ -2754,7 +2647,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
   LocalMilestonesCompanion copyWith({
     Value<int>? id,
     Value<String>? userId,
-    Value<String>? milestoneId,
     Value<String>? projectId,
     Value<String>? name,
     Value<String>? description,
@@ -2764,7 +2656,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
     return LocalMilestonesCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      milestoneId: milestoneId ?? this.milestoneId,
       projectId: projectId ?? this.projectId,
       name: name ?? this.name,
       description: description ?? this.description,
@@ -2781,9 +2672,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
-    }
-    if (milestoneId.present) {
-      map['milestone_id'] = Variable<String>(milestoneId.value);
     }
     if (projectId.present) {
       map['project_id'] = Variable<String>(projectId.value);
@@ -2808,7 +2696,6 @@ class LocalMilestonesCompanion extends UpdateCompanion<LocalMilestone> {
     return (StringBuffer('LocalMilestonesCompanion(')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
-          ..write('milestoneId: $milestoneId, ')
           ..write('projectId: $projectId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
@@ -2853,17 +2740,6 @@ class $LocalMilestoneAttachmentsTable extends LocalMilestoneAttachments
   @override
   late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
     'project_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _milestoneIdMeta = const VerificationMeta(
-    'milestoneId',
-  );
-  @override
-  late final GeneratedColumn<String> milestoneId = GeneratedColumn<String>(
-    'milestone_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -2921,7 +2797,6 @@ class $LocalMilestoneAttachmentsTable extends LocalMilestoneAttachments
     id,
     userId,
     projectId,
-    milestoneId,
     type,
     filePath,
     isSynced,
@@ -2958,17 +2833,6 @@ class $LocalMilestoneAttachmentsTable extends LocalMilestoneAttachments
     } else if (isInserting) {
       context.missing(_projectIdMeta);
     }
-    if (data.containsKey('milestone_id')) {
-      context.handle(
-        _milestoneIdMeta,
-        milestoneId.isAcceptableOrUnknown(
-          data['milestone_id']!,
-          _milestoneIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_milestoneIdMeta);
-    }
     if (data.containsKey('type')) {
       context.handle(
         _typeMeta,
@@ -3004,7 +2868,7 @@ class $LocalMilestoneAttachmentsTable extends LocalMilestoneAttachments
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   List<Set<GeneratedColumn>> get uniqueKeys => [
-    {userId, projectId, milestoneId, type, filePath},
+    {userId, projectId, type, filePath},
   ];
   @override
   LocalMilestoneAttachment map(
@@ -3027,11 +2891,6 @@ class $LocalMilestoneAttachmentsTable extends LocalMilestoneAttachments
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
             data['${effectivePrefix}project_id'],
-          )!,
-      milestoneId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}milestone_id'],
           )!,
       type:
           attachedDatabase.typeMapping.read(
@@ -3067,7 +2926,6 @@ class LocalMilestoneAttachment extends DataClass
   final int id;
   final String userId;
   final String projectId;
-  final String milestoneId;
 
   /// image | audio | video
   final String type;
@@ -3082,7 +2940,6 @@ class LocalMilestoneAttachment extends DataClass
     required this.id,
     required this.userId,
     required this.projectId,
-    required this.milestoneId,
     required this.type,
     required this.filePath,
     required this.isSynced,
@@ -3094,7 +2951,6 @@ class LocalMilestoneAttachment extends DataClass
     map['id'] = Variable<int>(id);
     map['user_id'] = Variable<String>(userId);
     map['project_id'] = Variable<String>(projectId);
-    map['milestone_id'] = Variable<String>(milestoneId);
     map['type'] = Variable<String>(type);
     map['file_path'] = Variable<String>(filePath);
     map['is_synced'] = Variable<bool>(isSynced);
@@ -3107,7 +2963,6 @@ class LocalMilestoneAttachment extends DataClass
       id: Value(id),
       userId: Value(userId),
       projectId: Value(projectId),
-      milestoneId: Value(milestoneId),
       type: Value(type),
       filePath: Value(filePath),
       isSynced: Value(isSynced),
@@ -3124,7 +2979,6 @@ class LocalMilestoneAttachment extends DataClass
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
       projectId: serializer.fromJson<String>(json['projectId']),
-      milestoneId: serializer.fromJson<String>(json['milestoneId']),
       type: serializer.fromJson<String>(json['type']),
       filePath: serializer.fromJson<String>(json['filePath']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
@@ -3138,7 +2992,6 @@ class LocalMilestoneAttachment extends DataClass
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<String>(userId),
       'projectId': serializer.toJson<String>(projectId),
-      'milestoneId': serializer.toJson<String>(milestoneId),
       'type': serializer.toJson<String>(type),
       'filePath': serializer.toJson<String>(filePath),
       'isSynced': serializer.toJson<bool>(isSynced),
@@ -3150,7 +3003,6 @@ class LocalMilestoneAttachment extends DataClass
     int? id,
     String? userId,
     String? projectId,
-    String? milestoneId,
     String? type,
     String? filePath,
     bool? isSynced,
@@ -3159,7 +3011,6 @@ class LocalMilestoneAttachment extends DataClass
     id: id ?? this.id,
     userId: userId ?? this.userId,
     projectId: projectId ?? this.projectId,
-    milestoneId: milestoneId ?? this.milestoneId,
     type: type ?? this.type,
     filePath: filePath ?? this.filePath,
     isSynced: isSynced ?? this.isSynced,
@@ -3172,8 +3023,6 @@ class LocalMilestoneAttachment extends DataClass
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
       projectId: data.projectId.present ? data.projectId.value : this.projectId,
-      milestoneId:
-          data.milestoneId.present ? data.milestoneId.value : this.milestoneId,
       type: data.type.present ? data.type.value : this.type,
       filePath: data.filePath.present ? data.filePath.value : this.filePath,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
@@ -3187,7 +3036,6 @@ class LocalMilestoneAttachment extends DataClass
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('projectId: $projectId, ')
-          ..write('milestoneId: $milestoneId, ')
           ..write('type: $type, ')
           ..write('filePath: $filePath, ')
           ..write('isSynced: $isSynced, ')
@@ -3197,16 +3045,8 @@ class LocalMilestoneAttachment extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    userId,
-    projectId,
-    milestoneId,
-    type,
-    filePath,
-    isSynced,
-    createdAt,
-  );
+  int get hashCode =>
+      Object.hash(id, userId, projectId, type, filePath, isSynced, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3214,7 +3054,6 @@ class LocalMilestoneAttachment extends DataClass
           other.id == this.id &&
           other.userId == this.userId &&
           other.projectId == this.projectId &&
-          other.milestoneId == this.milestoneId &&
           other.type == this.type &&
           other.filePath == this.filePath &&
           other.isSynced == this.isSynced &&
@@ -3226,7 +3065,6 @@ class LocalMilestoneAttachmentsCompanion
   final Value<int> id;
   final Value<String> userId;
   final Value<String> projectId;
-  final Value<String> milestoneId;
   final Value<String> type;
   final Value<String> filePath;
   final Value<bool> isSynced;
@@ -3235,7 +3073,6 @@ class LocalMilestoneAttachmentsCompanion
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.projectId = const Value.absent(),
-    this.milestoneId = const Value.absent(),
     this.type = const Value.absent(),
     this.filePath = const Value.absent(),
     this.isSynced = const Value.absent(),
@@ -3245,21 +3082,18 @@ class LocalMilestoneAttachmentsCompanion
     this.id = const Value.absent(),
     required String userId,
     required String projectId,
-    required String milestoneId,
     required String type,
     required String filePath,
     this.isSynced = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : userId = Value(userId),
        projectId = Value(projectId),
-       milestoneId = Value(milestoneId),
        type = Value(type),
        filePath = Value(filePath);
   static Insertable<LocalMilestoneAttachment> custom({
     Expression<int>? id,
     Expression<String>? userId,
     Expression<String>? projectId,
-    Expression<String>? milestoneId,
     Expression<String>? type,
     Expression<String>? filePath,
     Expression<bool>? isSynced,
@@ -3269,7 +3103,6 @@ class LocalMilestoneAttachmentsCompanion
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (projectId != null) 'project_id': projectId,
-      if (milestoneId != null) 'milestone_id': milestoneId,
       if (type != null) 'type': type,
       if (filePath != null) 'file_path': filePath,
       if (isSynced != null) 'is_synced': isSynced,
@@ -3281,7 +3114,6 @@ class LocalMilestoneAttachmentsCompanion
     Value<int>? id,
     Value<String>? userId,
     Value<String>? projectId,
-    Value<String>? milestoneId,
     Value<String>? type,
     Value<String>? filePath,
     Value<bool>? isSynced,
@@ -3291,7 +3123,6 @@ class LocalMilestoneAttachmentsCompanion
       id: id ?? this.id,
       userId: userId ?? this.userId,
       projectId: projectId ?? this.projectId,
-      milestoneId: milestoneId ?? this.milestoneId,
       type: type ?? this.type,
       filePath: filePath ?? this.filePath,
       isSynced: isSynced ?? this.isSynced,
@@ -3310,9 +3141,6 @@ class LocalMilestoneAttachmentsCompanion
     }
     if (projectId.present) {
       map['project_id'] = Variable<String>(projectId.value);
-    }
-    if (milestoneId.present) {
-      map['milestone_id'] = Variable<String>(milestoneId.value);
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -3335,7 +3163,6 @@ class LocalMilestoneAttachmentsCompanion
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('projectId: $projectId, ')
-          ..write('milestoneId: $milestoneId, ')
           ..write('type: $type, ')
           ..write('filePath: $filePath, ')
           ..write('isSynced: $isSynced, ')
@@ -3389,7 +3216,6 @@ typedef $$SubmissionsTableCreateCompanionBuilder =
       Value<int> id,
       required String userId,
       required String projectId,
-      required String milestoneId,
       Value<bool> isSynced,
       Value<DateTime> createdAt,
       required String userLat,
@@ -3402,7 +3228,6 @@ typedef $$SubmissionsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> userId,
       Value<String> projectId,
-      Value<String> milestoneId,
       Value<bool> isSynced,
       Value<DateTime> createdAt,
       Value<String> userLat,
@@ -3530,11 +3355,6 @@ class $$SubmissionsTableFilterComposer
 
   ColumnFilters<String> get projectId => $composableBuilder(
     column: $table.projectId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3693,11 +3513,6 @@ class $$SubmissionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
@@ -3746,11 +3561,6 @@ class $$SubmissionsTableAnnotationComposer
 
   GeneratedColumn<String> get projectId =>
       $composableBuilder(column: $table.projectId, builder: (column) => column);
-
-  GeneratedColumn<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
@@ -3911,7 +3721,6 @@ class $$SubmissionsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> userId = const Value.absent(),
                 Value<String> projectId = const Value.absent(),
-                Value<String> milestoneId = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String> userLat = const Value.absent(),
@@ -3922,7 +3731,6 @@ class $$SubmissionsTableTableManager
                 id: id,
                 userId: userId,
                 projectId: projectId,
-                milestoneId: milestoneId,
                 isSynced: isSynced,
                 createdAt: createdAt,
                 userLat: userLat,
@@ -3935,7 +3743,6 @@ class $$SubmissionsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String userId,
                 required String projectId,
-                required String milestoneId,
                 Value<bool> isSynced = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 required String userLat,
@@ -3946,7 +3753,6 @@ class $$SubmissionsTableTableManager
                 id: id,
                 userId: userId,
                 projectId: projectId,
-                milestoneId: milestoneId,
                 isSynced: isSynced,
                 createdAt: createdAt,
                 userLat: userLat,
@@ -5600,7 +5406,6 @@ typedef $$LocalMilestonesTableCreateCompanionBuilder =
     LocalMilestonesCompanion Function({
       Value<int> id,
       required String userId,
-      required String milestoneId,
       required String projectId,
       required String name,
       required String description,
@@ -5611,7 +5416,6 @@ typedef $$LocalMilestonesTableUpdateCompanionBuilder =
     LocalMilestonesCompanion Function({
       Value<int> id,
       Value<String> userId,
-      Value<String> milestoneId,
       Value<String> projectId,
       Value<String> name,
       Value<String> description,
@@ -5635,11 +5439,6 @@ class $$LocalMilestonesTableFilterComposer
 
   ColumnFilters<String> get userId => $composableBuilder(
     column: $table.userId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5688,11 +5487,6 @@ class $$LocalMilestonesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get projectId => $composableBuilder(
     column: $table.projectId,
     builder: (column) => ColumnOrderings(column),
@@ -5733,11 +5527,6 @@ class $$LocalMilestonesTableAnnotationComposer
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
-
-  GeneratedColumn<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<String> get projectId =>
       $composableBuilder(column: $table.projectId, builder: (column) => column);
@@ -5803,7 +5592,6 @@ class $$LocalMilestonesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> userId = const Value.absent(),
-                Value<String> milestoneId = const Value.absent(),
                 Value<String> projectId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> description = const Value.absent(),
@@ -5812,7 +5600,6 @@ class $$LocalMilestonesTableTableManager
               }) => LocalMilestonesCompanion(
                 id: id,
                 userId: userId,
-                milestoneId: milestoneId,
                 projectId: projectId,
                 name: name,
                 description: description,
@@ -5823,7 +5610,6 @@ class $$LocalMilestonesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String userId,
-                required String milestoneId,
                 required String projectId,
                 required String name,
                 required String description,
@@ -5832,7 +5618,6 @@ class $$LocalMilestonesTableTableManager
               }) => LocalMilestonesCompanion.insert(
                 id: id,
                 userId: userId,
-                milestoneId: milestoneId,
                 projectId: projectId,
                 name: name,
                 description: description,
@@ -5876,7 +5661,6 @@ typedef $$LocalMilestoneAttachmentsTableCreateCompanionBuilder =
       Value<int> id,
       required String userId,
       required String projectId,
-      required String milestoneId,
       required String type,
       required String filePath,
       Value<bool> isSynced,
@@ -5887,7 +5671,6 @@ typedef $$LocalMilestoneAttachmentsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> userId,
       Value<String> projectId,
-      Value<String> milestoneId,
       Value<String> type,
       Value<String> filePath,
       Value<bool> isSynced,
@@ -5915,11 +5698,6 @@ class $$LocalMilestoneAttachmentsTableFilterComposer
 
   ColumnFilters<String> get projectId => $composableBuilder(
     column: $table.projectId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5968,11 +5746,6 @@ class $$LocalMilestoneAttachmentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
@@ -6011,11 +5784,6 @@ class $$LocalMilestoneAttachmentsTableAnnotationComposer
 
   GeneratedColumn<String> get projectId =>
       $composableBuilder(column: $table.projectId, builder: (column) => column);
-
-  GeneratedColumn<String> get milestoneId => $composableBuilder(
-    column: $table.milestoneId,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -6079,7 +5847,6 @@ class $$LocalMilestoneAttachmentsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> userId = const Value.absent(),
                 Value<String> projectId = const Value.absent(),
-                Value<String> milestoneId = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String> filePath = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
@@ -6088,7 +5855,6 @@ class $$LocalMilestoneAttachmentsTableTableManager
                 id: id,
                 userId: userId,
                 projectId: projectId,
-                milestoneId: milestoneId,
                 type: type,
                 filePath: filePath,
                 isSynced: isSynced,
@@ -6099,7 +5865,6 @@ class $$LocalMilestoneAttachmentsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String userId,
                 required String projectId,
-                required String milestoneId,
                 required String type,
                 required String filePath,
                 Value<bool> isSynced = const Value.absent(),
@@ -6108,7 +5873,6 @@ class $$LocalMilestoneAttachmentsTableTableManager
                 id: id,
                 userId: userId,
                 projectId: projectId,
-                milestoneId: milestoneId,
                 type: type,
                 filePath: filePath,
                 isSynced: isSynced,

@@ -89,7 +89,8 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                         );
 
                                     if (insideGeofence) {
-                                      controller.showPhotoSourceDialog(index);
+                                      //controller.showPhotoSourceDialog(index);
+                                      controller.takePhoto(index);
                                     } else {
                                       PopupMixin().showErrorDialog(
                                         Get.context!,
@@ -105,34 +106,6 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                         ),
                       ),
 
-                      /*
-                      const SizedBox(height: AppDimensions.lg),
-
-                      Obx(() {
-                        if (!controller.isLastPendingMilestone) {
-                          return const SizedBox.shrink();
-                        }
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const TitleText(
-                              text: 'Video',
-                              fontWeight: FontWeight.w600,
-                            ),
-                            const SizedBox(height: AppDimensions.sm),
-                            CapturedVideoPreview(
-                              videoPath: controller.videoPath.value,
-                              onCaptureTap: controller.onCaptureVideo,
-                              onRemoveTap: () {
-                                controller.videoPath.value = "";
-                              },
-                            ),
-                            const SizedBox(height: AppDimensions.lg),
-                          ],
-                        );
-                      }),
-                      */
                       const SizedBox(height: AppDimensions.lg),
                       // Project Overall Status Section
                       const TitleText(
@@ -140,11 +113,11 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                         fontWeight: FontWeight.w600,
                       ),
                       const SizedBox(height: AppDimensions.sm),
+
                       Obx(() {
-                        return SizedBox(
-                          height: 50,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
                             children: [
                               SelectableProgressCard(
                                 title: "Not Started",
@@ -159,7 +132,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                               const SizedBox(width: AppDimensions.s),
 
                               SelectableProgressCard(
-                                title: "Work In Progress",
+                                title: "OnGoing",
                                 onTap:
                                     () => controller.selectProgress(
                                       "WorkInProgress",
@@ -194,11 +167,32 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                       ),
                       Obx(
                         () => ProgressSelector(
+                          isLocked: controller.isLocked.value,
                           progress: controller.statusProgressValue.value,
                           onChanged: (value) {
                             controller.statusProgressValue.value = value;
                           },
                         ),
+                      ),
+
+                      Obx(
+                        () =>
+                            controller.selectedProgress.value == "Completed"
+                                ? Column(
+                                  children: [
+                                    const SizedBox(height: 12),
+                                    CapturedVideoPreview(
+                                      videoPath: controller.displayedVideoPath,
+                                      onCaptureTap: controller.onCaptureVideo,
+                                      onRemoveTap:
+                                          controller.clearVideoSelection,
+                                      showRemoveButton:
+                                          controller.isShowingApiVideoOnly ==
+                                          false,
+                                    ),
+                                  ],
+                                )
+                                : SizedBox.shrink(),
                       ),
 
                       const SizedBox(height: AppDimensions.lg),
@@ -233,7 +227,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
             // color: const Color(0xFF8B4513), // Brown color from screenshot
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),

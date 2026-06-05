@@ -1,7 +1,14 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_disposable.dart';
+import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
+import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 
@@ -21,9 +28,14 @@ class SyncService extends GetxService {
 
     for (final item in pendingList) {
       try {
+        await _logUploadMediaSizes(
+          imagePaths: item.images.map((e) => e.filePath).toList(),
+          audioPath: item.audio?.filePath,
+          videoPath: item.video?.filePath,
+          source: 'service offline sync',
+        );
         final response = await repo.uploadMilestoneFiles(
           projectId: item.submission.projectId,
-          milestoneId: item.submission.milestoneId,
           imagePaths: item.images.map((e) => e.filePath).toList(),
           audioPath: item.audio?.filePath,
           videoPath: item.video?.filePath,
@@ -35,9 +47,81 @@ class SyncService extends GetxService {
         );
 
         if (response.statusCode == '200') {
-          await repository.markAsSynced(item.submission.id, userId);
+          await _cleanupUploadedSubmission(item, userId);
         }
       } catch (_) {}
     }
+  }
+
+  Future<void> _cleanupUploadedSubmission(
+    PendingSubmission item,
+    String userId,
+  ) async {
+    final uploadedPaths = <String>[
+      ...item.images.map((e) => e.filePath),
+      if (item.audio?.filePath.isNotEmpty == true) item.audio!.filePath,
+      if (item.video?.filePath.isNotEmpty == true) item.video!.filePath,
+    ];
+
+    for (final path in uploadedPaths) {
+      try {
+        final file = File(path);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e) {
+        debugPrint('Failed to delete uploaded media file: $e');
+      }
+    }
+
+    await repository.deleteUploadedSubmission(item.submission.id, userId);
+
+    final cachedProjectRepo = ProjectRepository(
+      ProjectDao(Get.find<AppDatabase>()),
+    );
+    try {
+      await cachedProjectRepo.deleteUploadedLocalAttachmentPaths(
+        userId: userId,
+        projectId: item.submission.projectId,
+        filePaths: uploadedPaths,
+      );
+    } catch (e) {
+      debugPrint('Failed to delete uploaded cached attachment paths: $e');
+    }
+  }
+
+  Future<void> _logUploadMediaSizes({
+    required List<String> imagePaths,
+    String? audioPath,
+    String? videoPath,
+    required String source,
+  }) async {
+    final paths = <String>[
+      ...imagePaths,
+      if (audioPath?.isNotEmpty == true) audioPath!,
+      if (videoPath?.isNotEmpty == true) videoPath!,
+    ];
+
+    int totalBytes = 0;
+    debugPrint('Upload size check: $source');
+
+    for (final path in paths) {
+      final file = File(path);
+      if (!await file.exists()) {
+        debugPrint('Missing upload file: $path');
+        continue;
+      }
+
+      final bytes = await file.length();
+      totalBytes += bytes;
+      debugPrint(
+        'Upload file: ${path.split('/').last} | '
+        '${(bytes / 1024).toStringAsFixed(2)} KB | $path',
+      );
+    }
+
+    debugPrint(
+      'Upload total media size: ${(totalBytes / 1024).toStringAsFixed(2)} KB',
+    );
   }
 }

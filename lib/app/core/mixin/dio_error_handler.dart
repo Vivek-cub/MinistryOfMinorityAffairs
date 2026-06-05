@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -12,7 +11,6 @@ import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
-
 
 mixin class DioErrorHandler {
   static bool _isErrorDialogShowing = false;
@@ -41,12 +39,7 @@ mixin class DioErrorHandler {
         break;
 
       case network.DioExceptionType.badResponse:
-        _handleBadResponse(
-          e.response,
-          title,
-          message,
-          skipAlert,
-        );
+        _handleBadResponse(e.response, title, message, skipAlert);
         return;
 
       case network.DioExceptionType.cancel:
@@ -117,7 +110,9 @@ mixin class DioErrorHandler {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 30),
+                      horizontal: 20,
+                      vertical: 30,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white,
@@ -155,7 +150,7 @@ mixin class DioErrorHandler {
                           onPressed: () {
                             Navigator.pop(dialogContext);
                           },
-                          )
+                        ),
                       ],
                     ),
                   ),
@@ -290,7 +285,9 @@ mixin class DioErrorHandler {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 30),
+                      horizontal: 20,
+                      vertical: 30,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white,
@@ -325,39 +322,57 @@ mixin class DioErrorHandler {
                         AuthSubmitButton(
                           title: "OK",
                           isEnabled: true,
-                          onPressed: () async{
-                            if (response?.statusCode == 401 &&
-                                RegExp(
-                                  r'expired|jwt',
-                                  caseSensitive: false,
-                                ).hasMatch(message.trim())) {
-                              if (Get.isRegistered<AuthService>()) {
-                                await Get.find<AuthService>().onLogout();
-                                if (Get.context != null) {
-                                  Navigator.pop(Get.context!);
+                          onPressed: () async {
+                            if (response?.statusCode == 401) {
+                              await Get.find<AuthService>().onLogout();
+                              if (Get.context != null) {
+                                if (Get.isDialogOpen ?? false) {
+                                  Get.back();
                                 }
-                                Get.offAllNamed(
-                                  AppRoutes.login,
-                                );
                               }
-                            } else if (RegExp(r'expired|jwt',
-                                    caseSensitive: false)
-                                .hasMatch(message.trim())) {
-                              if (Get.isRegistered<AuthService>()) {
-                                await Get.find<AuthService>().onLogout();
-                                if (Get.context != null) {
-                                  Navigator.pop(Get.context!);
-                                }
-                                Get.offAllNamed(
-                                  AppRoutes.home,
-                                );
-                              }
+                              Get.offAllNamed(AppRoutes.login);
                             } else {
                               Navigator.pop(dialogContext);
                             }
+
+                            // if (Get.context != null) {
+                            //   if (Get.isDialogOpen ?? false) {
+                            //     Get.back();
+                            //   }
+                            // }
+
+                            // if (response?.statusCode == 401 &&
+                            //     RegExp(
+                            //       r'expired|jwt',
+                            //       caseSensitive: false,
+                            //     ).hasMatch(message.trim())) {
+                            //   if (Get.isRegistered<AuthService>()) {
+                            //     await Get.find<AuthService>().onLogout();
+                            //     if (Get.context != null) {
+                            //       if (Get.isDialogOpen ?? false) {
+                            //         Get.back();
+                            //       }
+                            //     }
+                            //     Get.offAllNamed(AppRoutes.login);
+                            //   }
+                            // } else if (RegExp(
+                            //   r'expired|jwt',
+                            //   caseSensitive: false,
+                            // ).hasMatch(message.trim())) {
+                            //   if (Get.isRegistered<AuthService>()) {
+                            //     await Get.find<AuthService>().onLogout();
+                            //     if (Get.context != null) {
+                            //       if (Get.isDialogOpen ?? false) {
+                            //         Get.back();
+                            //       }
+                            //     }
+                            //     Get.offAllNamed(AppRoutes.login);
+                            //   }
+                            // } else {
+                            //   Navigator.pop(dialogContext);
+                            // }
                           },
-                          )
-                        
+                        ),
                       ],
                     ),
                   ),
@@ -407,7 +422,7 @@ mixin class DioErrorHandler {
         'error_message',
         'statusMessage',
         'msg',
-        'description'
+        'description',
       ];
 
       for (String field in possibleFields) {

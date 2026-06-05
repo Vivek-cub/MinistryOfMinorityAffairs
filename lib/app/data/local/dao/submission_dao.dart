@@ -25,7 +25,6 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
   Future<void> saveSubmission({
     required String userId,
     required String projectId,
-    required String milestoneId,
     required List<String> images,
     String? audioPath,
     int? audioDuration,
@@ -41,10 +40,7 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
     await transaction(() async {
       final existing =
           await (select(submissions)..where(
-            (t) =>
-                t.userId.equals(userId) &
-                t.projectId.equals(projectId) &
-                t.milestoneId.equals(milestoneId),
+            (t) => t.userId.equals(userId) & t.projectId.equals(projectId),
           )).getSingleOrNull();
 
       int submissionId;
@@ -54,7 +50,6 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
           SubmissionsCompanion.insert(
             userId: userId,
             projectId: projectId,
-            milestoneId: milestoneId,
             isSynced: Value(isSynced),
             userLat: userLat ?? "",
             userLng: userLng ?? "",
@@ -141,10 +136,9 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
 
   Future<List<PendingSubmission>> getPendingSubmissions(String userId) async {
     final pending =
-        await (select(submissions)
-          ..where(
-            (tbl) => tbl.isSynced.equals(false) & tbl.userId.equals(userId),
-          )).get();
+        await (select(submissions)..where(
+          (tbl) => tbl.isSynced.equals(false) & tbl.userId.equals(userId),
+        )).get();
 
     final result = <PendingSubmission>[];
 
@@ -185,17 +179,15 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
     )).write(const SubmissionsCompanion(isSynced: Value(true)));
   }
 
-  Future<PendingSubmission?> getDraftByProjectAndMilestone({
+  Future<PendingSubmission?> getDraftByProject({
     required String userId,
     required String projectId,
-    required String milestoneId,
   }) async {
     final sub =
         await (select(submissions)..where(
           (t) =>
               t.userId.equals(userId) &
               t.projectId.equals(projectId) &
-              t.milestoneId.equals(milestoneId) &
               t.isSynced.equals(false),
         )).getSingleOrNull();
 
@@ -247,6 +239,25 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
       }
 
       await (delete(submissions)..where((t) => t.userId.equals(userId))).go();
+    });
+  }
+
+  Future<void> deleteSubmissionWithAttachments(
+    int submissionId,
+    String userId,
+  ) async {
+    await transaction(() async {
+      await (delete(submissionImages)
+        ..where((t) => t.submissionId.equals(submissionId))).go();
+      await (delete(submissionAudio)
+        ..where((t) => t.submissionId.equals(submissionId))).go();
+      await (delete(submissionVideo)
+        ..where((t) => t.submissionId.equals(submissionId))).go();
+      await (delete(submissionRemarks)
+        ..where((t) => t.submissionId.equals(submissionId))).go();
+      await (delete(submissions)..where(
+        (t) => t.id.equals(submissionId) & t.userId.equals(userId),
+      )).go();
     });
   }
 }

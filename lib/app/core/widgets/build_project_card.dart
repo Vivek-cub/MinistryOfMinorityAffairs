@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
@@ -9,7 +10,8 @@ import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 class BuildProjectCard extends StatelessWidget {
   final ProjectDetails project;
   final VoidCallback? onPressed;
-  BuildProjectCard(this.project, this.onPressed);
+  bool? isUrgent = false;
+  BuildProjectCard(this.project, this.onPressed, this.isUrgent);
   @override
   Widget build(BuildContext context) {
     return buildProjectCard(project, onPressed);
@@ -51,15 +53,23 @@ class BuildProjectCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.textHint),
+        border: Border.all(
+          color: isUrgent == false ? AppColors.textHint : AppColors.error,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color:
+                isUrgent == false
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.red.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color:
+                isUrgent == false
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.red.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(2, 0),
           ),
@@ -72,6 +82,7 @@ class BuildProjectCard extends StatelessWidget {
             text: project.projectName ?? "",
             fontWeight: FontWeight.bold,
             maxLines: 2,
+            color: isUrgent == false ? AppColors.textPrimary : AppColors.error,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -159,6 +170,7 @@ class BuildProjectCard extends StatelessWidget {
             isEnabled: true,
             height: 44,
             onPressed: onPressed,
+            isUrgent: isUrgent ?? false,
           ),
         ],
       ),

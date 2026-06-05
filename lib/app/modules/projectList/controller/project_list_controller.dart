@@ -4,6 +4,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_name.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
@@ -24,7 +25,7 @@ class ProjectListController extends GetxController
 
   // Selected filters
   final selectedSector = Rx<String?>('');
-  final selectedYear = Rx<String?>('');
+  final Rx<FinancialYearName?> selectedYear = Rx<FinancialYearName?>(null);
 
   // Dropdown states
   final isSectorDropdownOpen = false.obs;
@@ -35,12 +36,14 @@ class ProjectListController extends GetxController
 
   RxString status = "".obs;
   RxBool geoStatus = false.obs;
+  RxBool isShowingCalendar = false.obs;
 
   RxString paramName = "".obs;
 
   final RxList<UserProject> projects = <UserProject>[].obs;
   final RxList<UserProject> allProjects = <UserProject>[].obs;
   final RxList<Category> category = <Category>[].obs;
+  final RxList<FinancialYearName> yearName = <FinancialYearName>[].obs;
   final Rx<Category?> selectedCategory = Rx<Category?>(null);
 
   RxBool isFilterSelected = false.obs;
@@ -55,6 +58,7 @@ class ProjectListController extends GetxController
       status.value = args['status']?.toString() ?? '';
       paramName.value = args['paramName']?.toString() ?? '';
       geoStatus.value = args['geoStatus'] ?? false;
+      isShowingCalendar.value = args['showCalendar'] ?? false;
       statusFilter.value = args['statusFilter']?.toString() ?? '';
     }
 
@@ -65,6 +69,7 @@ class ProjectListController extends GetxController
       }
     });
     getAllSector();
+    getAllFinancialYears();
   }
 
   void checkParamToLoadProject() {
@@ -84,11 +89,15 @@ class ProjectListController extends GetxController
       if (selectedCategory.value != null) {
         sectorId = selectedCategory.value?.id ?? "";
       }
+      String yearId = "";
+      if (selectedYear.value != null) {
+        yearId = selectedYear.value?.id ?? "";
+      }
       final modelData = await repo.getProjectList(
         status: status.value,
         paramName: paramName.value,
         sectorId: sectorId,
-        year: selectedYear.value ?? "",
+        year: yearId,
         startDate: "",
         endDate: "",
       );
@@ -115,11 +124,15 @@ class ProjectListController extends GetxController
       if (selectedCategory.value != null) {
         sectorId = selectedCategory.value?.id ?? "";
       }
+      String yearId = "";
+      if (selectedYear.value != null) {
+        yearId = selectedYear.value?.id ?? "";
+      }
       final modelData = await repo.getProjectListByGeoTagged(
         status: geoStatus.value,
         paramName: paramName.value,
         sectorId: sectorId,
-        year: selectedYear.value ?? "",
+        year: yearId,
         startDate: "",
         endDate: "",
       );
@@ -200,34 +213,45 @@ class ProjectListController extends GetxController
   }
 
   void onUpdateProgress(ProjectDetails project, String projectStatus) {
-    if (status.value == "Proposal") {
+    if (isShowingCalendar.value == true) {
       Get.toNamed(
-        AppRoutes.updateProposalLatlng,
+        AppRoutes.calendarProject,
         arguments: {"project": project, "status": projectStatus},
       );
     } else {
       Get.toNamed(
-        AppRoutes.workDetail,
+        AppRoutes.uploadProjectDetails,
         arguments: {"project": project, "status": projectStatus},
       );
     }
+    // if (status.value == "Proposal") {
+    //   Get.toNamed(
+    //     AppRoutes.uploadProjectDetails,
+    //     arguments: {"project": project, "status": projectStatus},
+    //   );
+    // } else {
+    //   Get.toNamed(
+    //     AppRoutes.workDetail,
+    //     arguments: {"project": project, "status": projectStatus},
+    //   );
+    // }
   }
 
-  List<String> get years => [
-    '2013',
-    '2014',
-    '2015',
-    '2016',
-    '2017',
-    '2018',
-    '2019',
-    '2020',
-    '2021',
-    '2022',
-    '2023',
-    '2024',
-    '2025',
-  ];
+  // List<String> get years => [
+  //   '2013',
+  //   '2014',
+  //   '2015',
+  //   '2016',
+  //   '2017',
+  //   '2018',
+  //   '2019',
+  //   '2020',
+  //   '2021',
+  //   '2022',
+  //   '2023',
+  //   '2024',
+  //   '2025',
+  // ];
 
   Future<void> getAllSector() async {
     try {
@@ -237,6 +261,25 @@ class ProjectListController extends GetxController
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null) {
           category.value = modelData!.data ?? [];
+        }
+      } else {
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      throw e;
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  Future<void> getAllFinancialYears() async {
+    try {
+      isLoading(true);
+      final modelData = await repo.getAllFinancialYears();
+
+      if (modelData?.statusCode == "200") {
+        if (modelData?.data != null) {
+          yearName.value = modelData!.data ?? [];
         }
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");

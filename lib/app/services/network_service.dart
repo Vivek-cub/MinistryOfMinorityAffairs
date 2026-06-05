@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class NetworkService {
@@ -7,7 +8,9 @@ class NetworkService {
   static Future<bool> hasInternet() async {
     final connectivityResult = await _connectivity.checkConnectivity();
 
-    if (connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult.every(
+      (result) => result == ConnectivityResult.none,
+    )) {
       return false;
     }
 

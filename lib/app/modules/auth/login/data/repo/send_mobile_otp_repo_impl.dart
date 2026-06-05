@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:get/get_core/src/get_main.dart';
@@ -10,56 +9,55 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/login/data/model/v
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/domain/repo/send_mobile_otp_repo.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
+import 'package:dio/dio.dart' as dio;
 
-class SendMobileOtpRepoImpl extends SendMobileOtpRepo with PopupMixin,SnackBarMixin{
-
+class SendMobileOtpRepoImpl extends SendMobileOtpRepo
+    with PopupMixin, SnackBarMixin {
   final ApiService apiService;
   SendMobileOtpRepoImpl(this.apiService);
 
   @override
-  Future<SendMobileOtpRespModel?> sendMobileOtp({required String mobileNo}) async{
-    
-    try{
+  Future<SendMobileOtpRespModel?> sendMobileOtp({
+    required String mobileNo,
+  }) async {
+    try {
       final resp = await apiService.post(
         NetworkConstants.login,
-        data: {"phoneNumber":mobileNo},
+        data: {"phoneNumber": mobileNo},
       );
       if (resp.statusCode == HttpStatus.ok) {
         return SendMobileOtpRespModel.fromJson(resp.data);
-      }else{
+      } else {
         SendMobileOtpRespModel modelData = SendMobileOtpRespModel();
         showErrorDialog(
           Get.context!,
-            title: "Error",
-            message: modelData.statusMessage??"Something Went Wrong",);
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
         return modelData;
       }
-    }catch(e){
-        throw Exception(e);
+    } catch (e) {
+      throw Exception(e);
     }
-
-    
   }
 
   @override
-  Future<VerifyMobileOtpRespModel?> verifyOTP({required String mobileNo, required String otp}) async{
-    try{
+  Future<VerifyMobileOtpRespModel?> verifyOTP({
+    required String mobileNo,
+    required String otp,
+  }) async {
+    try {
       final resp = await apiService.post(
-      NetworkConstants.verifyOtp,
-      data: {"phoneNumber":mobileNo,"otp":otp},
-    );
-    if (resp.statusCode == HttpStatus.ok) {
+        NetworkConstants.verifyOtp,
+        data: {"phoneNumber": mobileNo, "otp": otp},
+      );
+      if (resp.statusCode == HttpStatus.ok && resp.data != null) {
         return VerifyMobileOtpRespModel.fromJson(resp.data);
-      }else{
-        VerifyMobileOtpRespModel modelData = VerifyMobileOtpRespModel();
-        showErrorDialog(
-          Get.context!,
-            title: "Error",
-            message: modelData.statusMessage??"Something Went Wrong",);
-        return modelData;
+      } else {
+        throw dio.DioException(requestOptions: dio.RequestOptions());
       }
-    }catch(e){
-      throw Exception(e);
+    } on dio.DioException catch (e) {
+      throw dio.DioException(requestOptions: dio.RequestOptions());
     }
   }
 }

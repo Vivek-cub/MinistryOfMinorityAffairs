@@ -8,7 +8,6 @@ class SubmissionRepository {
   Future<void> save({
     required String userId,
     required String projectId,
-    required String milestoneId,
     required List<String> images,
     String? audioPath,
     int? audioDuration,
@@ -24,7 +23,6 @@ class SubmissionRepository {
     return dao.saveSubmission(
       userId: userId,
       projectId: projectId,
-      milestoneId: milestoneId,
       images: images,
       audioPath: audioPath,
       audioDuration: audioDuration,
@@ -40,9 +38,7 @@ class SubmissionRepository {
   }
 
   // 🔁 For auto-sync
-  Future<List<PendingSubmission>> getPending({
-    required String userId,
-  }) {
+  Future<List<PendingSubmission>> getPending({required String userId}) {
     return dao.getPendingSubmissions(userId);
   }
 
@@ -53,16 +49,15 @@ class SubmissionRepository {
   Future<PendingSubmission?> getDraftByProjectAndMilestone({
     required String userId,
     required String projectId,
-    required String milestoneId,
   }) {
-    return dao.getDraftByProjectAndMilestone(
-      userId: userId,
-      projectId: projectId,
-      milestoneId: milestoneId,
-    );
+    return dao.getDraftByProject(userId: userId, projectId: projectId);
   }
 
   Future<void> clearLocalDataForUser(String userId) {
     return dao.clearLocalDataForUser(userId);
+  }
+
+  Future<void> deleteUploadedSubmission(int submissionId, String userId) {
+    return dao.deleteSubmissionWithAttachments(submissionId, userId);
   }
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
 
 /// Utility helper functions
 class Helpers {
   // ==================== Date & Time ====================
-  
+
   /// Format date to dd/MM/yyyy
   static String formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
@@ -57,7 +58,7 @@ class Helpers {
   }
 
   // ==================== Validation ====================
-  
+
   /// Validate email
   static bool isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
@@ -79,7 +80,7 @@ class Helpers {
   }
 
   // ==================== Formatting ====================
-  
+
   /// Format currency in Indian format (e.g., ₹1,00,000.00)
   static String formatCurrency(double amount) {
     final formatter = NumberFormat.currency(
@@ -109,7 +110,7 @@ class Helpers {
   }
 
   // ==================== Snackbars & Dialogs ====================
-  
+
   /// Show success snackbar
   static void showSuccess(String message) {
     Get.snackbar(
@@ -174,21 +175,22 @@ class Helpers {
     String cancelText = 'No',
   }) async {
     return await Get.dialog<bool>(
-      AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text(cancelText),
+          AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: Text(cancelText),
+              ),
+              ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                child: Text(confirmText),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            child: Text(confirmText),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   /// Show loading dialog
@@ -199,10 +201,7 @@ class Helpers {
           mainAxisSize: MainAxisSize.min,
           children: [
             const CircularProgressIndicator(),
-            if (message != null) ...[
-              const SizedBox(height: 16),
-              Text(message),
-            ],
+            if (message != null) ...[const SizedBox(height: 16), Text(message)],
           ],
         ),
       ),
@@ -218,7 +217,7 @@ class Helpers {
   }
 
   // ==================== Device Info ====================
-  
+
   /// Check if device is mobile
   static bool isMobile() {
     return GetPlatform.isMobile;
@@ -236,14 +235,14 @@ class Helpers {
   }
 
   // ==================== Network ====================
-  
+
   /// Check if URL is valid
   static bool isValidUrl(String url) {
     return Uri.tryParse(url)?.hasAbsolutePath ?? false;
   }
 
   // ==================== File Size ====================
-  
+
   /// Format file size
   static String formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
@@ -252,5 +251,49 @@ class Helpers {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
     }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  DateTime dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  String dateKey(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(dateOnly(date));
+  }
+
+  Object? getAttachmentForDate(
+    DateTime date,
+    List<ProjectMilestone>? milestones,
+  ) {
+    final normalizedDate = dateOnly(date);
+
+    for (final milestone in milestones ?? []) {
+      for (final attachment in milestone.imageAtt ?? []) {
+        final attachmentDate = parseAttachmentDate(attachment.date);
+
+        if (attachmentDate != null &&
+            dateOnly(attachmentDate) == normalizedDate) {
+          return attachment;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  DateTime? parseAttachmentDate(String? value) {
+    final rawDate = value?.trim();
+    if (rawDate == null || rawDate.isEmpty) return null;
+
+    final parsedIso = DateTime.tryParse(rawDate);
+    if (parsedIso != null) return parsedIso;
+
+    for (final pattern in ['dd-MM-yyyy', 'dd/MM/yyyy', 'yyyy-MM-dd']) {
+      try {
+        return DateFormat(pattern).parseStrict(rawDate);
+      } catch (_) {}
+    }
+
+    return null;
   }
 }

@@ -5,7 +5,7 @@ class LocalMilestoneAttachments extends Table {
   TextColumn get userId => text()();
 
   TextColumn get projectId => text()();
-  TextColumn get milestoneId => text()();
+  // TextColumn get milestoneId => text()();
 
   /// image | audio | video
   TextColumn get type => text()();
@@ -20,6 +20,7 @@ class LocalMilestoneAttachments extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-    {userId, projectId, milestoneId, type, filePath},
+    // {userId, projectId, milestoneId, type, filePath},
+    {userId, projectId, type, filePath},
   ];
 }

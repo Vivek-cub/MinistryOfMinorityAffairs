@@ -5,7 +5,7 @@ class Submissions extends Table {
   TextColumn get userId => text()();
   TextColumn get projectId => text()();
 
-  TextColumn get milestoneId => text()();
+  // TextColumn get milestoneId => text()();
 
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
@@ -16,6 +16,7 @@ class Submissions extends Table {
   TextColumn get projectStatus => text()();
   @override
   List<Set<Column>> get uniqueKeys => [
-    {userId, projectId, milestoneId},
+    //{userId, projectId, milestoneId},
+    {userId, projectId},
   ];
 }

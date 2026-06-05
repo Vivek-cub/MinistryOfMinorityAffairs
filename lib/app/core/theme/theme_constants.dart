@@ -84,3 +84,11 @@ sealed class AppGradientColor {
     end: Alignment.bottomCenter,
   );
 }
+
+sealed class AppRedGradientColor {
+  static Gradient get gradient => LinearGradient(
+    colors: [Color(0xFF780606), Color(0xFFFF6666)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+}

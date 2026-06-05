@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
@@ -11,6 +13,7 @@ import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart'
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
@@ -61,18 +64,45 @@ class HomeController extends GetxController with SnackBarMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   RxString profileImage = "".obs;
   final isSyncing = false.obs;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   @override
   void onInit() {
     super.onInit();
+    _listenForInternetRestore();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkInternet();
     });
   }
 
   @override
-  void onReady() {
-    super.onReady();
+  void onClose() {
+    _connectivitySubscription?.cancel();
+    super.onClose();
+  }
+
+  void _listenForInternetRestore() {
+    //isSyncing.value = true;
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) async {
+      final hasNetwork = results.any(
+        (result) => result != ConnectivityResult.none,
+      );
+
+      if (!hasNetwork) {
+        hasInternet.value = false;
+        return;
+      }
+
+      final wasOffline = hasInternet.value == false;
+      final online = await NetworkService.hasInternet();
+      hasInternet.value = online;
+
+      if (wasOffline && online) {
+        await checkInternet();
+      }
+    });
   }
 
   void openDrawer() {
@@ -89,11 +119,12 @@ class HomeController extends GetxController with SnackBarMixin {
     if (!hasInternet.value) return;
     try {
       isSyncing.value = true;
-      await Future.wait([
-        getDashboardCount(),
-        // loadProjects(),
-        syncPendingSubmissions(),
-      ]);
+      await getDashboardCount();
+      await loadProjects();
+      if ((data.value.projectsNotVisitedFor3Months ?? 0) > 0) {
+        await loadUrgentProjects();
+      }
+      await syncPendingSubmissions();
     } finally {
       isSyncing.value = false;
     }
@@ -101,8 +132,13 @@ class HomeController extends GetxController with SnackBarMixin {
 
   void onUpdateProgressTap(ProjectDetails project, String status) {
     // Navigate to project detail/update page
+    // Get.toNamed(
+    //   AppRoutes.workDetail,
+    //   arguments: {"project": project, "status": status},
+    // );
+
     Get.toNamed(
-      AppRoutes.workDetail,
+      AppRoutes.uploadProjectDetails,
       arguments: {"project": project, "status": status},
     );
   }
@@ -128,7 +164,16 @@ class HomeController extends GetxController with SnackBarMixin {
   }
 
   void onCalendarTap() {
-    Get.toNamed(AppRoutes.calendarProject);
+    Get.toNamed(
+      AppRoutes.projectList,
+      arguments: {
+        'status': "All",
+        'paramName': "status",
+        'statusFilter': "All",
+        'showCalendar': true,
+      },
+    );
+    // Get.toNamed(AppRoutes.calendarProject);
   }
 
   void onProjetTap() {
@@ -164,24 +209,18 @@ class HomeController extends GetxController with SnackBarMixin {
 
   Future<void> getDashboardCount() async {
     try {
-      showAlertCustom(backBtnDisable: true, title: "Fetching...");
       final modelData = await repo.getHomeData();
 
       if (modelData?.statusCode == "200") {
-        Get.back();
         if (modelData?.data != null) {
           data.value = modelData!.data!;
           userName(data.value.user?.name ?? "");
           await authService.setUserId(modelData.data?.user?.id ?? '');
         }
-        loadProjects();
       } else {
-        Get.back();
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
-    } catch (e) {
-      Get.back();
-    } finally {}
+    } catch (e) {}
   }
 
   Future<void> syncPendingSubmissions() async {
@@ -195,9 +234,14 @@ class HomeController extends GetxController with SnackBarMixin {
 
     for (final item in pendingList) {
       try {
+        await _logUploadMediaSizes(
+          imagePaths: item.images.map((e) => e.filePath).toList(),
+          audioPath: item.audio?.filePath,
+          videoPath: item.video?.filePath,
+          source: 'home offline sync',
+        );
         final response = await projectRepo.uploadMilestoneFiles(
           projectId: item.submission.projectId,
-          milestoneId: item.submission.milestoneId,
           imagePaths: item.images.map((e) => e.filePath).toList(),
           audioPath: item.audio?.filePath,
           videoPath: item.video?.filePath,
@@ -209,10 +253,82 @@ class HomeController extends GetxController with SnackBarMixin {
         );
 
         if (response.statusCode == '200') {
-          await submissionRepo.markAsSynced(item.submission.id, userId);
+          await _cleanupUploadedSubmission(item, userId);
         }
       } catch (_) {}
     }
+  }
+
+  Future<void> _cleanupUploadedSubmission(
+    PendingSubmission item,
+    String userId,
+  ) async {
+    final uploadedPaths = <String>[
+      ...item.images.map((e) => e.filePath),
+      if (item.audio?.filePath.isNotEmpty == true) item.audio!.filePath,
+      if (item.video?.filePath.isNotEmpty == true) item.video!.filePath,
+    ];
+
+    for (final path in uploadedPaths) {
+      try {
+        final file = File(path);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e) {
+        debugPrint('Failed to delete uploaded media file: $e');
+      }
+    }
+
+    await submissionRepo.deleteUploadedSubmission(item.submission.id, userId);
+
+    final cachedProjectRepo = ProjectRepository(
+      ProjectDao(Get.find<AppDatabase>()),
+    );
+    try {
+      await cachedProjectRepo.deleteUploadedLocalAttachmentPaths(
+        userId: userId,
+        projectId: item.submission.projectId,
+        filePaths: uploadedPaths,
+      );
+    } catch (e) {
+      debugPrint('Failed to delete uploaded cached attachment paths: $e');
+    }
+  }
+
+  Future<void> _logUploadMediaSizes({
+    required List<String> imagePaths,
+    String? audioPath,
+    String? videoPath,
+    required String source,
+  }) async {
+    final paths = <String>[
+      ...imagePaths,
+      if (audioPath?.isNotEmpty == true) audioPath!,
+      if (videoPath?.isNotEmpty == true) videoPath!,
+    ];
+
+    int totalBytes = 0;
+    debugPrint('Upload size check: $source');
+
+    for (final path in paths) {
+      final file = File(path);
+      if (!await file.exists()) {
+        debugPrint('Missing upload file: $path');
+        continue;
+      }
+
+      final bytes = await file.length();
+      totalBytes += bytes;
+      debugPrint(
+        'Upload file: ${path.split('/').last} | '
+        '${(bytes / 1024).toStringAsFixed(2)} KB | $path',
+      );
+    }
+
+    debugPrint(
+      'Upload total media size: ${(totalBytes / 1024).toStringAsFixed(2)} KB',
+    );
   }
 
   // List<PendingSubmission> _uniqueByProjectId(List<PendingSubmission> list) {
@@ -314,7 +430,7 @@ class HomeController extends GetxController with SnackBarMixin {
     return compressed ?? file;
   }
 
-  void loadProjects() async {
+  Future<void> loadProjects() async {
     try {
       final modelData = await projectListRepo.getProjectList(
         status: "All",
@@ -332,7 +448,29 @@ class HomeController extends GetxController with SnackBarMixin {
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
     } catch (e) {
-      throw Exception(e);
+      Get.snackbar("Error", "Failed to fetch dashboard data");
+    } finally {}
+  }
+
+  Future<void> loadUrgentProjects() async {
+    try {
+      final modelData = await projectListRepo.getProjectList(
+        status: "All",
+        paramName: "status",
+        sectorId: "",
+        year: "",
+        startDate: "",
+        endDate: "",
+      );
+      if (modelData?.statusCode == "200") {
+        if (modelData?.data != null && modelData?.data?.projects != null) {
+          projects.value = modelData!.data?.projects ?? [];
+        }
+      } else {
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Failed to fetch dashboard data");
     } finally {}
   }
 }

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/services/audio_recorder_service.dart';
 
 class AudioRecorderController extends GetxController {
@@ -25,6 +28,16 @@ class AudioRecorderController extends GetxController {
   }
 
   Future<void> _startRecording() async {
+    if (filePath.value != null) {
+      Get.snackbar(
+        'Audio already recorded',
+        'Only one audio can be recorded at a time. Delete the existing audio to record again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.warning,
+      );
+      return;
+    }
+
     final path = await _service.startRecording();
     if (path == null) return;
 
@@ -34,13 +47,18 @@ class AudioRecorderController extends GetxController {
 
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if(durationMs.value>9000){
-      _stopRecording();
-      return;
-    }
+      if (durationMs.value >= 60000) {
+        _stopRecording();
+        Get.snackbar(
+          'Recording Stopped',
+          'Maximum recording duration is 1 minute.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+
+        return;
+      }
       durationMs.value += 1000;
     });
-    
   }
 
   Future<void> _stopRecording() async {
@@ -63,6 +81,21 @@ class AudioRecorderController extends GetxController {
   Future<void> stop() async {
     await _player.stop();
     isPlaying.value = false;
+  }
+
+  Future<void> deleteRecording() async {
+    final path = filePath.value;
+    if (path == null) return;
+
+    await stop();
+
+    final file = File(path);
+    if (await file.exists()) {
+      await file.delete();
+    }
+
+    filePath.value = null;
+    durationMs.value = 0;
   }
 
   @override

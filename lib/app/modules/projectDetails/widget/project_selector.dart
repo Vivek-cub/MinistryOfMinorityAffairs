@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+
 class ProgressSelector extends StatelessWidget {
   final int progress;
   final Function(int)? onChanged;
-  const ProgressSelector({super.key,required this.progress,required this.onChanged});
+  final bool isLocked;
+  const ProgressSelector({
+    super.key,
+    required this.progress,
+    required this.onChanged,
+    this.isLocked = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +27,13 @@ class ProgressSelector extends StatelessWidget {
           divisions: 10,
           label: "${progress.toInt()}%",
           onChanged: (value) {
+            if (isLocked) return;
+
             if (onChanged != null) {
               onChanged!(value.toInt());
             }
           },
         ),
-        
       ],
     );
   }

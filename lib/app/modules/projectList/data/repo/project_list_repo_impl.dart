@@ -6,6 +6,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category_response.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_response.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
@@ -27,7 +28,7 @@ class ProjectListRepoImpl extends ProjectListRepo
     try {
       final resp = await apiService.get(
         NetworkConstants.projectList,
-        query: {paramName: status, "sectorId": sectorId, "year": year},
+        query: {paramName: status, "sectorId": sectorId, "yearId": year},
       );
       if (resp.statusCode == HttpStatus.ok) {
         return ProjectResponse.fromJson(resp.data);
@@ -57,7 +58,7 @@ class ProjectListRepoImpl extends ProjectListRepo
     try {
       final resp = await apiService.get(
         NetworkConstants.projectList,
-        query: {paramName: status, "sectorId": sectorId, "year": year},
+        query: {paramName: status, "sectorId": sectorId, "yearId": year},
       );
       if (resp.statusCode == HttpStatus.ok) {
         return ProjectResponse.fromJson(resp.data);
@@ -103,6 +104,26 @@ class ProjectListRepoImpl extends ProjectListRepo
         return ProjectResponse.fromJson(resp.data);
       } else {
         ProjectResponse modelData = ProjectResponse();
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
+        return modelData;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  @override
+  Future<FinancialYearResponseModel?> getAllFinancialYears() async {
+    try {
+      final resp = await apiService.get(NetworkConstants.getAllFinancialYears);
+      if (resp.statusCode == HttpStatus.ok) {
+        return FinancialYearResponseModel.fromJson(resp.data);
+      } else {
+        FinancialYearResponseModel modelData = FinancialYearResponseModel();
         showErrorDialog(
           Get.context!,
           title: "Error",

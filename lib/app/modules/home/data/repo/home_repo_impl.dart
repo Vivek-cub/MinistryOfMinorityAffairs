@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get_connect/http/src/multipart/form_data.dart'
     hide FormData;
 import 'package:get/get_connect/http/src/multipart/multipart_file.dart'
@@ -35,6 +36,7 @@ class HomeRepoImpl extends HomeRepo with PopupMixin, SnackBarMixin {
         return modelData;
       }
     } catch (e) {
+      debugPrint(e.toString());
       throw Exception(e);
     }
   }

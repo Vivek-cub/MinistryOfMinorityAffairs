@@ -1,4 +1,5 @@
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category_response.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_response.dart';
 
 abstract class ProjectListRepo {
@@ -20,4 +21,5 @@ abstract class ProjectListRepo {
   });
   Future<CategoryResponse?> getAllSector();
   Future<ProjectResponse?> getAssignedProjects();
+  Future<FinancialYearResponseModel?> getAllFinancialYears();
 }

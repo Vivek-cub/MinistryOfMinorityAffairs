@@ -61,3 +61,78 @@ class BuildStatCard extends StatelessWidget {
     );
   }
 }
+
+class BuildModernStatCard extends StatelessWidget {
+  final String title;
+  final int value;
+  final String icon;
+  final VoidCallback onTap;
+
+  const BuildModernStatCard({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+
+          borderRadius: BorderRadius.circular(18),
+
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(icon, height: 28, color: Colors.white),
+
+            const SizedBox(height: 12),
+
+            Text(
+              value.toString(),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.3,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
