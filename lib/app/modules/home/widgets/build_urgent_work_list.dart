@@ -43,7 +43,7 @@ class BuildUrgentWorkList extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TitleText(
-                text: 'Urgent',
+                text: 'Long Pending List',
                 fontWeight: FontWeight.bold,
                 color: AppColors.error,
               ),
@@ -51,7 +51,7 @@ class BuildUrgentWorkList extends StatelessWidget {
           ),
           SizedBox(height: AppDimensions.xxs),
           Obx(() {
-            return Container(
+            return SizedBox(
               height: 220,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -63,7 +63,7 @@ class BuildUrgentWorkList extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.80,
+                      width: MediaQuery.of(context).size.width * 0.90,
                       child: BuildProjectCard(
                         project.project ?? ProjectDetails(),
                         () {

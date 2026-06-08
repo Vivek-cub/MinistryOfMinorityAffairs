@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:ministry_of_minority_affairs/app/modules/calender/views/full_screen_image_page.dart';
+import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
 class ImageGallerySheet extends StatelessWidget {
   final List<String> images;
@@ -45,13 +46,15 @@ class ImageGallerySheet extends StatelessWidget {
                 mainAxisSpacing: 10,
               ),
               itemBuilder: (context, index) {
+                final imageUrl = _resolveImageUrl(images[index]);
+
                 return GestureDetector(
                   onTap: () {
-                    Get.to(() => FullScreenImagePage(imageUrl: images[index]));
+                    Get.to(() => FullScreenImagePage(imageUrl: imageUrl));
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(images[index], fit: BoxFit.cover),
+                    child: Image.network(imageUrl, fit: BoxFit.cover),
                   ),
                 );
               },
@@ -61,4 +64,15 @@ class ImageGallerySheet extends StatelessWidget {
       ),
     );
   }
+}
+
+String _resolveImageUrl(String path) {
+  final cleanedPath = path.replaceAll('\\', '/').trim();
+  if (cleanedPath.startsWith('http://') || cleanedPath.startsWith('https://')) {
+    return cleanedPath;
+  }
+
+  final rawBaseUrl =
+      NetworkConstants.baseUrl.replaceFirst('baseUrl=', '').trim();
+  return Uri.parse(rawBaseUrl).resolve(cleanedPath).toString();
 }

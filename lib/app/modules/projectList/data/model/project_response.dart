@@ -5,16 +5,21 @@ class ProjectResponse {
   final String? statusMessage;
   final ProjectDashboardData? data;
 
-  ProjectResponse({this.statusCode, this.statusMessage, this.data});
+  const ProjectResponse({
+    this.statusCode,
+    this.statusMessage,
+    this.data,
+  });
 
   factory ProjectResponse.fromJson(Map<String, dynamic> json) {
+    final responseData = json['data'];
+
     return ProjectResponse(
-      statusCode: json['statusCode'],
-      statusMessage: json['statusMessage'],
-      data:
-          json['data'] != null
-              ? ProjectDashboardData.fromJson(json['data'])
-              : null,
+      statusCode: json['statusCode']?.toString(),
+      statusMessage: json['statusMessage']?.toString(),
+      data: responseData is Map<String, dynamic>
+          ? ProjectDashboardData.fromJson(responseData)
+          : null,
     );
   }
 }

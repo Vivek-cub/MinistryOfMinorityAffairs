@@ -135,4 +135,24 @@ class ProjectListRepoImpl extends ProjectListRepo
       throw Exception(e);
     }
   }
+
+  @override
+  Future<ProjectResponse?> getPendingProjectList() async {
+    try {
+      final resp = await apiService.get(NetworkConstants.pendingProjectList);
+      if (resp.statusCode == HttpStatus.ok) {
+        return ProjectResponse.fromJson(resp.data);
+      } else {
+        ProjectResponse modelData = ProjectResponse();
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
+        return modelData;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 }

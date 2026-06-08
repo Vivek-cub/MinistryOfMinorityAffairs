@@ -121,8 +121,8 @@ class HomeController extends GetxController with SnackBarMixin {
       isSyncing.value = true;
       await getDashboardCount();
       await loadProjects();
-      if ((data.value.projectsNotVisitedFor3Months ?? 0) > 0) {
-        await loadUrgentProjects();
+      if ((data.value.projectsNotVisitedFor3Months ?? 0) < 0) {
+        await loadPendingProjectList();
       }
       await syncPendingSubmissions();
     } finally {
@@ -452,16 +452,9 @@ class HomeController extends GetxController with SnackBarMixin {
     } finally {}
   }
 
-  Future<void> loadUrgentProjects() async {
+  Future<void> loadPendingProjectList() async {
     try {
-      final modelData = await projectListRepo.getProjectList(
-        status: "All",
-        paramName: "status",
-        sectorId: "",
-        year: "",
-        startDate: "",
-        endDate: "",
-      );
+      final modelData = await projectListRepo.getPendingProjectList();
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
           projects.value = modelData!.data?.projects ?? [];

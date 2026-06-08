@@ -17,4 +17,6 @@ sealed class NetworkConstants {
       "api/v1/pms/master/getAllFinancialYears";
   static final String uploadProfileImage = "api/v1/pms/user/updateProfile";
   static final String updateLatLng = "api/v1/pms/mobile/updateLatLng";
+  static final String pendingProjectList =
+      "api/v1/pms/mobile/getProjectNotVisited";
 }

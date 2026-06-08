@@ -171,11 +171,11 @@ class UploadProjectDetailsController extends GetxController
       final sizeKb = (await finalFile.length()) / 1024;
       debugPrint('📸 Final image size: ${sizeKb.toStringAsFixed(2)} KB');
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to take photo',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   'Error',
+      //   'Failed to take photo',
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
     }
   }
 

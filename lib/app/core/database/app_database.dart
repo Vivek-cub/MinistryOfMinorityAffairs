@@ -35,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => instance;
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -43,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (m, from, to) async {
-      if (from < 16) {
+      if (from < 17) {
         await m.deleteTable('submission_images');
         await m.deleteTable('submission_audio');
         await m.deleteTable('submission_video');

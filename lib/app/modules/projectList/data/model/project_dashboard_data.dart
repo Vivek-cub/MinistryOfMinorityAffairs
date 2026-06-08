@@ -6,6 +6,7 @@ class ProjectDashboardData {
   final String? sectorId;
   final String? projectUniqueId;
   final String? year;
+  final String? yearId;
   final List<UserProject> projects;
 
   ProjectDashboardData({
@@ -14,6 +15,7 @@ class ProjectDashboardData {
     this.sectorId,
     this.projectUniqueId,
     this.year,
+    this.yearId,
     required this.projects,
   });
 
@@ -24,9 +26,12 @@ class ProjectDashboardData {
       sectorId: json['sectorId'],
       projectUniqueId: json['projectUniqueId'],
       year: json['year'],
-      projects: (json['projects'] as List<dynamic>? ?? [])
-          .map((e) => UserProject.fromJson(e))
-          .toList(),
+      yearId: json['yearId'],
+      projects:
+          (json['projects'] as List<dynamic>? ?? [])
+              .whereType<Map<String, dynamic>>()
+              .map(UserProject.fromJson)
+              .toList(),
     );
   }
 }

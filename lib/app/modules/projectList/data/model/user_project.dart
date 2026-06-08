@@ -20,16 +20,32 @@ class UserProject {
   });
 
   factory UserProject.fromJson(Map<String, dynamic> json) {
+    final projectJson = json['unitDetails'] ?? json['project'];
+
     return UserProject(
-      id: json['Id'],
-      userId: json['userId'],
-      projectId: json['projectId'],
-      status: json['status'],
-      createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
-      updatedAt: DateTime.tryParse(json['updatedAt'] ?? ''),
-      project: json['project'] != null
-          ? ProjectDetails.fromJson(json['project'])
-          : null,
+      id: _stringValue(json['Id']),
+      userId: _stringValue(json['userId']),
+      projectId: _stringValue(json['projectId']),
+      status: _stringValue(json['status']),
+      createdAt: _parseDate(json['createdAt']),
+      updatedAt: _parseDate(json['updatedAt']),
+      project:
+          projectJson is Map<String, dynamic>
+              ? ProjectDetails.fromJson({
+                ...projectJson,
+                'status': projectJson['status'] ?? json['status'],
+              })
+              : null,
     );
+  }
+
+  static String? _stringValue(dynamic value) {
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
   }
 }

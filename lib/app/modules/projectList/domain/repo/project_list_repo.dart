@@ -20,6 +20,7 @@ abstract class ProjectListRepo {
     required String endDate,
   });
   Future<CategoryResponse?> getAllSector();
+  Future<ProjectResponse?> getPendingProjectList();
   Future<ProjectResponse?> getAssignedProjects();
   Future<FinancialYearResponseModel?> getAllFinancialYears();
 }
