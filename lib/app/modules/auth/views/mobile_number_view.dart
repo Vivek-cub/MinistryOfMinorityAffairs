@@ -24,7 +24,9 @@ class MobileNumberView extends GetView<MobileNumberController> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(gradient: AppGradientColor.gradient),
+          decoration: BoxDecoration(
+            gradient: OldAppButtonGradientColor.gradient,
+          ),
           height: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
           child: SingleChildScrollView(

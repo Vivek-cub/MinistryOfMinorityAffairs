@@ -30,9 +30,9 @@ class MilestoneCard extends StatelessWidget {
     } else {
       milestoneStatus = "In-Progress";
     }
-    final hasAttachments =
-        MilestoneAttachmentMapper.hasImages(milestone) ||
-        MilestoneAttachmentMapper.hasAudio(milestone);
+    final hasAttachments = false;
+    // MilestoneAttachmentMapper.hasImages(milestone) ||
+    // MilestoneAttachmentMapper.hasAudio(milestone);
 
     return milestoneStatus == "Completed" || hasAttachments
         ? Card(
@@ -158,111 +158,111 @@ class MilestoneCard extends StatelessWidget {
     return MilestoneProgress(progress: progress);
   }
 
-  Widget _buildAttachments(BuildContext context) {
-    final imageGroups = MilestoneAttachmentMapper.imageGroups(milestone);
-    final audioGroups = MilestoneAttachmentMapper.audioGroups(milestone);
-    final attachmentGroups = <_AttachmentGroup>[];
+  // Widget _buildAttachments(BuildContext context) {
+  //   final imageGroups = MilestoneAttachmentMapper.imageGroups(milestone);
+  //   final audioGroups = MilestoneAttachmentMapper.audioGroups(milestone);
+  //   final attachmentGroups = <_AttachmentGroup>[];
 
-    for (final group in imageGroups) {
-      final dateText = (group.date ?? "").trim();
-      final images =
-          (group.images ?? const <String>[])
-              .where((path) => path.trim().isNotEmpty)
-              .toList();
-      if (images.isEmpty) continue;
+  //   for (final group in imageGroups) {
+  //     final dateText = (group.date ?? "");
+  //     final images =
+  //         (group.images ?? const <String>[])
+  //             .where((path) => path.trim().isNotEmpty)
+  //             .toList();
+  //     if (images.isEmpty) continue;
 
-      final attachmentGroup = _groupForDate(attachmentGroups, dateText);
-      attachmentGroup.images.addAll(images);
-    }
+  //     // final attachmentGroup = _groupForDate(attachmentGroups, dateText);
+  //     //  attachmentGroup.images.addAll(images);
+  //   }
 
-    for (final group in audioGroups) {
-      final dateText = (group.date ?? "").trim();
-      final audios =
-          (group.audios ?? const <String>[])
-              .where((path) => path.trim().isNotEmpty)
-              .toList();
-      if (audios.isEmpty) continue;
+  //   for (final group in audioGroups) {
+  //     final dateText = (group.date ?? "").trim();
+  //     final audios =
+  //         (group.audios ?? const <String>[])
+  //             .where((path) => path.trim().isNotEmpty)
+  //             .toList();
+  //     if (audios.isEmpty) continue;
 
-      final attachmentGroup = _groupForDate(attachmentGroups, dateText);
-      attachmentGroup.audios.addAll(audios);
-    }
+  //     final attachmentGroup = _groupForDate(attachmentGroups, dateText);
+  //     attachmentGroup.audios.addAll(audios);
+  //   }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          attachmentGroups.map((group) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (group.date.isNotEmpty) ...[
-                    CustomText(
-                      text: group.date,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (group.images.isNotEmpty) ...[
-                    SizedBox(
-                      height: 90,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: group.images.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) {
-                          final path = group.images[i];
-                          final isRemote = !_isLocalPath(path);
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children:
+  //         attachmentGroups.map((group) {
+  //           return Padding(
+  //             padding: const EdgeInsets.only(bottom: 12),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 if (group.date.isNotEmpty) ...[
+  //                   CustomText(
+  //                     text: group.date,
+  //                     fontWeight: FontWeight.w600,
+  //                     color: AppColors.textSecondary,
+  //                     maxLines: 2,
+  //                   ),
+  //                   const SizedBox(height: 8),
+  //                 ],
+  //                 if (group.images.isNotEmpty) ...[
+  //                   SizedBox(
+  //                     height: 90,
+  //                     child: ListView.separated(
+  //                       scrollDirection: Axis.horizontal,
+  //                       itemCount: group.images.length,
+  //                       separatorBuilder: (_, __) => const SizedBox(width: 8),
+  //                       itemBuilder: (_, i) {
+  //                         final path = group.images[i];
+  //                         final isRemote = !_isLocalPath(path);
 
-                          return InkWell(
-                            onTap: () {
-                              openImageViewer(
-                                context,
-                                group.images
-                                    .map(_resolveAttachmentUrl)
-                                    .toList(),
-                                i,
-                              );
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child:
-                                  isRemote
-                                      ? Image.network(
-                                        _resolveAttachmentUrl(path),
-                                        width: 90,
-                                        height: 90,
-                                        fit: BoxFit.cover,
-                                      )
-                                      : Image.file(
-                                        File(path),
-                                        width: 90,
-                                        height: 90,
-                                        fit: BoxFit.cover,
-                                      ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                  if (group.audios.isNotEmpty) ...[
-                    if (group.images.isNotEmpty) const SizedBox(height: 8),
-                    ...group.audios.map(
-                      (path) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _AudioPlayerTile(path: path),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          }).toList(),
-    );
-  }
+  //                         return InkWell(
+  //                           onTap: () {
+  //                             openImageViewer(
+  //                               context,
+  //                               group.images
+  //                                   .map(_resolveAttachmentUrl)
+  //                                   .toList(),
+  //                               i,
+  //                             );
+  //                           },
+  //                           child: ClipRRect(
+  //                             borderRadius: BorderRadius.circular(8),
+  //                             child:
+  //                                 isRemote
+  //                                     ? Image.network(
+  //                                       _resolveAttachmentUrl(path),
+  //                                       width: 90,
+  //                                       height: 90,
+  //                                       fit: BoxFit.cover,
+  //                                     )
+  //                                     : Image.file(
+  //                                       File(path),
+  //                                       width: 90,
+  //                                       height: 90,
+  //                                       fit: BoxFit.cover,
+  //                                     ),
+  //                           ),
+  //                         );
+  //                       },
+  //                     ),
+  //                   ),
+  //                 ],
+  //                 if (group.audios.isNotEmpty) ...[
+  //                   if (group.images.isNotEmpty) const SizedBox(height: 8),
+  //                   ...group.audios.map(
+  //                     (path) => Padding(
+  //                       padding: const EdgeInsets.only(bottom: 8),
+  //                       child: _AudioPlayerTile(path: path),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ],
+  //             ),
+  //           );
+  //         }).toList(),
+  //   );
+  // }
 
   _AttachmentGroup _groupForDate(List<_AttachmentGroup> groups, String date) {
     for (final group in groups) {
@@ -314,7 +314,7 @@ class MilestoneProgress extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CustomText(
-                  text: "Milestone Progress",
+                  text: "Project Progress",
                   color: AppColors.textSecondary,
                 ),
                 CustomText(

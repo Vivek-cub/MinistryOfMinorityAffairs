@@ -13,9 +13,9 @@ import 'package:ministry_of_minority_affairs/app/data/repository/submission_repo
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/usecases/capture_project_video.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/audio_recorder_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/geofence_service.dart';
@@ -33,6 +33,7 @@ class UploadProjectDetailsController extends GetxController
   final ProjectDetailRepo repo;
   final AuthService authService;
   ProjectRepository dbRepo;
+  final CaptureProjectVideo captureProjectVideo;
 
   final photos = List<String?>.filled(3, null).obs;
 
@@ -47,8 +48,9 @@ class UploadProjectDetailsController extends GetxController
     this.repo,
     this.authService,
     this.dbRepo,
+    this.captureProjectVideo,
   );
-  Rx<ProjectDetails> data = ProjectDetails().obs;
+  Rx<UnitDetails> data = UnitDetails().obs;
   RxString videoPath = "".obs;
   String? audioPath = "";
   String? finalVideoPath = "";
@@ -60,6 +62,7 @@ class UploadProjectDetailsController extends GetxController
   RxInt statusProgressValue = 0.obs;
   RxString projectStatus = "".obs;
   RxBool isLocked = false.obs;
+  RxString projectOrUnitId = "".obs;
 
   @override
   void onInit() {
@@ -71,8 +74,9 @@ class UploadProjectDetailsController extends GetxController
   void _initializeProjectData() {
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
-      data.value = args['project'] ?? ProjectDetails();
+      data.value = args['project'] ?? UnitDetails();
       projectStatus.value = args['status'];
+      projectOrUnitId.value = args["id"];
     }
 
     saveToLocalDb();
@@ -223,7 +227,7 @@ class UploadProjectDetailsController extends GetxController
 
     await repository.save(
       userId: userId,
-      projectId: data.value.id ?? '',
+      projectId: projectOrUnitId.value,
       images: photos.whereType<String>().toList(),
       audioPath: audioPath,
       audioDuration: Get.find<AudioRecorderController>().durationMs.value,
@@ -260,7 +264,7 @@ class UploadProjectDetailsController extends GetxController
         source: 'direct online upload',
       );
       final modelData = await repo.uploadMilestoneFiles(
-        projectId: data.value.id ?? '',
+        projectId: projectOrUnitId.value,
         imagePaths: selectedImages,
         videoPath: finalVideoPath,
         audioPath: audioPath,
@@ -375,6 +379,9 @@ class UploadProjectDetailsController extends GetxController
         message: "Please select progress of your project",
       );
       return;
+    }
+    if (projectOrUnitId.value.isEmpty) {
+      projectOrUnitId.value = data.value.id ?? "";
     }
 
     // if (audioPath == "" || audioPath == null) {
@@ -537,7 +544,7 @@ class UploadProjectDetailsController extends GetxController
     try {
       await dbRepo.deleteUploadedLocalAttachmentPaths(
         userId: userId,
-        projectId: data.value.id ?? '',
+        projectId: projectOrUnitId.value,
         filePaths: uploadedPaths,
       );
     } catch (e) {
@@ -719,99 +726,26 @@ class UploadProjectDetailsController extends GetxController
       return;
     }
 
-    final picker = ImagePicker();
-    final XFile? video = await picker.pickVideo(
-      source: ImageSource.camera,
-      maxDuration: const Duration(minutes: 2),
-    );
+    var showedLoading = false;
 
-    if (video != null) {
-      showAlertCustom(backBtnDisable: true, title: "Loading...");
-      final compressedFile = await compressVideoIfNeeded(File(video.path));
+    try {
+      final compressedFile = await captureProjectVideo(
+        maxDuration: const Duration(minutes: 2),
+        onCompressionStarted: () {
+          showedLoading = true;
+          showAlertCustom(backBtnDisable: true, title: "Loading...");
+        },
+      );
+
+      if (compressedFile == null) return;
 
       videoPath.value = compressedFile.path;
       finalVideoPath = compressedFile.path;
-      Get.back();
-    }
-  }
-
-  Future<File> compressVideoIfNeeded(File file) async {
-    const int maxSize = 5 * 1024 * 1024;
-
-    final originalSize = await file.length();
-
-    debugPrint(
-      "Original video size: "
-      "${(originalSize / (1024 * 1024)).toStringAsFixed(2)} MB",
-    );
-
-    if (originalSize <= maxSize) {
-      return file;
-    }
-
-    final tempDir = await offlineMediaDir();
-
-    final compressionLevels = [
-      {'width': 960, 'bitrate': '700k', 'audioBitrate': '64k', 'fps': 24},
-      {'width': 720, 'bitrate': '500k', 'audioBitrate': '48k', 'fps': 24},
-      {'width': 640, 'bitrate': '350k', 'audioBitrate': '32k', 'fps': 22},
-      {'width': 480, 'bitrate': '250k', 'audioBitrate': '24k', 'fps': 20},
-    ];
-
-    File? compressedFile;
-
-    for (int i = 0; i < compressionLevels.length; i++) {
-      final level = compressionLevels[i];
-
-      final outputPath = p.join(
-        tempDir.path,
-        'compressed_${i}_${DateTime.now().millisecondsSinceEpoch}.mp4',
-      );
-
-      final command = '''
--y -i "${file.path}"
--vf scale='min(${level['width']},iw)':-2,fps=${level['fps']}
--c:v libx264
--preset veryfast
--b:v ${level['bitrate']}
--maxrate ${level['bitrate']}
--bufsize 1000k
--c:a aac
--b:a ${level['audioBitrate']}
--movflags +faststart
-"$outputPath"
-''';
-
-      debugPrint(
-        "Original Compressing video "
-        "Level ${i + 1} "
-        "Bitrate ${level['bitrate']}",
-      );
-
-      await FFmpegKit.execute(command);
-
-      final tempFile = File(outputPath);
-
-      if (!tempFile.existsSync()) {
-        continue;
-      }
-
-      final size = await tempFile.length();
-
-      debugPrint(
-        "Original Compressed size: "
-        "${(size / (1024 * 1024)).toStringAsFixed(2)} MB",
-      );
-
-      compressedFile = tempFile;
-
-      if (size <= maxSize) {
-        debugPrint("Original Compression successful below 5 MB");
-        return compressedFile;
+    } finally {
+      if (showedLoading && (Get.isDialogOpen ?? false)) {
+        Get.back();
       }
     }
-
-    return compressedFile ?? file;
   }
 
   void clearVideoSelection() {

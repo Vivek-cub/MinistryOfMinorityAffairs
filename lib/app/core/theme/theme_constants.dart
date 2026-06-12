@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 /// Based on Indian government branding and modern UI standards
 sealed class AppColors {
   // Primary Colors - Saffron and Blue from Indian National Flag
-  static const Color primary = Color(0xFFFF9933); // Saffron
+  static const Color primary = Color.fromARGB(255, 246, 125, 4); // Saffron
   static const Color primaryDark = Color(0xFFE67E00);
   static const Color primaryLight = Color(0xFFFFB366);
 
@@ -15,7 +15,7 @@ sealed class AppColors {
   static const Color accent = Color(0xFF000080); // Navy Blue (Ashoka Chakra)
 
   // Neutral Colors
-  static const Color background = Color(0xFFF5F5F5);
+  static const Color background = Color.fromARGB(255, 242, 236, 219);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color cardBackground = Color(0xFFFAFAFA);
 
@@ -90,5 +90,21 @@ sealed class AppRedGradientColor {
     colors: [Color(0xFF780606), Color(0xFFFF6666)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
+  );
+}
+
+sealed class OldAppGradientColor {
+  static Gradient get gradient => LinearGradient(
+    colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+}
+
+sealed class OldAppButtonGradientColor {
+  static Gradient get gradient => LinearGradient(
+    colors: [AppColors.primaryLight, AppColors.primary, AppColors.primaryDark],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
   );
 }

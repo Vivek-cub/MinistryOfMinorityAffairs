@@ -6,7 +6,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectD
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/local_projects.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_db_helper.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/milestone_attachment_mapper.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 
 part 'project_dao.g.dart';
 
@@ -16,7 +16,7 @@ part 'project_dao.g.dart';
 class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
   ProjectDao(AppDatabase db) : super(db);
 
-  Future<void> saveProject(ProjectDetails project, String userId) async {
+  Future<void> saveProject(UnitDetails project, String userId) async {
     await transaction(() async {
       await into(localProjects).insert(
         LocalProjectsCompanion(
@@ -65,76 +65,76 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         );
       }
 
-      for (final m in project.milestones ?? []) {
-        await into(localMilestones).insert(
-          LocalMilestonesCompanion(
-            userId: Value(userId),
-            projectId: Value(project.id ?? ""),
-            name: Value(m.milestoneName ?? ""),
-            description: Value(m.milestoneDescription ?? ""),
-            status: Value(m.status ?? ""),
-            progress: Value(m.progress ?? 0),
-          ),
-          onConflict: DoUpdate(
-            (old) => LocalMilestonesCompanion(
-              name: Value(m.milestoneName ?? ""),
-              description: Value(m.milestoneDescription ?? ""),
-              status: Value(m.status ?? ""),
-              progress: Value(m.progress ?? 0),
-            ),
-            target: [localMilestones.userId, localMilestones.projectId],
-          ),
-        );
+      // for (final m in project.milestones ?? []) {
+      //   await into(localMilestones).insert(
+      //     LocalMilestonesCompanion(
+      //       userId: Value(userId),
+      //       projectId: Value(project.id ?? ""),
+      //       name: Value(m.milestoneName ?? ""),
+      //       description: Value(m.milestoneDescription ?? ""),
+      //       status: Value(m.status ?? ""),
+      //       progress: Value(m.progress ?? 0),
+      //     ),
+      //     onConflict: DoUpdate(
+      //       (old) => LocalMilestonesCompanion(
+      //         name: Value(m.milestoneName ?? ""),
+      //         description: Value(m.milestoneDescription ?? ""),
+      //         status: Value(m.status ?? ""),
+      //         progress: Value(m.progress ?? 0),
+      //       ),
+      //       target: [localMilestones.userId, localMilestones.projectId],
+      //     ),
+      //   );
 
-        for (final img in MilestoneAttachmentMapper.imagePaths(m)) {
-          await into(localMilestoneAttachments).insert(
-            LocalMilestoneAttachmentsCompanion(
-              userId: Value(userId),
-              projectId: Value(project.id ?? ""),
-              type: const Value('image'),
-              filePath: Value(img),
-            ),
-            onConflict: DoNothing(
-              target: [
-                localMilestoneAttachments.userId,
-                localMilestoneAttachments.projectId,
-                localMilestoneAttachments.type,
-                localMilestoneAttachments.filePath,
-              ],
-            ),
-          );
-        }
-        for (final audio in MilestoneAttachmentMapper.audioPaths(m)) {
-          await into(localMilestoneAttachments).insert(
-            LocalMilestoneAttachmentsCompanion(
-              userId: Value(userId),
-              projectId: Value(project.id ?? ""),
-              type: const Value('audio'),
-              filePath: Value(audio),
-            ),
-            onConflict: DoNothing(
-              target: [
-                localMilestoneAttachments.userId,
-                localMilestoneAttachments.projectId,
-                localMilestoneAttachments.type,
-                localMilestoneAttachments.filePath,
-              ],
-            ),
-          );
-        }
+      //   for (final img in MilestoneAttachmentMapper.imagePaths(m)) {
+      //     await into(localMilestoneAttachments).insert(
+      //       LocalMilestoneAttachmentsCompanion(
+      //         userId: Value(userId),
+      //         projectId: Value(project.id ?? ""),
+      //         type: const Value('image'),
+      //         filePath: Value(img),
+      //       ),
+      //       onConflict: DoNothing(
+      //         target: [
+      //           localMilestoneAttachments.userId,
+      //           localMilestoneAttachments.projectId,
+      //           localMilestoneAttachments.type,
+      //           localMilestoneAttachments.filePath,
+      //         ],
+      //       ),
+      //     );
+      //   }
+      //   for (final audio in MilestoneAttachmentMapper.audioPaths(m)) {
+      //     await into(localMilestoneAttachments).insert(
+      //       LocalMilestoneAttachmentsCompanion(
+      //         userId: Value(userId),
+      //         projectId: Value(project.id ?? ""),
+      //         type: const Value('audio'),
+      //         filePath: Value(audio),
+      //       ),
+      //       onConflict: DoNothing(
+      //         target: [
+      //           localMilestoneAttachments.userId,
+      //           localMilestoneAttachments.projectId,
+      //           localMilestoneAttachments.type,
+      //           localMilestoneAttachments.filePath,
+      //         ],
+      //       ),
+      //     );
+      //   }
 
-        // if (m.audioAtt?.isNotEmpty == true) {
-        //   await into(localMilestoneAttachments).insert(
-        //     LocalMilestoneAttachmentsCompanion(
-        //       userId: Value(userId),
-        //       projectId: Value(project.id ?? ""),
-        //       milestoneId: Value(m.id ?? ""),
-        //       type: const Value('audio'),
-        //       filePath: Value(m.audioAtt!),
-        //     ),
-        //   );
-        // }
-      }
+      // if (m.audioAtt?.isNotEmpty == true) {
+      //   await into(localMilestoneAttachments).insert(
+      //     LocalMilestoneAttachmentsCompanion(
+      //       userId: Value(userId),
+      //       projectId: Value(project.id ?? ""),
+      //       milestoneId: Value(m.id ?? ""),
+      //       type: const Value('audio'),
+      //       filePath: Value(m.audioAtt!),
+      //     ),
+      //   );
+      // }
+      //}
     });
   }
 

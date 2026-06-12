@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/header_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
@@ -48,6 +49,7 @@ class HomeView extends GetView<HomeController> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
+
                           children: [
                             //_buildHeader(context),
                             WorkProgressHeader(
@@ -62,9 +64,109 @@ class HomeView extends GetView<HomeController> {
                               onIconPressed: () {
                                 controller.checkInternet();
                               },
+                              widget: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppDimensions.xxs,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 12),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      child: HeaderText(
+                                        text: 'Quick Overview',
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                    Obx(() {
+                                      return InkWell(
+                                        onTap: () {
+                                          Get.toNamed(
+                                            AppRoutes.projectList,
+                                            arguments: {
+                                              'status': "All",
+                                              'paramName': "status",
+                                              'statusFilter': "all",
+                                            },
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 16,
+                                          ),
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            color: AppColors.textWhite,
+                                            // color: Colors.cyan.withValues(alpha: 0.15),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                //height: 24,
+                                                height: 60,
+                                                width: 60,
+                                                padding: EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.lightGrey,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: SvgPicture.asset(
+                                                  SvgAssets.assignedSvg ?? "",
+                                                  colorFilter: ColorFilter.mode(
+                                                    AppColors.governmentBlue,
+                                                    BlendMode.srcIn,
+                                                  ),
+                                                  height: 30,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  CustomText(
+                                                    text:
+                                                        "Total Assigned Projects",
+                                                    textAlign: TextAlign.center,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                    maxLines: 3,
+                                                  ),
+
+                                                  HeaderText(
+                                                    text:
+                                                        "(${controller.data.value.totalAssignedProposals ?? 0}) ",
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
+
                               // onBackPress: () => controller.openDrawer(),
-                              widget: _buildQuickOverview(context),
                             ),
+                            _buildQuickOverview(context),
                             (controller
                                             .data
                                             .value
@@ -156,94 +258,132 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildQuickOverview(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 12),
-          TitleText(
-            text: 'Quick Overview',
-            fontWeight: FontWeight.bold,
-            color: AppColors.textWhite,
-          ),
+          // SizedBox(height: 12),
+          // HeaderText(
+          //   text: 'Quick Overview',
+          //   fontWeight: FontWeight.bold,
+          //   color: AppColors.textPrimary,
+          // ),
 
-          const SizedBox(height: 16),
+          // const SizedBox(height: 16),
           Obx(() {
             final data = controller.data.value;
 
             return IntrinsicHeight(
               child: Column(
                 children: [
-                  /*
-                  (data.totalAssignedProposals ?? 0) > 0
-                      ? Expanded(
-                        child: InkWell(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Not Started',
+                          value: controller.data.value.notStarted ?? 0,
+                          icon: SvgAssets.notStartedSvg,
+                          iconColor: AppColors.secondary,
+
                           onTap: () {
                             Get.toNamed(
                               AppRoutes.projectList,
                               arguments: {
-                                'status': "Proposal",
+                                'status': "NotStarted",
                                 'paramName': "status",
-                                'statusFilter': "all",
+                                'statusFilter': "not_started",
                               },
                             );
                           },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            margin: EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              // color: Colors.cyan.withValues(alpha: 0.15),
-                            ),
-                            child: BlinkingBorder(
-                              blinkStyle: BlinkStyle.pulsing,
-                              strokeStyle: StrokeStyle.solid,
-                              borderRadius: BorderRadius.circular(16),
-                              color: AppColors.error,
-                              child: Column(
-                                // crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    //height: 24,
-                                    decoration: BoxDecoration(
-                                      // color: backgroundColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: SvgPicture.asset(
-                                      SvgAssets.assignedSvg ?? "",
-                                      color: AppColors.textWhite,
-                                      height: 40,
-                                    ),
-                                  ),
-                                  //const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CustomText(
-                                        text: "Assigned Proposals",
-                                        textAlign: TextAlign.center,
-                                        color: AppColors.textWhite,
-                                        maxLines: 3,
-                                      ),
-                                      CustomText(
-                                        text:
-                                            "(${data.totalAssignedProposals ?? 0}) ",
-                                        color: AppColors.textWhite,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
                         ),
-                      )
-                      : SizedBox.shrink(),
+                      ),
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Work in Progress',
+                          value: controller.data.value.inProgress ?? 0,
+                          icon: SvgAssets.notStartedSvg,
+                          iconColor: AppColors.governmentGold,
 
-*/
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "Assigned",
+                                'paramName': "status",
+                                'statusFilter': "in_progress",
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Completed',
+                          value: controller.data.value.totalCompleted ?? 0,
+                          icon: SvgAssets.completedSvg,
+                          iconColor: AppColors.secondary,
+
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "Completed",
+                                'paramName': "status",
+                                'statusFilter': "completed",
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Geotagged',
+                          value: controller.data.value.geoTagged ?? 0,
+                          icon: SvgAssets.geotaggedSvg,
+                          iconColor: AppColors.governmentBlue,
+
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "",
+                                'paramName': "geoTagged",
+                                'statusFilter': "",
+                                'geoStatus': true,
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Non-Geotagged',
+                          value: controller.data.value.nonGeoTagged ?? 0,
+                          icon: SvgAssets.nonGeotaggedSvg,
+                          iconColor: AppColors.warning,
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "",
+                                'paramName': "geoTagged",
+                                'statusFilter': "",
+                                'geoStatus': false,
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  /*
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -373,6 +513,8 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ],
                   ),
+
+                  */
                 ],
               ),
             );

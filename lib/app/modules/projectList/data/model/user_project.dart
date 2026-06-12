@@ -1,22 +1,24 @@
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 
 class UserProject {
   final String? id;
   final String? userId;
   final String? projectId;
   final String? status;
+  final String? titleOrProjectName;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final ProjectDetails? project;
+  final UnitDetails? unitDetails;
 
   UserProject({
     this.id,
     this.userId,
     this.projectId,
     this.status,
+    this.titleOrProjectName,
     this.createdAt,
     this.updatedAt,
-    this.project,
+    this.unitDetails,
   });
 
   factory UserProject.fromJson(Map<String, dynamic> json) {
@@ -27,13 +29,15 @@ class UserProject {
       userId: _stringValue(json['userId']),
       projectId: _stringValue(json['projectId']),
       status: _stringValue(json['status']),
+      titleOrProjectName: _stringValue(json['titleOrProjectName']),
       createdAt: _parseDate(json['createdAt']),
       updatedAt: _parseDate(json['updatedAt']),
-      project:
+      unitDetails:
           projectJson is Map<String, dynamic>
-              ? ProjectDetails.fromJson({
+              ? UnitDetails.fromJson({
                 ...projectJson,
                 'status': projectJson['status'] ?? json['status'],
+                'titleOrProjectName': json['titleOrProjectName'],
               })
               : null,
     );

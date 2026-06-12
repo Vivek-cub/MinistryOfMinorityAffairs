@@ -3,21 +3,30 @@ import 'package:flutter_svg/svg.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/milestone_card.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
 class BuildProjectCard extends StatelessWidget {
-  final ProjectDetails project;
+  final UnitDetails project;
   final VoidCallback? onPressed;
   bool? isUrgent = false;
-  BuildProjectCard(this.project, this.onPressed, this.isUrgent);
+  bool? isShowingCalendar = false;
+  BuildProjectCard({
+    required this.project,
+    required this.onPressed,
+    required this.isUrgent,
+    required this.isShowingCalendar,
+  });
   @override
   Widget build(BuildContext context) {
     return buildProjectCard(project, onPressed);
   }
 
-  Widget buildProjectCard(ProjectDetails project, VoidCallback? onPressed) {
+  Widget buildProjectCard(UnitDetails project, VoidCallback? onPressed) {
+    debugPrint("isShowingCalendar  ${isShowingCalendar.toString()}");
     Color statusColor;
     Color statusBgColor;
 
@@ -77,6 +86,7 @@ class BuildProjectCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           TitleText(
             text: project.projectName ?? "",
@@ -84,6 +94,8 @@ class BuildProjectCard extends StatelessWidget {
             maxLines: 2,
             color: isUrgent == false ? AppColors.textPrimary : AppColors.error,
           ),
+
+          const SizedBox(height: AppDimensions.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,23 +107,25 @@ class BuildProjectCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: CustomText(
-                  text: project.status ?? "",
-                  color: statusColor,
-                ),
-              ),
+              project.status != null
+                  ? Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusBgColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: CustomText(
+                      text: project.status ?? "",
+                      color: statusColor,
+                    ),
+                  )
+                  : SizedBox.shrink(),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppDimensions.md),
           Row(
             children: [
               Expanded(
@@ -125,7 +139,7 @@ class BuildProjectCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: CustomText(
-                        text: project.address ?? "",
+                        text: project.address ?? "No Address Found",
                         maxLines: 2,
                       ),
                     ),
@@ -133,7 +147,7 @@ class BuildProjectCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 16),
+              const SizedBox(width: AppDimensions.md),
 
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -154,24 +168,35 @@ class BuildProjectCard extends StatelessWidget {
               ),
             ],
           ),
-          if (project.districtId != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.business, size: 16, color: AppColors.textPrimary),
-                const SizedBox(width: 4),
-                CustomText(text: project.districtId ?? ""),
-              ],
-            ),
-          ],
-          const SizedBox(height: 16),
-          AuthSubmitButton(
-            title: "Update Progress",
-            isEnabled: true,
-            height: 44,
-            onPressed: onPressed,
-            isUrgent: isUrgent ?? false,
+          isShowingCalendar == true
+              ? const SizedBox(height: AppDimensions.md)
+              : SizedBox.shrink(),
+          isShowingCalendar == true
+              ? Row(
+                children: [Expanded(child: MilestoneProgress(progress: 40))],
+              )
+              : SizedBox.shrink(),
+
+          const SizedBox(height: AppDimensions.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GradientButton(
+                text:
+                    isShowingCalendar == false
+                        ? "Update Current Status"
+                        : "View Images",
+                onPressed: onPressed,
+              ),
+            ],
           ),
+          // AuthSubmitButton(
+          //   title: "Update Current Status",
+          //   isEnabled: true,
+          //   height: 44,
+          //   onPressed: onPressed,
+          //   isUrgent: isUrgent ?? false,
+          // ),
         ],
       ),
     );

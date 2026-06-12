@@ -16,7 +16,7 @@ import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_r
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
@@ -61,6 +61,7 @@ class HomeController extends GetxController with SnackBarMixin {
   Rx<HomeData> data = HomeData().obs;
   RxBool hasInternet = true.obs;
   final RxList<UserProject> projects = <UserProject>[].obs;
+  final RxList<UserProject> pendingProjects = <UserProject>[].obs;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   RxString profileImage = "".obs;
   final isSyncing = false.obs;
@@ -115,13 +116,17 @@ class HomeController extends GetxController with SnackBarMixin {
 
   Future<void> checkInternet() async {
     if (isSyncing.value) return;
+    isSyncing.value = true;
     hasInternet.value = await NetworkService.hasInternet();
-    if (!hasInternet.value) return;
+    if (!hasInternet.value) {
+      isSyncing.value = false;
+      return;
+    }
+    ;
     try {
-      isSyncing.value = true;
       await getDashboardCount();
       await loadProjects();
-      if ((data.value.projectsNotVisitedFor3Months ?? 0) < 0) {
+      if ((data.value.projectsNotVisitedFor3Months ?? 0) > 0) {
         await loadPendingProjectList();
       }
       await syncPendingSubmissions();
@@ -130,7 +135,7 @@ class HomeController extends GetxController with SnackBarMixin {
     }
   }
 
-  void onUpdateProgressTap(ProjectDetails project, String status) {
+  void onUpdateProgressTap(UnitDetails project, String status, String id) {
     // Navigate to project detail/update page
     // Get.toNamed(
     //   AppRoutes.workDetail,
@@ -139,7 +144,7 @@ class HomeController extends GetxController with SnackBarMixin {
 
     Get.toNamed(
       AppRoutes.uploadProjectDetails,
-      arguments: {"project": project, "status": status},
+      arguments: {"project": project, "status": status, "id": id},
     );
   }
 
@@ -148,8 +153,8 @@ class HomeController extends GetxController with SnackBarMixin {
     Get.toNamed(
       AppRoutes.projectList,
       arguments: {
-        'status': "All",
-        'paramName': "status",
+        'status': "pending",
+        'paramName': "pending",
         'statusFilter': "all",
       },
     );
@@ -457,7 +462,7 @@ class HomeController extends GetxController with SnackBarMixin {
       final modelData = await projectListRepo.getPendingProjectList();
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
-          projects.value = modelData!.data?.projects ?? [];
+          pendingProjects.value = modelData!.data?.projects ?? [];
         }
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");

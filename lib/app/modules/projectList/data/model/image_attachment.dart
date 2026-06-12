@@ -1,13 +1,19 @@
 class ImageAttachment {
-  final String? date;
-  final List<String>? images;
+  final DateTime? date;
+  final String? images;
 
   ImageAttachment({this.date, this.images});
 
   factory ImageAttachment.fromJson(Map<String, dynamic> json) {
     return ImageAttachment(
-      date: json['date'],
-      images: (json['images'] as List?)?.map((e) => e.toString()).toList(),
+      date: _parseDate(json['createdAt']),
+      images: json['path'],
+      // images: (json['path'] as List?)?.map((e) => e.toString()).toList(),
     );
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
   }
 }

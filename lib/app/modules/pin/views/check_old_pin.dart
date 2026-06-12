@@ -19,7 +19,9 @@ class CheckOldPin extends GetView<CheckOldPinController> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(gradient: AppGradientColor.gradient),
+          decoration: BoxDecoration(
+            gradient: OldAppButtonGradientColor.gradient,
+          ),
           height: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: SingleChildScrollView(
@@ -85,7 +87,7 @@ class CheckOldPin extends GetView<CheckOldPinController> {
                 Obx(() {
                   final isEnabled = controller.isButtonEnabled.value;
                   return AuthSubmitButton(
-                    title: "Submit",
+                    title: "Next",
                     isEnabled: true,
                     isAuthButton: true,
 

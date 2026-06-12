@@ -1,19 +1,17 @@
 import 'dart:io';
 
-import 'package:ffmpeg_kit_flutter_minimal/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/usecases/capture_project_video.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/geofence_service.dart';
@@ -22,7 +20,6 @@ import 'package:ministry_of_minority_affairs/app/services/location_service.dart'
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 /// Work Detail controller
 /// Manages state and business logic for Work Detail screen
@@ -32,6 +29,7 @@ class WorkDetailController extends GetxController
   final ProjectDetailRepo repo;
   final AuthService authService;
   ProjectRepository dbRepo;
+  final CaptureProjectVideo captureProjectVideo;
 
   // Remarks controller
   final remarksController = TextEditingController();
@@ -44,8 +42,9 @@ class WorkDetailController extends GetxController
     this.repo,
     this.authService,
     this.dbRepo,
+    this.captureProjectVideo,
   );
-  Rx<ProjectDetails> data = ProjectDetails().obs;
+  Rx<UnitDetails> data = UnitDetails().obs;
   RxString videoPath = "".obs;
   String? audioPath = "";
   String? finalVideoPath = "";
@@ -63,17 +62,17 @@ class WorkDetailController extends GetxController
   void _initializeProjectData() {
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
-      data.value = args['project'] ?? ProjectDetails();
+      data.value = args['project'] ?? UnitDetails();
       projectStatus.value = args['status'];
     }
 
-    if (data.value.milestones != null && data.value.milestones!.isNotEmpty) {
-      milestones(data.value.milestones);
-      if (selectedMilestoneId.value.isEmpty) {
-        selectedMilestoneId.value =
-            _defaultMilestoneId(data.value.milestones) ?? "";
-      }
-    }
+    // if (data.value.milestones != null && data.value.milestones!.isNotEmpty) {
+    //   milestones(data.value.milestones);
+    //   if (selectedMilestoneId.value.isEmpty) {
+    //     selectedMilestoneId.value =
+    //         _defaultMilestoneId(data.value.milestones) ?? "";
+    //   }
+    // }
     saveToLocalDb();
   }
 
@@ -94,19 +93,25 @@ class WorkDetailController extends GetxController
       return;
     }
 
-    final picker = ImagePicker();
-    final XFile? video = await picker.pickVideo(
-      source: ImageSource.camera,
-      maxDuration: const Duration(minutes: 2),
-    );
+    var showedLoading = false;
 
-    if (video != null) {
-      showAlertCustom(backBtnDisable: true, title: "Loading...");
-      final compressedFile = await compressVideoIfNeeded(File(video.path));
+    try {
+      final compressedFile = await captureProjectVideo(
+        maxDuration: const Duration(minutes: 2),
+        onCompressionStarted: () {
+          showedLoading = true;
+          showAlertCustom(backBtnDisable: true, title: "Loading...");
+        },
+      );
+
+      if (compressedFile == null) return;
 
       videoPath.value = compressedFile.path;
       finalVideoPath = compressedFile.path;
-      Get.back();
+    } finally {
+      if (showedLoading && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
     }
   }
 
@@ -202,7 +207,8 @@ class WorkDetailController extends GetxController
     if (selectedMilestoneId.value.isNotEmpty) {
       return selectedMilestoneId.value;
     }
-    return _defaultMilestoneId(data.value.milestones) ?? "";
+    return "";
+    // return _defaultMilestoneId(data.value.milestones) ?? "";
   }
 
   String? _defaultMilestoneId(List<ProjectMilestone>? milestoneList) {
@@ -338,85 +344,6 @@ class WorkDetailController extends GetxController
         },
       );
     }
-  }
-
-  Future<File> compressVideoIfNeeded(File file) async {
-    const int maxSize = 5 * 1024 * 1024;
-
-    final originalSize = await file.length();
-
-    debugPrint(
-      "Original video size: "
-      "${(originalSize / (1024 * 1024)).toStringAsFixed(2)} MB",
-    );
-
-    if (originalSize <= maxSize) {
-      return file;
-    }
-
-    final tempDir = await offlineMediaDir();
-
-    final compressionLevels = [
-      {'width': 960, 'bitrate': '700k', 'audioBitrate': '64k', 'fps': 24},
-      {'width': 720, 'bitrate': '500k', 'audioBitrate': '48k', 'fps': 24},
-      {'width': 640, 'bitrate': '350k', 'audioBitrate': '32k', 'fps': 22},
-      {'width': 480, 'bitrate': '250k', 'audioBitrate': '24k', 'fps': 20},
-    ];
-
-    File? compressedFile;
-
-    for (int i = 0; i < compressionLevels.length; i++) {
-      final level = compressionLevels[i];
-
-      final outputPath = p.join(
-        tempDir.path,
-        'compressed_${i}_${DateTime.now().millisecondsSinceEpoch}.mp4',
-      );
-
-      final command = '''
--y -i "${file.path}"
--vf scale='min(${level['width']},iw)':-2,fps=${level['fps']}
--c:v libx264
--preset veryfast
--b:v ${level['bitrate']}
--maxrate ${level['bitrate']}
--bufsize 1000k
--c:a aac
--b:a ${level['audioBitrate']}
--movflags +faststart
-"$outputPath"
-''';
-
-      debugPrint(
-        "Original Compressing video "
-        "Level ${i + 1} "
-        "Bitrate ${level['bitrate']}",
-      );
-
-      await FFmpegKit.execute(command);
-
-      final tempFile = File(outputPath);
-
-      if (!tempFile.existsSync()) {
-        continue;
-      }
-
-      final size = await tempFile.length();
-
-      debugPrint(
-        "Original Compressed size: "
-        "${(size / (1024 * 1024)).toStringAsFixed(2)} MB",
-      );
-
-      compressedFile = tempFile;
-
-      if (size <= maxSize) {
-        debugPrint("Original Compression successful below 5 MB");
-        return compressedFile;
-      }
-    }
-
-    return compressedFile ?? file;
   }
 
   //   Future<File> compressVideoIfNeeded(File file) async {

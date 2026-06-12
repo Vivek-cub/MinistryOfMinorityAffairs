@@ -5,7 +5,7 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/build_project_card
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 
 class BuildWorkList extends StatelessWidget {
   HomeController controller;
@@ -62,14 +62,16 @@ class BuildWorkList extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: BuildProjectCard(
-                        project.project ?? ProjectDetails(),
-                        () {
+                        project: project.unitDetails ?? UnitDetails(),
+                        onPressed: () {
                           controller.onUpdateProgressTap(
-                            project.project ?? ProjectDetails(),
+                            project.unitDetails ?? UnitDetails(),
                             project.status ?? "",
+                            "",
                           );
                         },
-                        false,
+                        isUrgent: false,
+                        isShowingCalendar: false,
                       ),
                       //child: _buildProjectCard(project.project??ProjectDetails()),
                     );

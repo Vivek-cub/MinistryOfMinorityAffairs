@@ -9,7 +9,7 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/project_list_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_name.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/widget/app_dropdown.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
@@ -219,20 +219,30 @@ class ProjectListView extends GetView<ProjectListController> {
                                           final project =
                                               controller.projects[index];
                                           return BuildProjectCard(
-                                            project.project ?? ProjectDetails(),
-                                            () {
+                                            project:
+                                                project.unitDetails ??
+                                                UnitDetails(),
+                                            onPressed: () {
                                               controller.onUpdateProgress(
-                                                controller
-                                                        .projects[index]
-                                                        .project ??
-                                                    ProjectDetails(),
-                                                controller
-                                                        .projects[index]
-                                                        .status ??
-                                                    "",
+                                                project:
+                                                    project.unitDetails ??
+                                                    UnitDetails(),
+                                                projectStatus:
+                                                    project.status ?? "",
+                                                id:
+                                                    controller
+                                                                .paramName
+                                                                .value ==
+                                                            "pending"
+                                                        ? project.id ?? ""
+                                                        : "",
                                               );
                                             },
-                                            false,
+                                            isUrgent: false,
+                                            isShowingCalendar:
+                                                controller
+                                                    .isShowingCalendar
+                                                    .value,
                                           );
                                         },
                                         separatorBuilder: (context, index) {

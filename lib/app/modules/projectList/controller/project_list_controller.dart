@@ -5,7 +5,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart'
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_name.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
@@ -41,6 +41,7 @@ class ProjectListController extends GetxController
   RxString paramName = "".obs;
 
   final RxList<UserProject> projects = <UserProject>[].obs;
+  final RxList<UserProject> pendingProjects = <UserProject>[].obs;
   final RxList<UserProject> allProjects = <UserProject>[].obs;
   final RxList<Category> category = <Category>[].obs;
   final RxList<FinancialYearName> yearName = <FinancialYearName>[].obs;
@@ -51,9 +52,7 @@ class ProjectListController extends GetxController
   @override
   void onInit() {
     super.onInit();
-
     final args = Get.arguments;
-
     if (args is Map<String, dynamic>) {
       status.value = args['status']?.toString() ?? '';
       paramName.value = args['paramName']?.toString() ?? '';
@@ -61,7 +60,6 @@ class ProjectListController extends GetxController
       isShowingCalendar.value = args['showCalendar'] ?? false;
       statusFilter.value = args['statusFilter']?.toString() ?? '';
     }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!isClosed) {
         debugPrint(paramName.value);
@@ -77,6 +75,8 @@ class ProjectListController extends GetxController
       loadProjectsbyGeoTagged();
     } else if (paramName.value == "noInternet") {
       loadOfflineProjects();
+    } else if (paramName.value == "pending") {
+      loadPendingProjects();
     } else {
       loadProjects();
     }
@@ -173,7 +173,7 @@ class ProjectListController extends GetxController
                   projectId: p.id,
                   status: p.status,
                   createdAt: p.createdAt,
-                  project: p,
+                  unitDetails: p,
                 );
                 return map;
               })
@@ -200,8 +200,8 @@ class ProjectListController extends GetxController
 
     final filtered =
         allProjects.where((project) {
-          final name = project.project?.projectName?.toLowerCase() ?? '';
-          final address = project.project?.address?.toLowerCase() ?? '';
+          final name = project.unitDetails?.projectName?.toLowerCase() ?? '';
+          final address = project.unitDetails?.address?.toLowerCase() ?? '';
           final id = project.projectId?.toLowerCase() ?? '';
 
           return name.contains(query) ||
@@ -212,7 +212,11 @@ class ProjectListController extends GetxController
     projects.value = filtered;
   }
 
-  void onUpdateProgress(ProjectDetails project, String projectStatus) {
+  void onUpdateProgress({
+    required UnitDetails project,
+    required String projectStatus,
+    required String id,
+  }) {
     if (isShowingCalendar.value == true) {
       Get.toNamed(
         AppRoutes.calendarProject,
@@ -221,7 +225,7 @@ class ProjectListController extends GetxController
     } else {
       Get.toNamed(
         AppRoutes.uploadProjectDetails,
-        arguments: {"project": project, "status": projectStatus},
+        arguments: {"project": project, "status": projectStatus, "id": id},
       );
     }
     // if (status.value == "Proposal") {
@@ -286,6 +290,27 @@ class ProjectListController extends GetxController
       }
     } catch (e) {
       throw e;
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  void loadPendingProjects() async {
+    try {
+      isLoading(true);
+
+      final modelData = await repo.getPendingProjectList();
+      isLoading(false);
+      if (modelData?.statusCode == "200") {
+        if (modelData?.data != null && modelData?.data?.projects != null) {
+          projects.value = modelData!.data?.projects ?? [];
+          allProjects.value = List.from(modelData.data?.projects ?? []);
+        }
+      } else {
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      throw Exception(e);
     } finally {
       isLoading(false);
     }

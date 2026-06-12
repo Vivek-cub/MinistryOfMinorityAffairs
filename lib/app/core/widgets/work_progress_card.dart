@@ -45,7 +45,7 @@ class WorkProgressCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      project.project?.projectName??"",
+                      project.unitDetails?.projectName ?? "",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -55,14 +55,14 @@ class WorkProgressCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    StatusTag(status: project.project?.status??""),
+                    StatusTag(status: project.unitDetails?.status ?? ""),
                   ],
                 ),
               ),
-              if (project.project?.projectUniqueId !=null) ...[
+              if (project.unitDetails?.projectUniqueId != null) ...[
                 const SizedBox(width: 8),
                 Text(
-                  project.project?.projectUniqueId??"",
+                  project.unitDetails?.projectUniqueId ?? "",
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -76,15 +76,11 @@ class WorkProgressCard extends StatelessWidget {
           // Location and Updated info row
           Row(
             children: [
-              Icon(
-                Icons.location_on,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
+              Icon(Icons.location_on, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  project.project?.address??"",
+                  project.unitDetails?.address ?? "",
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -96,14 +92,12 @@ class WorkProgressCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                Icons.access_time,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
+              Icon(Icons.access_time, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 4),
               Text(
-                project.project?.createdAt !=null? project.project?.createdAt.toString()??"":"",
+                project.createdAt != null
+                    ? project.createdAt.toString() ?? ""
+                    : "",
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,

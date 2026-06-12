@@ -1,4 +1,3 @@
-
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/bindings_interface.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -7,9 +6,11 @@ import 'package:ministry_of_minority_affairs/app/data/local/dao/submission_dao.d
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/audio_recorder_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/upload_project_details_controller.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/work_detail_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_detail_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/services/ffmpeg_video_compressor.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/services/image_picker_video_capture_service.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/usecases/capture_project_video.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
@@ -54,13 +55,20 @@ class UploadProjectDetailsBinding extends Bindings {
     // );
     final projectDao = ProjectDao(db);
     final projectRepo = ProjectRepository(projectDao);
+    final captureProjectVideo = CaptureProjectVideo(
+      captureService: ImagePickerVideoCaptureService(),
+      compressor: FfmpegVideoCompressor(),
+    );
 
-    Get.put(UploadProjectDetailsController(
-      repo,
-      ProjectDetailRepoImpl(Get.find<ApiService>()),
+    Get.put(
+      UploadProjectDetailsController(
+        repo,
+        ProjectDetailRepoImpl(Get.find<ApiService>()),
         Get.find<AuthService>(),
-        projectRepo         
-      ));
+        projectRepo,
+        captureProjectVideo,
+      ),
+    );
 
       
 

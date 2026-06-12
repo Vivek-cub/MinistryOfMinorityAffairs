@@ -23,13 +23,7 @@ class BuildDrawer extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF0F4C81), Color(0xFF205B5F)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
+              decoration: BoxDecoration(gradient: OldAppGradientColor.gradient),
 
               child: Column(
                 children: [

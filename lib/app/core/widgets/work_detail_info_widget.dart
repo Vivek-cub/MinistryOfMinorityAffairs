@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import '../theme/theme_constants.dart';
 import 'status_tag.dart';
@@ -8,7 +8,7 @@ import 'status_tag.dart';
 /// Reusable widget for displaying work detail information
 /// Shows Work ID, Status, State, District, Block, Work Type, Approval Year
 class WorkDetailInfoWidget extends StatelessWidget {
-  final ProjectDetails project;
+  final UnitDetails project;
   final String status;
 
   const WorkDetailInfoWidget({

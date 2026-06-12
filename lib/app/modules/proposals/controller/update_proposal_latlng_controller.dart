@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/proposals/domain/repo/update_proposal_latlng_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
@@ -12,7 +12,7 @@ class UpdateProposalLatlngController extends GetxController
     with SnackBarMixin, PopupMixin {
   final UpdateProposalLatlngRepo repo;
   final AuthService authService;
-  Rx<ProjectDetails> data = ProjectDetails().obs;
+  Rx<UnitDetails> data = UnitDetails().obs;
 
   UpdateProposalLatlngController(this.repo, this.authService);
 
@@ -32,7 +32,7 @@ class UpdateProposalLatlngController extends GetxController
   void _initializeProject() {
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
-      data.value = args['project'] ?? ProjectDetails();
+      data.value = args['project'] ?? UnitDetails();
       projectStatus.value = args['status'];
     }
   }

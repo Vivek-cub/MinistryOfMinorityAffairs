@@ -1,24 +1,22 @@
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_db_helper.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/milestone_attachment_mapper.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 
 class ProjectRepository {
   final ProjectDao dao;
   ProjectRepository(this.dao);
 
-  Future<void> saveProject(ProjectDetails project, String userId) {
+  Future<void> saveProject(UnitDetails project, String userId) {
     return dao.saveProject(project, userId);
   }
 
-  Future<List<ProjectDetails>> getLocalProjects(String userId) async {
+  Future<List<UnitDetails>> getLocalProjects(String userId) async {
     final data = await dao.getAllProjectsFull(userId);
     return data.map(mapToProjectDetails).toList();
   }
 
-  ProjectDetails mapToProjectDetails(LocalProjectFull local) {
-    return ProjectDetails(
+  UnitDetails mapToProjectDetails(LocalProjectFull local) {
+    return UnitDetails(
       id: local.project.projectId,
       projectName: local.project.projectName,
       status: local.project.status,
@@ -29,17 +27,17 @@ class ProjectRepository {
       districtId: local.project.districtId,
       projectUniqueId: local.project.projectUniqueId,
       videoAtt: local.video,
-      milestones:
-          local.milestones.map((m) {
-            return ProjectMilestone(
-              milestoneName: m.milestone.name,
-              milestoneDescription: m.milestone.description,
-              status: m.milestone.status,
-              imageAtt: MilestoneAttachmentMapper.toImageAttachments(m.images),
-              audioAtt: MilestoneAttachmentMapper.toAudioAttachments(m.audio),
-              progress: m.milestone.progress,
-            );
-          }).toList(),
+      // milestones:
+      //     local.milestones.map((m) {
+      //       return ProjectMilestone(
+      //         milestoneName: m.milestone.name,
+      //         milestoneDescription: m.milestone.description,
+      //         status: m.milestone.status,
+      //         imageAtt: MilestoneAttachmentMapper.toImageAttachments(m.images),
+      //         audioAtt: MilestoneAttachmentMapper.toAudioAttachments(m.audio),
+      //         progress: m.milestone.progress,
+      //       );
+      //     }).toList(),
     );
   }
 

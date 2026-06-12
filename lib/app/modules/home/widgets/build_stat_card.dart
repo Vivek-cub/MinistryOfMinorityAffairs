@@ -18,7 +18,7 @@ class BuildStatCard extends StatelessWidget {
     this.value,
     this.icon,
     this.backgroundColor,
-    this.iconColor,
+    this.iconColor = AppColors.accent,
     this.onTap,
   });
 
@@ -35,29 +35,43 @@ class BuildStatCard extends StatelessWidget {
   }
 
   Widget cardContainer() {
-    return Container(padding: EdgeInsets.all(16), child: cardContent());
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: cardContent(),
+    );
   }
 
   Widget cardContent() {
-    return Column(
-      children: [
-        Container(
-          height: 24,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            shape: BoxShape.circle,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      height: 130,
+      decoration: BoxDecoration(
+        color: AppColors.textWhite,
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Column(
+        children: [
+          Container(
+            height: 40,
+            width: 40,
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: iconColor?.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: SvgPicture.asset(icon ?? "", color: iconColor),
           ),
-          child: SvgPicture.asset(icon ?? "", color: AppColors.textWhite),
-        ),
-        //const SizedBox(height: 12),
-        CustomText(
-          text: title ?? "",
-          textAlign: TextAlign.center,
-          color: AppColors.textWhite,
-          maxLines: 3,
-        ),
-        CustomText(text: "($value) ", color: AppColors.textWhite),
-      ],
+          //const SizedBox(height: 12),
+          CustomText(
+            text: title ?? "",
+            textAlign: TextAlign.center,
+            color: AppColors.textPrimary,
+            maxLines: 3,
+          ),
+          HeaderText(text: "($value) ", color: AppColors.textPrimary),
+        ],
+      ),
     );
   }
 }

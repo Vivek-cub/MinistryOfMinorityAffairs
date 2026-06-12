@@ -5,7 +5,7 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/build_project_card
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 
 class BuildUrgentWorkList extends StatelessWidget {
   HomeController controller;
@@ -18,7 +18,7 @@ class BuildUrgentWorkList extends StatelessWidget {
         horizontal: AppDimensions.xs,
         vertical: AppDimensions.sm,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xs),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.sm),
       decoration: BoxDecoration(
         color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(AppDimensions.xs),
@@ -38,49 +38,69 @@ class BuildUrgentWorkList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: AppDimensions.sm1),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TitleText(
                 text: 'Long Pending List',
                 fontWeight: FontWeight.bold,
-                color: AppColors.error,
+                color: AppColors.textPrimary,
+              ),
+              TextButton(
+                onPressed: controller.onViewAllTap,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const CustomText(
+                  text: "View More",
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
-          SizedBox(height: AppDimensions.xxs),
-          Obx(() {
-            return SizedBox(
-              height: 220,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true,
-                itemCount: controller.projects.length,
-                itemBuilder: (context, index) {
-                  final project = controller.projects[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.90,
-                      child: BuildProjectCard(
-                        project.project ?? ProjectDetails(),
-                        () {
-                          controller.onUpdateProgressTap(
-                            project.project ?? ProjectDetails(),
-                            project.status ?? "",
+          Obx(() {
+            final projects = controller.pendingProjects.take(3).toList();
+            return projects.isNotEmpty
+                ? SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children:
+                        projects.map((project) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              right: 12,
+                              bottom: 12,
+                              top: 12,
+                            ),
+                            child: SizedBox(
+                              width:
+                                  controller.pendingProjects.length > 1
+                                      ? MediaQuery.of(context).size.width * 0.80
+                                      : MediaQuery.of(context).size.width *
+                                          0.89,
+                              child: BuildProjectCard(
+                                project: project.unitDetails ?? UnitDetails(),
+                                onPressed: () {
+                                  controller.onUpdateProgressTap(
+                                    project.unitDetails ?? UnitDetails(),
+                                    project.status ?? "",
+                                    project.id ?? "",
+                                  );
+                                },
+                                isUrgent: true,
+                                isShowingCalendar: false,
+                              ),
+                            ),
                           );
-                        },
-                        true,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
+                        }).toList(),
+                  ),
+                )
+                : SizedBox(height: AppDimensions.sm);
           }),
-          SizedBox(height: 12),
         ],
       ),
     );
