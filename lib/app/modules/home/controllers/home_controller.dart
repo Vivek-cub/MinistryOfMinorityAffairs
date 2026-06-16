@@ -3,31 +3,29 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
-import 'package:ministry_of_minority_affairs/app/data/models/project_model.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/capture_image_mixin.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/compress_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
-/// Home screen controller
-/// Manages home screen state and business logic
-class HomeController extends GetxController with SnackBarMixin {
+class HomeController extends GetxController
+    with SnackBarMixin, CompressMixin, CaptureImageMixin {
   final HomeRepo repo;
   final ProjectListRepo projectListRepo;
   final AuthService authService;
@@ -41,23 +39,8 @@ class HomeController extends GetxController with SnackBarMixin {
     this.projectRepo,
     this.projectListRepo,
   );
-  // User info
   final userName = ''.obs;
-
-  // Dashboard statistics
-  final dashboardStats = Rx<DashboardStats>(
-    DashboardStats(
-      totalAssigned: 1367,
-      inProgress: 507,
-      notStarted: 623,
-      completed: 237,
-      geotagged: 600,
-      nonGeotagged: 767,
-    ),
-  );
-
-  // Work list
-
+  final assignedState = ''.obs;
   Rx<HomeData> data = HomeData().obs;
   RxBool hasInternet = true.obs;
   final RxList<UserProject> projects = <UserProject>[].obs;
@@ -90,16 +73,13 @@ class HomeController extends GetxController with SnackBarMixin {
       final hasNetwork = results.any(
         (result) => result != ConnectivityResult.none,
       );
-
       if (!hasNetwork) {
         hasInternet.value = false;
         return;
       }
-
       final wasOffline = hasInternet.value == false;
       final online = await NetworkService.hasInternet();
       hasInternet.value = online;
-
       if (wasOffline && online) {
         await checkInternet();
       }
@@ -122,7 +102,6 @@ class HomeController extends GetxController with SnackBarMixin {
       isSyncing.value = false;
       return;
     }
-    ;
     try {
       await getDashboardCount();
       await loadProjects();
@@ -135,16 +114,21 @@ class HomeController extends GetxController with SnackBarMixin {
     }
   }
 
-  void onUpdateProgressTap(UnitDetails project, String status, String id) {
-    // Navigate to project detail/update page
-    // Get.toNamed(
-    //   AppRoutes.workDetail,
-    //   arguments: {"project": project, "status": status},
-    // );
-
+  void onUpdateProgressTap(
+    UnitDetails project,
+    String status,
+    String id,
+    UserProject userProject,
+    bool fromUrgentList,
+  ) {
     Get.toNamed(
       AppRoutes.uploadProjectDetails,
-      arguments: {"project": project, "status": status, "id": id},
+      arguments: {
+        "project": project,
+        "status": status,
+        "id": id,
+        "userProject": fromUrgentList == true ? userProject : null,
+      },
     );
   }
 
@@ -160,58 +144,6 @@ class HomeController extends GetxController with SnackBarMixin {
     );
   }
 
-  void onChangePinTap() {
-    Get.toNamed(AppRoutes.oldPinCheck);
-  }
-
-  void onDashboardTap() {
-    Get.toNamed(AppRoutes.home);
-  }
-
-  void onCalendarTap() {
-    Get.toNamed(
-      AppRoutes.projectList,
-      arguments: {
-        'status': "All",
-        'paramName': "status",
-        'statusFilter': "All",
-        'showCalendar': true,
-      },
-    );
-    // Get.toNamed(AppRoutes.calendarProject);
-  }
-
-  void onProjetTap() {
-    Get.toNamed(
-      AppRoutes.projectList,
-      arguments: {
-        'status': "Completed",
-        'paramName': "status",
-        'statusFilter': "completed",
-      },
-    );
-  }
-
-  void onLogoutTap() {
-    Get.defaultDialog(
-      title: 'Logout',
-      middleText: 'Are you sure you want to logout?',
-      textConfirm: 'Yes',
-      textCancel: 'No',
-      onConfirm: () async {
-        Get.back();
-        // Perform logout
-        await authService.onLogout();
-        Get.snackbar(
-          'Logged Out',
-          'You have been logged out successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        Get.offNamed(AppRoutes.splash);
-      },
-    );
-  }
-
   Future<void> getDashboardCount() async {
     try {
       final modelData = await repo.getHomeData();
@@ -220,6 +152,7 @@ class HomeController extends GetxController with SnackBarMixin {
         if (modelData?.data != null) {
           data.value = modelData!.data!;
           userName(data.value.user?.name ?? "");
+          assignedState(data.value.user?.state ?? "");
           await authService.setUserId(modelData.data?.user?.id ?? '');
         }
       } else {
@@ -312,17 +245,14 @@ class HomeController extends GetxController with SnackBarMixin {
       if (audioPath?.isNotEmpty == true) audioPath!,
       if (videoPath?.isNotEmpty == true) videoPath!,
     ];
-
     int totalBytes = 0;
     debugPrint('Upload size check: $source');
-
     for (final path in paths) {
       final file = File(path);
       if (!await file.exists()) {
         debugPrint('Missing upload file: $path');
         continue;
       }
-
       final bytes = await file.length();
       totalBytes += bytes;
       debugPrint(
@@ -330,25 +260,10 @@ class HomeController extends GetxController with SnackBarMixin {
         '${(bytes / 1024).toStringAsFixed(2)} KB | $path',
       );
     }
-
     debugPrint(
       'Upload total media size: ${(totalBytes / 1024).toStringAsFixed(2)} KB',
     );
   }
-
-  // List<PendingSubmission> _uniqueByProjectId(List<PendingSubmission> list) {
-  //   final seen = <String>{};
-  //   final result = <PendingSubmission>[];
-
-  //   for (final item in list) {
-  //     final projectId = item.submission.projectId;
-  //     if (seen.add(projectId)) {
-  //       result.add(item); // first occurrence kept
-  //     }
-  //   }
-
-  //   return result;
-  // }
 
   Future<void> uploadProfileImage(String profilePic) async {
     try {
@@ -368,34 +283,86 @@ class HomeController extends GetxController with SnackBarMixin {
 
   Future<void> takePhoto() async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 100,
-      );
-
-      if (image == null) return;
-
-      // 🔑 Convert XFile → File
-      final File originalFile = File(image.path);
-
-      final File finalFile = await compressIfNeeded(originalFile);
-
-      profileImage.value = finalFile.path;
-
-      final sizeKb = (await finalFile.length()) / 1024;
-      debugPrint('Final image size: ${sizeKb.toStringAsFixed(2)} KB');
+      final File? image = await captureImage();
+      profileImage(image?.path);
       uploadProfileImage(profileImage.value);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to take photo',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Helpers.showError("Failed to capture photo");
     }
   }
 
-  Future<File> compressIfNeeded(File file) async {
+  Future<void> loadProjects() async {
+    try {
+      final modelData = await projectListRepo.getProjectList(
+        status: "All",
+        paramName: "status",
+        sectorId: "",
+        year: "",
+        startDate: "",
+        endDate: "",
+      );
+      if (modelData?.statusCode == "200") {
+        if (modelData?.data != null && modelData?.data?.projects != null) {
+          projects.value = modelData!.data?.projects ?? [];
+        }
+      } else {
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Failed to fetch dashboard");
+    } finally {}
+  }
+
+  Future<void> loadPendingProjectList() async {
+    try {
+      final modelData = await projectListRepo.getPendingProjectList();
+      if (modelData?.statusCode == "200") {
+        if (modelData?.data != null && modelData?.data?.projects != null) {
+          pendingProjects.value = modelData!.data?.projects ?? [];
+        }
+      } else {
+        Get.snackbar("Error", "Failed to fetch dashboard data");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Failed to fetch dashboard data");
+    } finally {}
+  }
+}
+
+/*
+
+ // try {
+    //   final ImagePicker picker = ImagePicker();
+    //   final XFile? image = await picker.pickImage(
+    //     source: ImageSource.camera,
+    //     imageQuality: 100,
+    //   );
+
+    //   if (image == null) return;
+
+    //   // 🔑 Convert XFile → File
+    //   final File originalFile = File(image.path);
+
+    //   final File finalFile = await compressIfNeeded(originalFile);
+
+    //   profileImage.value = finalFile.path;
+
+    //   final sizeKb = (await finalFile.length()) / 1024;
+    //   debugPrint('Final image size: ${sizeKb.toStringAsFixed(2)} KB');
+    //   uploadProfileImage(profileImage.value);
+    // } catch (e) {
+    //   Get.snackbar(
+    //     'Error',
+    //     'Failed to take photo',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //   );
+    // }
+
+*/
+
+/*
+
+Future<File> compressIfNeeded(File file) async {
     final bytes = await file.length();
 
     if (bytes <= 1024 * 1024) {
@@ -435,40 +402,18 @@ class HomeController extends GetxController with SnackBarMixin {
     return compressed ?? file;
   }
 
-  Future<void> loadProjects() async {
-    try {
-      final modelData = await projectListRepo.getProjectList(
-        status: "All",
-        paramName: "status",
-        sectorId: "",
-        year: "",
-        startDate: "",
-        endDate: "",
-      );
-      if (modelData?.statusCode == "200") {
-        if (modelData?.data != null && modelData?.data?.projects != null) {
-          projects.value = modelData!.data?.projects ?? [];
-        }
-      } else {
-        Get.snackbar("Error", "Failed to fetch dashboard data");
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Failed to fetch dashboard data");
-    } finally {}
-  }
+*/
 
-  Future<void> loadPendingProjectList() async {
-    try {
-      final modelData = await projectListRepo.getPendingProjectList();
-      if (modelData?.statusCode == "200") {
-        if (modelData?.data != null && modelData?.data?.projects != null) {
-          pendingProjects.value = modelData!.data?.projects ?? [];
-        }
-      } else {
-        Get.snackbar("Error", "Failed to fetch dashboard data");
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Failed to fetch dashboard data");
-    } finally {}
-  }
-}
+  // List<PendingSubmission> _uniqueByProjectId(List<PendingSubmission> list) {
+  //   final seen = <String>{};
+  //   final result = <PendingSubmission>[];
+
+  //   for (final item in list) {
+  //     final projectId = item.submission.projectId;
+  //     if (seen.add(projectId)) {
+  //       result.add(item); // first occurrence kept
+  //     }
+  //   }
+
+  //   return result;
+  // }

@@ -1,19 +1,22 @@
 import 'dart:io';
 
-// mixin class CaptureImageMixin {
-//   File takePhoto() async {
-//     final ImagePicker picker = ImagePicker();
-//     final XFile? image = await picker.pickImage(
-//       source: ImageSource.camera,
-//       imageQuality: 100, // capture full quality
-//     );
+import 'package:image_picker/image_picker.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/compress_mixin.dart';
 
-//     if (image == null) return;
+mixin CaptureImageMixin on CompressMixin {
+  Future<File?> captureImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 100, // capture full quality
+    );
 
-//     // 🔑 Convert XFile → File
-//     final File originalFile = File(image.path);
+    if (image == null) return null;
 
-//     final File finalFile = await compressIfNeeded(originalFile);
-//     return finalFile;
-//   }
-// }
+    // 🔑 Convert XFile → File
+    final File originalFile = File(image.path);
+
+    final File finalFile = await compressImageIfNeeded(originalFile);
+    return finalFile;
+  }
+}

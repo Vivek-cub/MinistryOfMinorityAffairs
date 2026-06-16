@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:video_player/video_player.dart';
 
 class CapturedVideoPreview extends StatefulWidget {
@@ -89,26 +91,36 @@ class _CapturedVideoPreviewState extends State<CapturedVideoPreview> {
   Widget build(BuildContext context) {
     // ---------- No video ----------
     if (widget.videoPath == null || widget.videoPath!.isEmpty) {
-      return GestureDetector(
-        onTap: widget.onCaptureTap,
-        child: Container(
-          height: 180,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.grey.shade200,
-            border: Border.all(color: Colors.grey.shade400),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const TitleText(
+            text: 'Project Completion Video',
+            fontWeight: FontWeight.w600,
           ),
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.videocam_outlined, size: 40),
-                SizedBox(height: 8),
-                Text('Tap to capture video'),
-              ],
+          const SizedBox(height: AppDimensions.sm),
+          GestureDetector(
+            onTap: widget.onCaptureTap,
+            child: Container(
+              height: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.grey.shade200,
+                border: Border.all(color: Colors.grey.shade400),
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.videocam_outlined, size: 40),
+                    SizedBox(height: 8),
+                    Text('Tap to capture video'),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       );
     }
 

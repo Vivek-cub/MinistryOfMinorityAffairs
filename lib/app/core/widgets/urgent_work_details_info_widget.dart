@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import '../theme/theme_constants.dart';
 import 'status_tag.dart';
 
 /// Reusable widget for displaying work detail information
 /// Shows Work ID, Status, State, District, Block, Work Type, Approval Year
-class WorkDetailInfoWidget extends StatelessWidget {
+class UrgentWorkDetailsInfoWidget extends StatelessWidget {
   final UnitDetails project;
+  final UserProject userProject;
   final String status;
 
-  const WorkDetailInfoWidget({
+  const UrgentWorkDetailsInfoWidget({
     super.key,
     required this.project,
+    required this.userProject,
     required this.status,
   });
 
@@ -58,14 +61,14 @@ class WorkDetailInfoWidget extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Work Details - Two Column Layout
-          _buildDetailRow(label: 'Unit ID', value: project.unitCode),
-          project.year != null ? const SizedBox(height: 16) : SizedBox.shrink(),
-          project.year != null
-              ? _buildDetailRow(
-                label: 'Approval Year',
-                value: project.year ?? "",
-              )
-              : SizedBox.shrink(),
+          _buildDetailRow(label: 'Unit ID', value: userProject.unitCode),
+          const SizedBox(height: 16),
+          // project.year != null
+          //     ? _buildDetailRow(
+          //       label: 'Approval Year',
+          //       value: project.year ?? "",
+          //     )
+          //     : SizedBox.shrink(),
           project.status != null
               ? const SizedBox(height: 16)
               : SizedBox.shrink(),
@@ -77,26 +80,32 @@ class WorkDetailInfoWidget extends StatelessWidget {
               )
               : SizedBox.shrink(),
           // const SizedBox(height: 16),
-          // if (project.address != null)
-          //   _buildDetailRow(
-          //     label: 'Address',
-          //     value: project.address ?? "",
-          //     showLocationIcon: true,
-          //   ),
-          if (project.unitProject?.districtName != null)
-            const SizedBox(height: 16),
-          if (project.unitProject?.districtName != null)
+          if (project.address != null)
             _buildDetailRow(
-              label: 'District',
-              value: project.unitProject?.districtName ?? "No Address Found",
+              label: 'Address',
+              value: project.address ?? "",
+              showLocationIcon: true,
             ),
-          if (project.unitProject?.blockTownName != null)
-            const SizedBox(height: 16),
-          if (project.unitProject?.blockTownName != null)
-            _buildDetailRow(
-              label: 'Block',
-              value: project.unitProject?.blockTownName,
-            ),
+          project.unitProject?.districtName != null
+              ? const SizedBox(height: 16)
+              : SizedBox.shrink(),
+          userProject.unitDetails?.districtName != null
+              ? _buildDetailRow(
+                label: 'District',
+                value:
+                    userProject.unitDetails?.districtName ??
+                    "No District Found",
+              )
+              : SizedBox.shrink(),
+          userProject.unitDetails?.blockTownName != null
+              ? const SizedBox(height: 16)
+              : SizedBox.shrink(),
+          userProject.unitDetails?.blockTownName != null
+              ? _buildDetailRow(
+                label: 'Block',
+                value: userProject.unitDetails?.blockTownName,
+              )
+              : SizedBox.shrink(),
 
           // if (project.visitCount != null) const SizedBox(height: 16),
           // if (project.visitCount != null)

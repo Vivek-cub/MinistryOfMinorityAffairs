@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/build_project_card.dart';
@@ -6,6 +8,8 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_project.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 
 class BuildWorkList extends StatelessWidget {
   HomeController controller;
@@ -44,7 +48,16 @@ class BuildWorkList extends StatelessWidget {
               TitleText(text: 'Work List', fontWeight: FontWeight.bold),
 
               TextButton(
-                onPressed: controller.onViewAllTap,
+                onPressed: () {
+                  Get.toNamed(
+                    AppRoutes.projectList,
+                    arguments: {
+                      'status': "All",
+                      'paramName': "status",
+                      'statusFilter': "all",
+                    },
+                  );
+                },
 
                 child: const CustomText(
                   text: "View More",
@@ -68,6 +81,8 @@ class BuildWorkList extends StatelessWidget {
                             project.unitDetails ?? UnitDetails(),
                             project.status ?? "",
                             "",
+                            project,
+                            false,
                           );
                         },
                         isUrgent: false,

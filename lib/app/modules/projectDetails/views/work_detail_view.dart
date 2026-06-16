@@ -39,10 +39,10 @@ class WorkDetailView extends GetView<WorkDetailController> {
                   subtitle: 'Track Progress of works in real-time',
                   avatarAssetPath: ImageAssets.emblemImage,
                   backIcon: Icons.arrow_back,
-                  widget: WorkDetailInfoWidget(
-                    project: controller.data.value,
-                    status: controller.projectStatus.value,
-                  ),
+                  // widget: WorkDetailInfoWidget(
+                  //   project: controller.data.value,
+                  //   status: controller.projectStatus.value,
+                  // ),
                 ),
 
                 // Content

@@ -10,7 +10,10 @@ class FfmpegVideoCompressor implements VideoCompressor {
   static const int maxSizeBytes = 5 * 1024 * 1024;
 
   @override
-  Future<File> compressIfNeeded(File file) async {
+  Future<File> compressIfNeeded(
+    File file, {
+    VoidCallback? onCompressionStarted,
+  }) async {
     final originalSize = await file.length();
 
     debugPrint(
@@ -22,7 +25,10 @@ class FfmpegVideoCompressor implements VideoCompressor {
       return file;
     }
 
+    onCompressionStarted?.call();
+
     final tempDir = await _offlineMediaDir();
+
     final compressionLevels = [
       const VideoCompressionLevel(
         width: 960,

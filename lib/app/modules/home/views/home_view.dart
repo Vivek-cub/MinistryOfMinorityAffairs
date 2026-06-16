@@ -54,7 +54,8 @@ class HomeView extends GetView<HomeController> {
                             //_buildHeader(context),
                             WorkProgressHeader(
                               title: "Welcome ${controller.userName.value}",
-                              subtitle: "Track Progress of works in real-time",
+                              subtitle:
+                                  "Assigned State - ${controller.assignedState.value}",
                               avatarAssetPath: ImageAssets.emblemImage,
                               onAvatarTap: () {
                                 controller.openDrawer();
@@ -168,11 +169,12 @@ class HomeView extends GetView<HomeController> {
                             ),
                             _buildQuickOverview(context),
                             (controller
-                                            .data
-                                            .value
-                                            .projectsNotVisitedFor3Months ??
-                                        0) >
-                                    0
+                                                .data
+                                                .value
+                                                .projectsNotVisitedFor3Months ??
+                                            0) >
+                                        0 &&
+                                    controller.pendingProjects.isNotEmpty
                                 ? BuildUrgentWorkList(controller: controller)
                                 : SizedBox.shrink(),
                             BuildWorkList(controller: controller),

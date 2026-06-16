@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/milestone_card.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
+import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
-class BuildProjectCard extends StatelessWidget {
-  final UnitDetails project;
+class BuildUrgentProjectCard extends StatelessWidget {
+  final UserProject project;
   final VoidCallback? onPressed;
   bool? isUrgent = false;
   bool? isShowingCalendar = false;
-  BuildProjectCard({
+  BuildUrgentProjectCard({
     required this.project,
     required this.onPressed,
     required this.isUrgent,
@@ -21,7 +26,7 @@ class BuildProjectCard extends StatelessWidget {
     return buildProjectCard(project, onPressed);
   }
 
-  Widget buildProjectCard(UnitDetails project, VoidCallback? onPressed) {
+  Widget buildProjectCard(UserProject project, VoidCallback? onPressed) {
     debugPrint("isShowingCalendar  ${isShowingCalendar.toString()}");
     Color statusColor;
     Color statusBgColor;
@@ -85,7 +90,7 @@ class BuildProjectCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           TitleText(
-            text: project.projectName ?? "",
+            text: project.unitDetails?.projectName ?? "",
             fontWeight: FontWeight.bold,
             maxLines: 2,
             color: isUrgent == false ? AppColors.textPrimary : AppColors.error,
@@ -138,8 +143,8 @@ class BuildProjectCard extends StatelessWidget {
                     Expanded(
                       child: CustomText(
                         text:
-                            project.address ??
-                            project.unitProject?.districtName ??
+                            project.completeAddress ??
+                            project.unitDetails?.districtName ??
                             "No Address Found",
                         maxLines: 2,
                       ),

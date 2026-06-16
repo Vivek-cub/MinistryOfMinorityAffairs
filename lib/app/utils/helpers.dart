@@ -1,7 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
+import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:native_exif/native_exif.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Utility helper functions
 class Helpers {
@@ -77,36 +84,6 @@ class Helpers {
   /// Validate PAN number
   static bool isValidPAN(String pan) {
     return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$').hasMatch(pan.toUpperCase());
-  }
-
-  // ==================== Formatting ====================
-
-  /// Format currency in Indian format (e.g., ₹1,00,000.00)
-  static String formatCurrency(double amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: '₹',
-      decimalDigits: 2,
-    );
-    return formatter.format(amount);
-  }
-
-  /// Format number with commas (e.g., 1,00,000)
-  static String formatNumber(int number) {
-    final formatter = NumberFormat('#,##,###', 'en_IN');
-    return formatter.format(number);
-  }
-
-  /// Capitalize first letter
-  static String capitalize(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
-  }
-
-  /// Truncate text with ellipsis
-  static String truncate(String text, int maxLength) {
-    if (text.length <= maxLength) return text;
-    return '${text.substring(0, maxLength)}...';
   }
 
   // ==================== Snackbars & Dialogs ====================
@@ -216,43 +193,6 @@ class Helpers {
     }
   }
 
-  // ==================== Device Info ====================
-
-  /// Check if device is mobile
-  static bool isMobile() {
-    return GetPlatform.isMobile;
-  }
-
-  /// Check if device is tablet
-  static bool isTablet() {
-    final data = MediaQueryData.fromView(WidgetsBinding.instance.window);
-    return data.size.shortestSide >= 600;
-  }
-
-  /// Check if device is in landscape mode
-  static bool isLandscape(BuildContext context) {
-    return MediaQuery.of(context).orientation == Orientation.landscape;
-  }
-
-  // ==================== Network ====================
-
-  /// Check if URL is valid
-  static bool isValidUrl(String url) {
-    return Uri.tryParse(url)?.hasAbsolutePath ?? false;
-  }
-
-  // ==================== File Size ====================
-
-  /// Format file size
-  static String formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-  }
-
   DateTime dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
@@ -295,5 +235,107 @@ class Helpers {
     }
 
     return null;
+  }
+
+  Future<Directory> offlineMediaDir() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final mediaDir = Directory('${dir.path}/offline_media');
+    if (!await mediaDir.exists()) {
+      await mediaDir.create(recursive: true);
+    }
+    return mediaDir;
+  }
+
+  Future<void> addExifData(
+    String path, {
+    double? lat,
+    double? lng,
+    String? time,
+  }) async {
+    AuthService authService = Get.find<AuthService>();
+    final exif = await Exif.fromPath(path);
+
+    String userId = await authService.getUserId() ?? "";
+
+    String formatDate(String? input) {
+      if (input == null || input.isEmpty) return "";
+      final date = DateTime.parse(input);
+      return "${date.year}:${date.month.toString().padLeft(2, '0')}:${date.day.toString().padLeft(2, '0')} "
+          "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    }
+
+    /// Convert decimal to DMS
+    List<String> toDMS(double coord) {
+      final abs = coord.abs();
+      final deg = abs.floor();
+      final minFloat = (abs - deg) * 60;
+      final min = minFloat.floor();
+      final sec = ((minFloat - min) * 60);
+
+      return ["$deg/1", "$min/1", "${(sec * 100).round()}/100"];
+    }
+
+    Map<String, String> attributes = {
+      "DateTimeOriginal": formatDate(time),
+      "UserComment": "UserId:$userId",
+    };
+
+    if (lat != null && lng != null) {
+      attributes.addAll({
+        "GPSLatitude": lat.toString(),
+        "GPSLatitudeRef": lat >= 0 ? "N" : "S",
+        "GPSLongitude": lng.toString(),
+        "GPSLongitudeRef": lng >= 0 ? "E" : "W",
+      });
+    }
+
+    await exif.writeAttributes(attributes);
+    await exif.close();
+  }
+
+  Future<void> readExif(String path) async {
+    final exif = await Exif.fromPath(path);
+
+    if (exif == null) {
+      print("No EXIF found");
+      return;
+    }
+
+    final attributes = await exif.getAttributes();
+
+    attributes?.forEach((key, value) {
+      print("print $key : $value");
+    });
+
+    await exif.close();
+  }
+
+  void refreshHomeIfAvailable() {
+    if (Get.isRegistered<HomeController>()) {
+      final homeController = Get.find<HomeController>();
+      homeController.checkInternet();
+    }
+  }
+
+  // Logout Section
+  void onLogoutTap() {
+    AuthService authService = Get.find<AuthService>();
+    Get.defaultDialog(
+      title: 'Logout',
+      middleText: 'Are you sure you want to logout?',
+      textConfirm: 'Yes',
+      textCancel: 'No',
+      onConfirm: () async {
+        Get.back();
+        // Perform logout
+        await authService.onLogout();
+        Get.snackbar(
+          'Logged Out',
+          'You have been logged out successfully',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.offNamed(AppRoutes.splash);
+      },
+    );
   }
 }

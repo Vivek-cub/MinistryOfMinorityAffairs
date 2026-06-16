@@ -10,6 +10,7 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/photo_upload_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/remarks_input_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/urgent_work_details_info_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/work_detail_info_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/work_progress_header.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
@@ -17,9 +18,11 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controll
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/controller/upload_project_details_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/audio_recorder_widget.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/capture_video_previews.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/function_toggle.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/project_selector.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/selectable_milestone_card.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/selectable_progress_card.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
 class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
@@ -49,10 +52,18 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                   subtitle: 'Track Progress of works in real-time',
                   avatarAssetPath: ImageAssets.emblemImage,
                   backIcon: Icons.arrow_back,
-                  widget: WorkDetailInfoWidget(
-                    project: controller.data.value,
-                    status: controller.projectStatus.value,
-                  ),
+                  widget: Obx(() {
+                    return controller.userProject != null
+                        ? UrgentWorkDetailsInfoWidget(
+                          project: controller.data.value,
+                          status: controller.projectStatus.value,
+                          userProject: controller.userProject ?? UserProject(),
+                        )
+                        : WorkDetailInfoWidget(
+                          project: controller.data.value,
+                          status: controller.projectStatus.value,
+                        );
+                  }),
                 ),
 
                 // Content
@@ -109,7 +120,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                       const SizedBox(height: AppDimensions.lg),
                       // Project Overall Status Section
                       const TitleText(
-                        text: 'Milestone overall status',
+                        text: 'Overall status',
                         fontWeight: FontWeight.w600,
                       ),
                       const SizedBox(height: AppDimensions.sm),
@@ -158,11 +169,35 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                         );
                       }),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+
+                      Obx(() {
+                        return controller.selectedProgress.value == "Completed"
+                            ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const TitleText(
+                                  text: 'Is this Project Functional?',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                const SizedBox(height: AppDimensions.sm),
+                                FunctionalYesNoSelector(
+                                  value: controller.isFunctionalProject.value,
+                                  onChanged: (value) {
+                                    controller.isFunctionalProject.value =
+                                        value;
+                                  },
+                                ),
+                              ],
+                            )
+                            : SizedBox.shrink();
+                      }),
+
+                      const SizedBox(height: 16),
 
                       // Project Overall Progress Section
                       const TitleText(
-                        text: 'Milestone Progress',
+                        text: 'Project Progress',
                         fontWeight: FontWeight.w600,
                       ),
                       Obx(
@@ -177,7 +212,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
 
                       Obx(
                         () =>
-                            controller.selectedProgress.value == "Completed"
+                            controller.isFunctionalProject.value == true
                                 ? Column(
                                   children: [
                                     const SizedBox(height: 12),

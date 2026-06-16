@@ -6,6 +6,7 @@ class User {
   //  DateTime? createdAt;
   //  DateTime? updatedAt;
   String? profilePath;
+  String? state;
 
   User({
     this.id,
@@ -15,6 +16,7 @@ class User {
     //  this.createdAt,
     //  this.updatedAt,
     this.profilePath,
+    this.state,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class User {
       // createdAt: DateTime.parse(json['createdAt']),
       // updatedAt: DateTime.parse(json['updatedAt']),
       profilePath: json["profilePath"],
+      state: json["state"],
     );
   }
 
@@ -37,6 +40,7 @@ class User {
       'isActive': isActive,
 
       "profilePath": profilePath,
+      "state": state,
     };
   }
 }

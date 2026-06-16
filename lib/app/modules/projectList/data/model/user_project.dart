@@ -6,6 +6,8 @@ class UserProject {
   final String? projectId;
   final String? status;
   final String? titleOrProjectName;
+  final String? unitCode;
+  final String? completeAddress;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final UnitDetails? unitDetails;
@@ -16,6 +18,8 @@ class UserProject {
     this.projectId,
     this.status,
     this.titleOrProjectName,
+    this.unitCode,
+    this.completeAddress,
     this.createdAt,
     this.updatedAt,
     this.unitDetails,
@@ -30,6 +34,8 @@ class UserProject {
       projectId: _stringValue(json['projectId']),
       status: _stringValue(json['status']),
       titleOrProjectName: _stringValue(json['titleOrProjectName']),
+      unitCode: _stringValue(json['unitCode']),
+      completeAddress: _stringValue(json['completeAddress']),
       createdAt: _parseDate(json['createdAt']),
       updatedAt: _parseDate(json['updatedAt']),
       unitDetails:

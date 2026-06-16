@@ -4,12 +4,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/build_project_card.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/build_urgent_project_card.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/project_list_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_name.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_project.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/widget/app_dropdown.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
@@ -218,32 +221,57 @@ class ProjectListView extends GetView<ProjectListController> {
                                         itemBuilder: (context, index) {
                                           final project =
                                               controller.projects[index];
-                                          return BuildProjectCard(
-                                            project:
-                                                project.unitDetails ??
-                                                UnitDetails(),
-                                            onPressed: () {
-                                              controller.onUpdateProgress(
+                                          return controller.paramName !=
+                                                  "pending"
+                                              ? BuildProjectCard(
                                                 project:
                                                     project.unitDetails ??
                                                     UnitDetails(),
-                                                projectStatus:
-                                                    project.status ?? "",
-                                                id:
+                                                onPressed: () {
+                                                  controller.onUpdateProgress(
+                                                    project:
+                                                        project.unitDetails ??
+                                                        UnitDetails(),
+                                                    projectStatus:
+                                                        project.status ?? "",
+                                                    id:
+                                                        controller
+                                                                    .paramName
+                                                                    .value ==
+                                                                "pending"
+                                                            ? project.id ?? ""
+                                                            : "",
+                                                    userProject: null,
+                                                  );
+                                                },
+                                                isUrgent: false,
+                                                isShowingCalendar:
                                                     controller
-                                                                .paramName
-                                                                .value ==
-                                                            "pending"
-                                                        ? project.id ?? ""
-                                                        : "",
+                                                        .isShowingCalendar
+                                                        .value,
+                                              )
+                                              : BuildUrgentProjectCard(
+                                                project: project,
+                                                onPressed: () {
+                                                  controller.onUpdateProgress(
+                                                    project:
+                                                        project.unitDetails ??
+                                                        UnitDetails(),
+                                                    projectStatus:
+                                                        project.status ?? "",
+                                                    id:
+                                                        controller
+                                                                    .paramName
+                                                                    .value ==
+                                                                "pending"
+                                                            ? project.id ?? ""
+                                                            : "",
+                                                    userProject: project,
+                                                  );
+                                                },
+                                                isUrgent: true,
+                                                isShowingCalendar: false,
                                               );
-                                            },
-                                            isUrgent: false,
-                                            isShowingCalendar:
-                                                controller
-                                                    .isShowingCalendar
-                                                    .value,
-                                          );
                                         },
                                         separatorBuilder: (context, index) {
                                           return SizedBox(

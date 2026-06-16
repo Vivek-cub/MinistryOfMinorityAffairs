@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/build_project_card.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/build_urgent_project_card.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
@@ -82,13 +83,15 @@ class BuildUrgentWorkList extends StatelessWidget {
                                       ? MediaQuery.of(context).size.width * 0.80
                                       : MediaQuery.of(context).size.width *
                                           0.89,
-                              child: BuildProjectCard(
-                                project: project.unitDetails ?? UnitDetails(),
+                              child: BuildUrgentProjectCard(
+                                project: project,
                                 onPressed: () {
                                   controller.onUpdateProgressTap(
                                     project.unitDetails ?? UnitDetails(),
-                                    project.status ?? "",
+                                    project.unitDetails?.status ?? "",
                                     project.id ?? "",
+                                    project,
+                                    true,
                                   );
                                 },
                                 isUrgent: true,

@@ -6,7 +6,9 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
+import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 
 class BuildDrawer extends StatelessWidget {
@@ -153,7 +155,7 @@ class BuildDrawer extends StatelessWidget {
               title: 'Dashboard',
               onTap: () {
                 Get.back();
-                controller.onDashboardTap();
+                Get.toNamed(AppRoutes.home);
               },
             ),
             _buildDrawerItem(
@@ -161,7 +163,14 @@ class BuildDrawer extends StatelessWidget {
               title: 'Completed Project',
               onTap: () {
                 Get.back();
-                controller.onProjetTap();
+                Get.toNamed(
+                  AppRoutes.projectList,
+                  arguments: {
+                    'status': "Completed",
+                    'paramName': "status",
+                    'statusFilter': "completed",
+                  },
+                );
               },
             ),
             _buildDrawerItem(
@@ -169,7 +178,7 @@ class BuildDrawer extends StatelessWidget {
               title: 'Change PIN',
               onTap: () {
                 Get.back();
-                controller.onChangePinTap();
+                Get.toNamed(AppRoutes.oldPinCheck);
               },
             ),
             _buildDrawerItem(
@@ -177,7 +186,16 @@ class BuildDrawer extends StatelessWidget {
               title: 'Calender',
               onTap: () {
                 Get.back();
-                controller.onCalendarTap();
+                Get.toNamed(
+                  AppRoutes.projectList,
+                  arguments: {
+                    'status': "All",
+                    'paramName': "status",
+                    'statusFilter': "All",
+                    'showCalendar': true,
+                  },
+                );
+                // Get.toNamed(AppRoutes.calendarProject);
               },
             ),
             const Spacer(),
@@ -187,7 +205,7 @@ class BuildDrawer extends StatelessWidget {
               title: 'Logout',
               onTap: () {
                 Get.back();
-                controller.onLogoutTap();
+                Helpers().onLogoutTap();
               },
               textColor: AppColors.textPrimary,
             ),

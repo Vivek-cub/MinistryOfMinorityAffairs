@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/image_attachment.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_project.dart';
 
 class UnitDetails {
   final String? id;
@@ -10,6 +11,7 @@ class UnitDetails {
   final String? projectTypeId;
   final String? status;
   final String? unitCount;
+  final String? unitCode;
   final int? visitCount;
   final String? projectName;
   final String? year;
@@ -18,11 +20,14 @@ class UnitDetails {
   final String? address;
   final String? createdBy;
   final String? updatedBy;
+  final String? blockTownName;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   // final List<ProjectMilestone>? milestones;
+  final UnitProject? unitProject;
   final List<ImageAttachment>? imageAtt;
   final String? videoAtt;
+  final String? districtName;
 
   UnitDetails({
     this.id,
@@ -32,6 +37,7 @@ class UnitDetails {
     this.projectTypeId,
     this.status,
     this.unitCount,
+    this.unitCode,
     this.visitCount,
     this.projectName,
     this.year,
@@ -42,13 +48,17 @@ class UnitDetails {
     this.updatedBy,
     this.createdAt,
     this.updatedAt,
+    this.blockTownName,
     this.imageAtt,
+    this.unitProject,
     //this.milestones = const [],
     this.videoAtt,
+    this.districtName,
   });
 
   factory UnitDetails.fromJson(Map<String, dynamic> json) {
     final project = _asMap(json['project']);
+    final responseData = json['project'];
     // final attachments = _attachmentMilestones(json['attachments']);
 
     return UnitDetails(
@@ -67,11 +77,12 @@ class UnitDetails {
       unitCount: _stringValue(
         json['unitCount'] ?? project?['unitCount'] ?? project?['nUnits'],
       ),
+      unitCode: _stringValue(json['unitCode'] ?? project?['unitCode']) ?? "",
       visitCount: _parseInt(json['visitCount'] ?? project?['visitCount']),
       projectName: _stringValue(
-        project?['projectName'] ??
-            json['projectName'] ??
-            json['titleOrProjectName'],
+        json['titleOrProjectName'] ??
+            project?['projectName'] ??
+            json['projectName'],
       ),
       year: _stringValue(json['year'] ?? project?['year']),
       lat: _parseDouble(json['lat'] ?? project?['lat']),
@@ -83,6 +94,7 @@ class UnitDetails {
       ),
       createdBy: _stringValue(json['createdBy'] ?? project?['createdBy']),
       updatedBy: _stringValue(json['updatedBy'] ?? project?['updatedBy']),
+      blockTownName: _stringValue(json['blockTownName']),
       createdAt: _parseDate(json['createdAt'] ?? project?['createdAt']),
       updatedAt: _parseDate(json['updatedAt'] ?? project?['updatedAt']),
       // milestones:
@@ -97,6 +109,11 @@ class UnitDetails {
               ?.map((e) => ImageAttachment.fromJson(e))
               .toList(),
       videoAtt: _stringValue(json['videoAtt']),
+      unitProject:
+          responseData is Map<String, dynamic>
+              ? UnitProject.fromJson(responseData)
+              : null,
+      districtName: _stringValue(json['districtName']),
     );
   }
 

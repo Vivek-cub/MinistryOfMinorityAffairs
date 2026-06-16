@@ -101,7 +101,7 @@ class ProjectListController extends GetxController
         startDate: "",
         endDate: "",
       );
-      isLoading(false);
+      // isLoading(false);
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
           projects.value = modelData!.data?.projects ?? [];
@@ -201,8 +201,11 @@ class ProjectListController extends GetxController
     final filtered =
         allProjects.where((project) {
           final name = project.unitDetails?.projectName?.toLowerCase() ?? '';
-          final address = project.unitDetails?.address?.toLowerCase() ?? '';
-          final id = project.projectId?.toLowerCase() ?? '';
+          final address =
+              project.unitDetails?.unitProject?.districtName?.toLowerCase() ??
+              '';
+          final id = project.unitDetails?.unitCode?.toLowerCase() ?? '';
+          debugPrint("check $id");
 
           return name.contains(query) ||
               address.contains(query) ||
@@ -216,6 +219,7 @@ class ProjectListController extends GetxController
     required UnitDetails project,
     required String projectStatus,
     required String id,
+    required UserProject? userProject,
   }) {
     if (isShowingCalendar.value == true) {
       Get.toNamed(
@@ -225,7 +229,12 @@ class ProjectListController extends GetxController
     } else {
       Get.toNamed(
         AppRoutes.uploadProjectDetails,
-        arguments: {"project": project, "status": projectStatus, "id": id},
+        arguments: {
+          "project": project,
+          "status": projectStatus,
+          "id": id,
+          "userProject": userProject,
+        },
       );
     }
     // if (status.value == "Proposal") {
@@ -300,7 +309,7 @@ class ProjectListController extends GetxController
       isLoading(true);
 
       final modelData = await repo.getPendingProjectList();
-      isLoading(false);
+
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
           projects.value = modelData!.data?.projects ?? [];
