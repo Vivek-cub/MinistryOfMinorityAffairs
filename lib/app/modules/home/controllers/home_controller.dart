@@ -49,6 +49,7 @@ class HomeController extends GetxController
   RxString profileImage = "".obs;
   final isSyncing = false.obs;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  final isLoading = true.obs;
 
   @override
   void onInit() {
@@ -97,6 +98,7 @@ class HomeController extends GetxController
   Future<void> checkInternet() async {
     if (isSyncing.value) return;
     isSyncing.value = true;
+    isLoading.value = true;
     hasInternet.value = await NetworkService.hasInternet();
     if (!hasInternet.value) {
       isSyncing.value = false;
@@ -111,6 +113,7 @@ class HomeController extends GetxController
       await syncPendingSubmissions();
     } finally {
       isSyncing.value = false;
+      isLoading.value = false;
     }
   }
 

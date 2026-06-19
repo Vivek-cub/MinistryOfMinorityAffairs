@@ -5,7 +5,9 @@ import 'package:ministry_of_minority_affairs/app/modules/pin/bindings/check_old_
 import 'package:ministry_of_minority_affairs/app/modules/pin/views/check_old_pin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/upload_project_details_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/upload_project_details.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/bindings/image_list_bindings.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/bindings/project_list_bindings.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/views/image_list_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/views/project_list_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/proposals/binding/update_proposal_latlng_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/proposals/view/update_proposal_latlng_view.dart';
@@ -115,6 +117,13 @@ class AppPages {
       name: AppRoutes.updateProposalLatlng,
       page: () => UpdateProposalLatlngView(),
       binding: UpdateProposalLatlngBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.seeImageList,
+      page: () => ImageListView(),
+      binding: ImageListBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

@@ -68,9 +68,12 @@ class _PhotoViewerState extends State<PhotoViewer> {
 
                 return PhotoViewGalleryPageOptions(
                   imageProvider: imageProvider,
-                  minScale: PhotoViewComputedScale.covered,
-                  maxScale: PhotoViewComputedScale.covered * 3,
-                  initialScale: PhotoViewComputedScale.covered,
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.contained,
+                  initialScale: PhotoViewComputedScale.contained,
+                  // minScale: PhotoViewComputedScale.covered,
+                  // maxScale: PhotoViewComputedScale.covered * 3,
+                  // initialScale: PhotoViewComputedScale.covered,
                 );
               },
               backgroundDecoration: const BoxDecoration(color: Colors.black),

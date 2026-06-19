@@ -22,6 +22,7 @@ abstract class AppRoutes {
   static const calendarProject = '/calendar-project';
   static const uploadProjectDetails = '/upload-project-details';
   static const updateProposalLatlng = '/upload-proposal-latlng';
+  static const seeImageList = '/see-image-list';
 
   // Add more routes as needed
 }

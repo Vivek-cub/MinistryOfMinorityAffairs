@@ -23,25 +23,25 @@ class SplashController extends GetxController {
 
   /// Navigate to next screen after splash duration
   Future<void> _navigateToNextScreen() async {
-    final hasSim = await simChangeService.hasSimAvailable();
-    if (!hasSim) {
-      _showNoSimDialog();
-      return;
-    }
+    // final hasSim = await simChangeService.hasSimAvailable();
+    // if (!hasSim) {
+    //   _showNoSimDialog();
+    //   return;
+    // }
 
-    final simChanged = await simChangeService.hasSimChanged();
-    if (simChanged) {
-      await authService.onLogout();
-      await authService.clearPin();
-      await simChangeService.storeCurrentAsBaseline();
-      Get.snackbar(
-        'Security Alert',
-        'SIM change detected. Please login again.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      Get.offAllNamed(AppRoutes.mobileNumber);
-      return;
-    }
+    // final simChanged = await simChangeService.hasSimChanged();
+    // if (simChanged) {
+    //   await authService.onLogout();
+    //   await authService.clearPin();
+    //   await simChangeService.storeCurrentAsBaseline();
+    //   Get.snackbar(
+    //     'Security Alert',
+    //     'SIM change detected. Please login again.',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //   );
+    //   Get.offAllNamed(AppRoutes.mobileNumber);
+    //   return;
+    // }
 
     if (authService.loggedIn) {
       final hasPin = await authService.checkPinFromStorage();

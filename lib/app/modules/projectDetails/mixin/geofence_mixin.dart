@@ -9,13 +9,14 @@ mixin GeofenceMixin on GetxController {
   RxDouble get userLng;
   RxBool get isInsideFence;
   Future<bool> checkGeoFence(double lat, double lng) async {
+    debugPrint("1. before Gepfence");
     final granted = await LocationPermissionService.request();
     if (!granted) return false;
-
+    debugPrint("1. After permission");
     final position = await LocationService.getAccurateLocation();
     userLat(position.latitude);
     userLng(position.longitude);
-
+    debugPrint("1. After location");
     if (lat == 0.0 && lng == 0.0) return true;
 
     isInsideFence.value = GeoFenceService.isInside(

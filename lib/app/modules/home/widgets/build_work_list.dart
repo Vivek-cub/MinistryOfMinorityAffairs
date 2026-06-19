@@ -59,9 +59,12 @@ class BuildWorkList extends StatelessWidget {
                   );
                 },
 
-                child: const CustomText(
-                  text: "View More",
-                  color: AppColors.textPrimary,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: const CustomText(
+                    text: "View More",
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],
@@ -72,6 +75,10 @@ class BuildWorkList extends StatelessWidget {
             return Column(
               children:
                   projects.map((project) {
+                    final imageUrl =
+                        (project.unitDetails?.imageAtt?.isNotEmpty ?? false)
+                            ? project.unitDetails!.imageAtt!.first.images ?? ""
+                            : "";
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: BuildProjectCard(
@@ -87,6 +94,7 @@ class BuildWorkList extends StatelessWidget {
                         },
                         isUrgent: false,
                         isShowingCalendar: false,
+                        thumbnail: imageUrl,
                       ),
                       //child: _buildProjectCard(project.project??ProjectDetails()),
                     );

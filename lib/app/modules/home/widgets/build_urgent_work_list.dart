@@ -55,9 +55,12 @@ class BuildUrgentWorkList extends StatelessWidget {
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const CustomText(
-                  text: "View More",
-                  color: AppColors.textPrimary,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: const CustomText(
+                    text: "View More",
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],

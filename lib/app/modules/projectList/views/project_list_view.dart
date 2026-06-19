@@ -221,7 +221,20 @@ class ProjectListView extends GetView<ProjectListController> {
                                         itemBuilder: (context, index) {
                                           final project =
                                               controller.projects[index];
-                                          return controller.paramName !=
+                                          final imageUrl =
+                                              (project
+                                                          .unitDetails
+                                                          ?.imageAtt
+                                                          ?.isNotEmpty ??
+                                                      false)
+                                                  ? project
+                                                          .unitDetails!
+                                                          .imageAtt!
+                                                          .first
+                                                          .images ??
+                                                      ""
+                                                  : "";
+                                          return controller.paramName.value !=
                                                   "pending"
                                               ? BuildProjectCard(
                                                 project:
@@ -249,6 +262,7 @@ class ProjectListView extends GetView<ProjectListController> {
                                                     controller
                                                         .isShowingCalendar
                                                         .value,
+                                                thumbnail: imageUrl,
                                               )
                                               : BuildUrgentProjectCard(
                                                 project: project,
@@ -281,7 +295,8 @@ class ProjectListView extends GetView<ProjectListController> {
                                       ),
                                     )
                                     : Center(
-                                      child: TitleText(text: "No Data Found"),
+                                      // child: TitleText(text: "No Data Found"),
+                                      child: CircularProgressIndicator(),
                                     ),
                           );
                         }

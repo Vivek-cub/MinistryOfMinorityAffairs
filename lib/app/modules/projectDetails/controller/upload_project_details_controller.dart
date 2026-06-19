@@ -98,13 +98,17 @@ class UploadProjectDetailsController extends GetxController
 
   Future<void> takePhoto(int index) async {
     try {
+      debugPrint("1. Before capture");
       final File? image = await captureImage();
 
       photos[index] = image?.path;
       photos.refresh();
+      debugPrint("2. After capture");
 
       try {
+        debugPrint("3. Before location");
         final position = await LocationService.getAccurateLocation();
+        debugPrint("4. After location");
 
         await Helpers().addExifData(
           image?.path ?? "",
@@ -112,7 +116,7 @@ class UploadProjectDetailsController extends GetxController
           lng: position.longitude,
           time: DateTime.now().toString(),
         );
-
+        debugPrint("5. EXIF completed");
         // await readExif(image?.path ?? "");
       } catch (e) {
         debugPrint('Failed to add image EXIF data: $e');
@@ -231,59 +235,66 @@ class UploadProjectDetailsController extends GetxController
 
   // Check Internet
   Future<void> submitData() async {
-    audioPath = await getAudioPath();
-    final rawVideoPath = videoPath.value;
+    showAlertCustom(backBtnDisable: true, title: "Preparing...");
+    try {
+      audioPath = await getAudioPath();
+      final rawVideoPath = videoPath.value;
 
-    final hasInternet = await NetworkService.hasInternet();
+      final hasInternet = await NetworkService.hasInternet();
 
-    if (photos.every((photo) => photo == null || photo.isEmpty)) {
-      showErrorDialog(Get.context!, message: "Please Upload Images");
-      return;
-    }
+      if (photos.every((photo) => photo == null || photo.isEmpty)) {
+        showErrorDialog(Get.context!, message: "Please Upload Images");
+        return;
+      }
 
-    if (selectedProgress.value == "") {
-      showErrorDialog(Get.context!, message: "Please Select Project Status");
-      return;
-    }
-    if (statusProgressValue.value == 0) {
-      showErrorDialog(
-        Get.context!,
-        message: "Please select progress of your project",
-      );
-      return;
-    }
-    if (selectedProgress.value == "Completed" &&
-        isFunctionalProject.value == null) {
-      showErrorDialog(
-        Get.context!,
-        message: "Please select Is this project functional or not",
-      );
-      return;
-    }
+      if (selectedProgress.value == "") {
+        showErrorDialog(Get.context!, message: "Please Select Project Status");
+        return;
+      }
+      if (statusProgressValue.value == 0) {
+        showErrorDialog(
+          Get.context!,
+          message: "Please select progress of your project",
+        );
+        return;
+      }
+      if (selectedProgress.value == "Completed" &&
+          isFunctionalProject.value == null) {
+        showErrorDialog(
+          Get.context!,
+          message: "Please select Is this project functional or not",
+        );
+        return;
+      }
 
-    if (isFunctionalProject.value == true && finalVideoPath == "") {
-      showErrorDialog(Get.context!, message: "Please upload video");
-      return;
-    }
+      if (isFunctionalProject.value == true && finalVideoPath == "") {
+        showErrorDialog(Get.context!, message: "Please upload video");
+        return;
+      }
 
-    if (projectOrUnitId.value.isEmpty) {
-      projectOrUnitId.value = data.value.id ?? "";
-    }
+      if (projectOrUnitId.value.isEmpty) {
+        projectOrUnitId.value = data.value.id ?? "";
+      }
 
-    if (hasInternet) {
-      submitOnline();
-    } else {
-      showMessageDialog(
-        Get.context!,
-        title: "NO Internet!",
-        message: "Want to save this in Local Database?",
-        onPressed: () async {
-          await saveOffline();
-        },
-      );
-    }
+      if (hasInternet) {
+        Get.back();
+        submitOnline();
+      } else {
+        Get.back();
+        showMessageDialog(
+          Get.context!,
+          title: "NO Internet!",
+          message: "Want to save this in Local Database?",
+          onPressed: () async {
+            await saveOffline();
+          },
+        );
+      }
 
-    isSubmitting.value = false;
+      isSubmitting.value = false;
+    } catch (e) {
+      Get.back();
+    }
   }
 
   void selectProgress(String value) {

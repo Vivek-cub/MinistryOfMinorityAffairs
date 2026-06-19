@@ -32,7 +32,7 @@ class ProjectListController extends GetxController
   final isYearDropdownOpen = false.obs;
 
   // Loading state
-  final isLoading = false.obs;
+  final isLoading = true.obs;
 
   RxString status = "".obs;
   RxBool geoStatus = false.obs;

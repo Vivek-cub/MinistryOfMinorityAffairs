@@ -98,7 +98,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                           controller.data.value.lat ?? 0.0,
                                           controller.data.value.lng ?? 0.0,
                                         );
-
+                                    debugPrint("1. After Gepfence");
                                     if (insideGeofence) {
                                       //controller.showPhotoSourceDialog(index);
                                       controller.takePhoto(index);
@@ -272,11 +272,18 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
           child: SafeArea(
             child: AuthSubmitButton(
               height: 44,
-              title: "Submit",
-              isEnabled: true,
-              // isEnabled: controller.isSubmitting.value,
-              onPressed: () {
-                controller.submitData();
+              title: controller.isSubmitting.value ? "Uploading..." : "Submit",
+              isEnabled: !controller.isSubmitting.value,
+              onPressed: () async {
+                if (controller.isSubmitting.value) return;
+
+                controller.isSubmitting.value = true;
+
+                try {
+                  await controller.submitData();
+                } finally {
+                  controller.isSubmitting.value = false;
+                }
               },
             ),
           ),

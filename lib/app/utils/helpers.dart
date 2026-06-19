@@ -7,6 +7,7 @@ import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_c
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_milestone.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -337,5 +338,17 @@ class Helpers {
         Get.offNamed(AppRoutes.splash);
       },
     );
+  }
+
+  String resolveImageUrl(String path) {
+    final cleanedPath = path.replaceAll('\\', '/').trim();
+    if (cleanedPath.startsWith('http://') ||
+        cleanedPath.startsWith('https://')) {
+      return cleanedPath;
+    }
+
+    final rawBaseUrl =
+        NetworkConstants.baseUrl.replaceFirst('baseUrl=', '').trim();
+    return Uri.parse(rawBaseUrl).resolve(cleanedPath).toString();
   }
 }

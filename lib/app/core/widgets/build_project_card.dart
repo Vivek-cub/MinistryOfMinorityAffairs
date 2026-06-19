@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
+import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
 class BuildProjectCard extends StatelessWidget {
   final UnitDetails project;
   final VoidCallback? onPressed;
   bool? isUrgent = false;
   bool? isShowingCalendar = false;
+  String? thumbnail;
   BuildProjectCard({
     required this.project,
     required this.onPressed,
     required this.isUrgent,
     required this.isShowingCalendar,
+    required this.thumbnail,
   });
   @override
   Widget build(BuildContext context) {
@@ -84,14 +90,47 @@ class BuildProjectCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          TitleText(
-            text: project.projectName ?? "",
-            fontWeight: FontWeight.bold,
-            maxLines: 2,
-            color: isUrgent == false ? AppColors.textPrimary : AppColors.error,
+          Row(
+            children: [
+              Expanded(
+                flex: 5,
+                child: TitleText(
+                  text: project.projectName ?? "",
+                  fontWeight: FontWeight.bold,
+                  maxLines: 2,
+                  color:
+                      isUrgent == false
+                          ? AppColors.textPrimary
+                          : AppColors.error,
+                ),
+              ),
+              thumbnail != "" && thumbnail != null
+                  ? InkWell(
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.seeImageList,
+                        arguments: {"unitDetails": project},
+                      );
+                    },
+                    child: SizedBox(
+                      height: 30,
+                      width: 50,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          child: Image.network(
+                            Helpers().resolveImageUrl(thumbnail ?? ""),
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  : SizedBox.shrink(),
+            ],
           ),
 
-          const SizedBox(height: AppDimensions.md),
+          // const SizedBox(height: AppDimensions.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +162,7 @@ class BuildProjectCard extends StatelessWidget {
                   : SizedBox.shrink(),
             ],
           ),
-          const SizedBox(height: AppDimensions.md),
+          // const SizedBox(height: AppDimensions.md),
           Row(
             children: [
               Expanded(
@@ -148,7 +187,7 @@ class BuildProjectCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: AppDimensions.md),
+              //  const SizedBox(width: AppDimensions.md),
 
               // Row(
               //   mainAxisSize: MainAxisSize.min,

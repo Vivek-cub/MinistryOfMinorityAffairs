@@ -96,7 +96,7 @@ class BuildUrgentProjectCard extends StatelessWidget {
             color: isUrgent == false ? AppColors.textPrimary : AppColors.error,
           ),
 
-          const SizedBox(height: AppDimensions.md),
+          //  const SizedBox(height: AppDimensions.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +128,7 @@ class BuildUrgentProjectCard extends StatelessWidget {
                   : SizedBox.shrink(),
             ],
           ),
-          const SizedBox(height: AppDimensions.md),
+          //  const SizedBox(height: AppDimensions.md),
           Row(
             children: [
               Expanded(
@@ -153,7 +153,7 @@ class BuildUrgentProjectCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: AppDimensions.md),
+              //    const SizedBox(width: AppDimensions.md),
 
               // Row(
               //   mainAxisSize: MainAxisSize.min,
