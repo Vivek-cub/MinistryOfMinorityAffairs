@@ -43,11 +43,28 @@ class UserProject {
               ? UnitDetails.fromJson({
                 ...projectJson,
                 'status': projectJson['status'] ?? json['status'],
-                'titleOrProjectName': json['titleOrProjectName'],
+                'titleOrProjectName':
+                    json['titleOrProjectName'] ??
+                    projectJson['titleOrProjectName'],
+                'unitCode': projectJson['unitCode'] ?? json['unitCode'],
+                'completeAddress':
+                    projectJson['completeAddress'] ?? json['completeAddress'],
               })
               : null,
     );
   }
+
+  UnitDetails get displayUnitDetails =>
+      unitDetails ??
+      UnitDetails(
+        id: projectId,
+        projectName: titleOrProjectName,
+        unitCode: unitCode,
+        address: completeAddress,
+        status: status,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+      );
 
   static String? _stringValue(dynamic value) {
     if (value == null) return null;

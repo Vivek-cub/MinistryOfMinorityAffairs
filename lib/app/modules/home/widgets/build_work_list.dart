@@ -95,6 +95,11 @@ class BuildWorkList extends StatelessWidget {
                         isUrgent: false,
                         isShowingCalendar: false,
                         thumbnail: imageUrl,
+                        showFunctionalButton:
+                            project.unitDetails?.noOfUnitsFunctional == 0,
+                        hideButton:
+                            project.unitDetails?.noOfUnitsFunctional == 1 &&
+                            project.status == "Completed",
                       ),
                       //child: _buildProjectCard(project.project??ProjectDetails()),
                     );

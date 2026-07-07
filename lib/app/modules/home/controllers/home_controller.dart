@@ -50,6 +50,7 @@ class HomeController extends GetxController
   final isSyncing = false.obs;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final isLoading = true.obs;
+  RxString userRole = "".obs;
 
   @override
   void onInit() {
@@ -111,6 +112,7 @@ class HomeController extends GetxController
         await loadPendingProjectList();
       }
       await syncPendingSubmissions();
+      userRole.value = await authService.getUserRole() ?? "";
     } finally {
       isSyncing.value = false;
       isLoading.value = false;
@@ -157,6 +159,8 @@ class HomeController extends GetxController
           userName(data.value.user?.name ?? "");
           assignedState(data.value.user?.state ?? "");
           await authService.setUserId(modelData.data?.user?.id ?? '');
+        } else {
+          await authService.onLogout();
         }
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");

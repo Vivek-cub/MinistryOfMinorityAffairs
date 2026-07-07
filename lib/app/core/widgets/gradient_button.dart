@@ -25,7 +25,7 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: OldAppButtonGradientColor.gradient,
+        gradient: AppButtonGradientColor.gradient,
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(

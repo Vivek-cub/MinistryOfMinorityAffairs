@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class FfmpegVideoCompressor implements VideoCompressor {
-  static const int maxSizeBytes = 5 * 1024 * 1024;
+  static const int maxSizeBytes = 25 * 1024 * 1024;
 
   @override
   Future<File> compressIfNeeded(

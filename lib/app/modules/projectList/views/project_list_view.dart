@@ -58,6 +58,7 @@ class ProjectListView extends GetView<ProjectListController> {
                               ),
 
                               child: SearchBarWidget(
+                                controller: controller.searchController,
                                 hintText: 'Search',
                                 onChanged: controller.onSearchChanged,
                               ),
@@ -72,6 +73,7 @@ class ProjectListView extends GetView<ProjectListController> {
                                 controller.selectedCategory.value = null;
                                 controller.selectedYear.value = null;
                                 controller.searchQuery.value = "";
+                                controller.searchController.clear();
                                 controller.checkParamToLoadProject();
                               }
                             },
@@ -173,47 +175,46 @@ class ProjectListView extends GetView<ProjectListController> {
                     // Projects List
                     Expanded(
                       child: Obx(() {
-                        if (controller.isLoading.value) {
+                        if (controller.isLoading.value ||
+                            !controller.isDataLoaded.value) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         } else {
                           return RefreshIndicator(
                             onRefresh: () async {
-                              controller.loadProjects();
+                              controller.searchController.clear();
+                              controller.searchQuery.value = "";
+                              controller.checkParamToLoadProject();
                             },
                             child:
                                 controller.projects.isNotEmpty
                                     ? Container(
-                                      margin: EdgeInsets.symmetric(
-                                        horizontal: AppDimensions.xs,
-                                        vertical: AppDimensions.sm,
-                                      ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: AppDimensions.sm,
                                         vertical: AppDimensions.md,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.textWhite,
+                                        //color: AppColors.textWhite,
                                         borderRadius: BorderRadius.circular(
                                           AppDimensions.xs,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                            blurRadius: 4,
-                                            offset: const Offset(2, 0),
-                                          ),
-                                        ],
+                                        // boxShadow: [
+                                        //   BoxShadow(
+                                        //     color: Colors.black.withValues(
+                                        //       alpha: 0.1,
+                                        //     ),
+                                        //     blurRadius: 4,
+                                        //     offset: const Offset(0, 2),
+                                        //   ),
+                                        //   BoxShadow(
+                                        //     color: Colors.black.withValues(
+                                        //       alpha: 0.1,
+                                        //     ),
+                                        //     blurRadius: 4,
+                                        //     offset: const Offset(2, 0),
+                                        //   ),
+                                        // ],
                                       ),
                                       child: ListView.separated(
                                         padding: EdgeInsets.zero,
@@ -221,6 +222,8 @@ class ProjectListView extends GetView<ProjectListController> {
                                         itemBuilder: (context, index) {
                                           final project =
                                               controller.projects[index];
+                                          final unitDetails =
+                                              project.displayUnitDetails;
                                           final imageUrl =
                                               (project
                                                           .unitDetails
@@ -237,14 +240,10 @@ class ProjectListView extends GetView<ProjectListController> {
                                           return controller.paramName.value !=
                                                   "pending"
                                               ? BuildProjectCard(
-                                                project:
-                                                    project.unitDetails ??
-                                                    UnitDetails(),
+                                                project: unitDetails,
                                                 onPressed: () {
                                                   controller.onUpdateProgress(
-                                                    project:
-                                                        project.unitDetails ??
-                                                        UnitDetails(),
+                                                    project: unitDetails,
                                                     projectStatus:
                                                         project.status ?? "",
                                                     id:
@@ -262,7 +261,19 @@ class ProjectListView extends GetView<ProjectListController> {
                                                     controller
                                                         .isShowingCalendar
                                                         .value,
+                                                showFunctionalButton:
+                                                    project
+                                                        .unitDetails
+                                                        ?.noOfUnitsFunctional ==
+                                                    0,
                                                 thumbnail: imageUrl,
+                                                hideButton:
+                                                    project
+                                                            .unitDetails
+                                                            ?.noOfUnitsFunctional ==
+                                                        1 &&
+                                                    project.status ==
+                                                        "Completed",
                                               )
                                               : BuildUrgentProjectCard(
                                                 project: project,
@@ -285,6 +296,18 @@ class ProjectListView extends GetView<ProjectListController> {
                                                 },
                                                 isUrgent: true,
                                                 isShowingCalendar: false,
+                                                showFunctionalButton:
+                                                    project
+                                                        .unitDetails
+                                                        ?.noOfUnitsFunctional ==
+                                                    0,
+                                                hideButton:
+                                                    project
+                                                            .unitDetails
+                                                            ?.noOfUnitsFunctional ==
+                                                        1 &&
+                                                    project.status ==
+                                                        "Completed",
                                               );
                                         },
                                         separatorBuilder: (context, index) {
@@ -295,8 +318,7 @@ class ProjectListView extends GetView<ProjectListController> {
                                       ),
                                     )
                                     : Center(
-                                      // child: TitleText(text: "No Data Found"),
-                                      child: CircularProgressIndicator(),
+                                      child: TitleText(text: "No Data Found"),
                                     ),
                           );
                         }

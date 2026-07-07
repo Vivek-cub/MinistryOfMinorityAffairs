@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/login/data/model/verify_mobile_otp_resp_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
+import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/storage/s_storage_service.dart';
 
 class AuthService extends GetxService {
@@ -11,6 +13,7 @@ class AuthService extends GetxService {
   final RxBool _loggedIn = false.obs;
   final RxnString _token = RxnString();
   final RxnString _userId = RxnString();
+  final RxnString _userRole = RxnString();
   final RxnString _pin = RxnString();
   final RxBool _isPinSet = false.obs;
   final RxBool _isPinVerifiedForSession = false.obs;
@@ -59,9 +62,11 @@ class AuthService extends GetxService {
 
     await storage.deleteKey(SStorageKeys.token);
     await storage.deleteKey(SStorageKeys.userId);
+    await storage.deleteKey(SStorageKeys.userRole);
 
     _loggedIn(false);
     _token(null);
+    _userRole(null);
     _isPinVerifiedForSession(false);
     return true;
   }
@@ -107,6 +112,11 @@ class AuthService extends GetxService {
     _userId(userId);
   }
 
+  Future<void> setUserRole(String role) async {
+    await storage.writeKey(key: SStorageKeys.userRole, value: role);
+    _userRole(role);
+  }
+
   Future<bool> isPinMatched(String pin) async {
     final value = await storage.readKey(key: SStorageKeys.mobilePin);
     return value != null && value == pin;
@@ -124,4 +134,36 @@ class AuthService extends GetxService {
 
   Future<String?> getUserId() async =>
       storage.readKey(key: SStorageKeys.userId);
+
+  Future<String?> getUserRole() async {
+    final role = _userRole.value;
+    if (role != null && role.isNotEmpty) {
+      return role;
+    }
+
+    final value = await storage.readKey(key: SStorageKeys.userRole);
+    _userRole(value);
+    return value;
+  }
+
+  Future<bool> isStateOfficer() async {
+    final role = await getUserRole();
+    return _normalizeRole(role) == 'stateofficer';
+  }
+
+  Future<bool> isDistrictOfficer() async {
+    final role = await getUserRole();
+    return _normalizeRole(role) == 'districtofficer';
+  }
+
+  Future<String> dashboardRoute() async {
+    final stateOfficer = await isStateOfficer();
+    final districtOfficer = await isDistrictOfficer();
+    return stateOfficer || districtOfficer
+        ? AppRoutes.stateDashboard
+        : AppRoutes.home;
+  }
+
+  String _normalizeRole(String? role) =>
+      (role ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
 }

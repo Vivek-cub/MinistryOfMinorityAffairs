@@ -19,9 +19,7 @@ class CheckOldPin extends GetView<CheckOldPinController> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(
-            gradient: OldAppButtonGradientColor.gradient,
-          ),
+          decoration: BoxDecoration(gradient: AppButtonGradientColor.gradient),
           height: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: SingleChildScrollView(

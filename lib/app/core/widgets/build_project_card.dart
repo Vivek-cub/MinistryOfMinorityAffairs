@@ -14,13 +14,17 @@ class BuildProjectCard extends StatelessWidget {
   final VoidCallback? onPressed;
   bool? isUrgent = false;
   bool? isShowingCalendar = false;
+  bool? showFunctionalButton = false;
+  bool? hideButton = false;
   String? thumbnail;
   BuildProjectCard({
     required this.project,
     required this.onPressed,
     required this.isUrgent,
     required this.isShowingCalendar,
+    required this.showFunctionalButton,
     required this.thumbnail,
+    required this.hideButton,
   });
   @override
   Widget build(BuildContext context) {
@@ -29,6 +33,12 @@ class BuildProjectCard extends StatelessWidget {
 
   Widget buildProjectCard(UnitDetails project, VoidCallback? onPressed) {
     debugPrint("isShowingCalendar  ${isShowingCalendar.toString()}");
+    final projectTitle =
+        project.projectName ??
+        project.unitProject?.projectName ??
+        project.projectUniqueId ??
+        project.unitCode ??
+        "";
     Color statusColor;
     Color statusBgColor;
 
@@ -95,7 +105,7 @@ class BuildProjectCard extends StatelessWidget {
               Expanded(
                 flex: 5,
                 child: TitleText(
-                  text: project.projectName ?? "",
+                  text: projectTitle,
                   fontWeight: FontWeight.bold,
                   maxLines: 2,
                   color:
@@ -177,8 +187,13 @@ class BuildProjectCard extends StatelessWidget {
                     Expanded(
                       child: CustomText(
                         text:
-                            project.address ??
+                            // project.address ??
+                            //project.unitProject?.blockTownName ??
+                            // project.blockName ??
                             project.unitProject?.districtName ??
+                            project.districtName ??
+                            project.unitProject?.stateName ??
+                            project.stateName ??
                             "No Address Found",
                         maxLines: 2,
                       ),
@@ -218,25 +233,22 @@ class BuildProjectCard extends StatelessWidget {
           //     )
           //     : SizedBox.shrink(),
           const SizedBox(height: AppDimensions.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GradientButton(
-                text:
-                    isShowingCalendar == false
-                        ? "Update Current Status"
-                        : "View Images",
-                onPressed: onPressed,
-              ),
-            ],
-          ),
-          // AuthSubmitButton(
-          //   title: "Update Current Status",
-          //   isEnabled: true,
-          //   height: 44,
-          //   onPressed: onPressed,
-          //   isUrgent: isUrgent ?? false,
-          // ),
+          hideButton == false
+              ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GradientButton(
+                    text:
+                        isShowingCalendar == false
+                            ? showFunctionalButton == false
+                                ? "Update Current Status"
+                                : "Update Functionality"
+                            : "View Images",
+                    onPressed: onPressed,
+                  ),
+                ],
+              )
+              : SizedBox.shrink(),
         ],
       ),
     );

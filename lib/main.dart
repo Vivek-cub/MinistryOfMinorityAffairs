@@ -1,7 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/utils/app_constants.dart';
+import 'package:ministry_of_minority_affairs/firebase_options.dart';
 import 'package:ministry_of_minority_affairs/inject.dart';
 import 'app/core/theme/app_theme.dart';
 import 'app/routes/app_pages.dart';
@@ -14,6 +16,7 @@ void main() async {
   //   fileName: ".env.prod",
   //   //  fileName: "assets/.env.dev",
   // );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await InjectDependencies.inject();
   runApp(const MyApp());
 }
@@ -24,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Nigrani",
+      title: "Pmjvk Nigrani",
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

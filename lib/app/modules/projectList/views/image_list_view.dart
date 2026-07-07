@@ -72,7 +72,7 @@ class ImageListView extends GetView<ImageListController> {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    CustomText(text: role),
+                                    CustomText(text: "Uploaded By :- $role"),
 
                                     const SizedBox(height: 8),
                                     GridView.builder(

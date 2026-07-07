@@ -14,7 +14,6 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/co
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/geofence_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
-import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/location_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
@@ -166,7 +165,7 @@ class UploadProjectDetailsController extends GetxController
     );
 
     Helpers().refreshHomeIfAvailable();
-    Get.offAllNamed(AppRoutes.home);
+    await _navigateToDashboard();
 
     if (showMessage) {
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -208,7 +207,7 @@ class UploadProjectDetailsController extends GetxController
           message: "Your data is submitted successfully",
           onPressed: () async {
             Helpers().refreshHomeIfAvailable();
-            Get.offAllNamed(AppRoutes.home);
+            await _navigateToDashboard();
           },
         );
       } else {
@@ -235,7 +234,7 @@ class UploadProjectDetailsController extends GetxController
 
   // Check Internet
   Future<void> submitData() async {
-    showAlertCustom(backBtnDisable: true, title: "Preparing...");
+    // showAlertCustom(backBtnDisable: true, title: "Preparing...");
     try {
       audioPath = await getAudioPath();
       final rawVideoPath = videoPath.value;
@@ -251,13 +250,13 @@ class UploadProjectDetailsController extends GetxController
         showErrorDialog(Get.context!, message: "Please Select Project Status");
         return;
       }
-      if (statusProgressValue.value == 0) {
-        showErrorDialog(
-          Get.context!,
-          message: "Please select progress of your project",
-        );
-        return;
-      }
+      // if (statusProgressValue.value == 0) {
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message: "Please select progress of your project",
+      //   );
+      //   return;
+      // }
       if (selectedProgress.value == "Completed" &&
           isFunctionalProject.value == null) {
         showErrorDialog(
@@ -277,10 +276,10 @@ class UploadProjectDetailsController extends GetxController
       }
 
       if (hasInternet) {
-        Get.back();
+        // Get.back();
         submitOnline();
       } else {
-        Get.back();
+        //Get.back();
         showMessageDialog(
           Get.context!,
           title: "NO Internet!",
@@ -293,13 +292,13 @@ class UploadProjectDetailsController extends GetxController
 
       isSubmitting.value = false;
     } catch (e) {
-      Get.back();
+      // Get.back();
     }
   }
 
   void selectProgress(String value) {
     selectedProgress.value = value;
-    if (selectedProgress.value == "NotStarted") {
+    if (selectedProgress.value == "Not Started") {
       statusProgressValue(0);
       isLocked(true);
     } else if (selectedProgress.value == "Completed") {
@@ -447,7 +446,7 @@ class UploadProjectDetailsController extends GetxController
         maxDuration: const Duration(minutes: 2),
         onCompressionStarted: () {
           showedLoading = true;
-          showAlertCustom(backBtnDisable: true, title: "Loading...");
+          // showAlertCustom(backBtnDisable: true, title: "Loading...");
         },
       );
 
@@ -456,15 +455,19 @@ class UploadProjectDetailsController extends GetxController
       videoPath.value = compressedFile.path;
       finalVideoPath = compressedFile.path;
     } finally {
-      if (showedLoading && (Get.isDialogOpen ?? false)) {
-        Get.back();
-      }
+      // if (showedLoading && (Get.isDialogOpen ?? false)) {
+      //   Get.back();
+      // }
     }
   }
 
   void clearVideoSelection() {
     videoPath.value = "";
     finalVideoPath = "";
+  }
+
+  Future<void> _navigateToDashboard() async {
+    Get.offAllNamed(await authService.dashboardRoute());
   }
 }
 

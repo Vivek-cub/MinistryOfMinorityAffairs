@@ -56,6 +56,13 @@ class OtpVerificationController extends GetxController
       if (modelData?.statusCode == '200') {
         Get.back();
         await authService.onLogin(modelData?.data?.token ?? '');
+        final role =
+            modelData?.data?.user?.role?.label ??
+            modelData?.data?.user?.role?.name ??
+            '';
+        if (role.isNotEmpty) {
+          await authService.setUserRole(role);
+        }
         final hasPin = await authService.checkPinFromStorage();
 
         Get.offNamed(hasPin ? AppRoutes.pinLogin : AppRoutes.setPin);

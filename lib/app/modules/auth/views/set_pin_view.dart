@@ -22,9 +22,7 @@ class SetPinView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(
-            gradient: OldAppButtonGradientColor.gradient,
-          ),
+          decoration: BoxDecoration(gradient: AppButtonGradientColor.gradient),
           height: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
           child: SingleChildScrollView(

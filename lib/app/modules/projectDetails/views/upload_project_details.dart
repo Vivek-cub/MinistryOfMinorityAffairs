@@ -133,11 +133,12 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                               SelectableProgressCard(
                                 title: "Not Started",
                                 onTap:
-                                    () =>
-                                        controller.selectProgress("NotStarted"),
+                                    () => controller.selectProgress(
+                                      "Not Started",
+                                    ),
                                 isSelected:
                                     controller.selectedProgress.value ==
-                                    "NotStarted",
+                                    "Not Started",
                               ),
 
                               const SizedBox(width: AppDimensions.s),
@@ -146,11 +147,11 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                 title: "OnGoing",
                                 onTap:
                                     () => controller.selectProgress(
-                                      "WorkInProgress",
+                                      "In Progress",
                                     ),
                                 isSelected:
                                     controller.selectedProgress.value ==
-                                    "WorkInProgress",
+                                    "In Progress",
                               ),
 
                               const SizedBox(width: AppDimensions.s),
@@ -206,6 +207,14 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                           progress: controller.statusProgressValue.value,
                           onChanged: (value) {
                             controller.statusProgressValue.value = value;
+                            if (controller.statusProgressValue.value == 100) {
+                              controller.selectedProgress.value = "Completed";
+                              controller.isLocked(true);
+                            }
+                            if (controller.statusProgressValue.value == 0) {
+                              controller.selectedProgress.value = "Not Started";
+                              controller.isLocked(true);
+                            }
                           },
                         ),
                       ),

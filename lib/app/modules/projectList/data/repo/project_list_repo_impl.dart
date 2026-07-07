@@ -7,6 +7,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/category_response.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/financial_year_response_model.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/officer_details_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_response.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
@@ -96,25 +97,25 @@ class ProjectListRepoImpl extends ProjectListRepo
     }
   }
 
-  @override
-  Future<ProjectResponse?> getAssignedProjects() async {
-    try {
-      final resp = await apiService.get(NetworkConstants.assignedProjectList);
-      if (resp.statusCode == HttpStatus.ok) {
-        return ProjectResponse.fromJson(resp.data);
-      } else {
-        ProjectResponse modelData = ProjectResponse();
-        showErrorDialog(
-          Get.context!,
-          title: "Error",
-          message: modelData.statusMessage ?? "Something Went Wrong",
-        );
-        return modelData;
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
+  // @override
+  // Future<ProjectResponse?> getAssignedProjects() async {
+  //   try {
+  //     final resp = await apiService.get(NetworkConstants.assignedProjectList);
+  //     if (resp.statusCode == HttpStatus.ok) {
+  //       return ProjectResponse.fromJson(resp.data);
+  //     } else {
+  //       ProjectResponse modelData = ProjectResponse();
+  //       showErrorDialog(
+  //         Get.context!,
+  //         title: "Error",
+  //         message: modelData.statusMessage ?? "Something Went Wrong",
+  //       );
+  //       return modelData;
+  //     }
+  //   } catch (e) {
+  //     throw Exception(e);
+  //   }
+  // }
 
   @override
   Future<FinancialYearResponseModel?> getAllFinancialYears() async {
@@ -144,6 +145,31 @@ class ProjectListRepoImpl extends ProjectListRepo
         return ProjectResponse.fromJson(resp.data);
       } else {
         ProjectResponse modelData = ProjectResponse();
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
+        return modelData;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  @override
+  Future<OfficerDetailsResponseModel?> getOfficerDetails({
+    required String userId,
+  }) async {
+    try {
+      final resp = await apiService.get(
+        NetworkConstants.getOfficerDetails,
+        query: {"userId": userId},
+      );
+      if (resp.statusCode == HttpStatus.ok) {
+        return OfficerDetailsResponseModel.fromJson(resp.data);
+      } else {
+        OfficerDetailsResponseModel modelData = OfficerDetailsResponseModel();
         showErrorDialog(
           Get.context!,
           title: "Error",

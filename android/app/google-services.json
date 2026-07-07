@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1065924441496",
+    "project_id": "moma-bfd5e",
+    "storage_bucket": "moma-bfd5e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065924441496:android:f4319fca73733d618327ed",
+        "android_client_info": {
+          "package_name": "com.minorityaffairs.ministry_of_minority_affairs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNRDjMoqhkSdo0qR0QkuGkDsswza5JKyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

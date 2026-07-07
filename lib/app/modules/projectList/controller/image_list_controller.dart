@@ -37,8 +37,10 @@ class ImageListController extends GetxController
       if (item.date == null) continue;
 
       final dateKey = DateFormat('dd MMM yyyy').format(item.date!);
-      //final roleKey = item.userRole ?? 'Officer';
-      final roleKey = 'Field Officer';
+
+      final roleKey = item.uploadedBy ?? ' Officer';
+      //final roleKey = 'Field Officer';
+      debugPrint("$roleKey  ${item.uploadedBy}");
 
       grouped.putIfAbsent(dateKey, () => {});
       grouped[dateKey]!.putIfAbsent(roleKey, () => []);

@@ -19,8 +19,8 @@ class PinLoginController extends GetxController with PopupMixin {
     if (isMatched == true) {
       authService.markPinVerifiedForSession();
       Get.back();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offNamed(AppRoutes.home);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        Get.offNamed(await authService.dashboardRoute());
       });
     } else {
       showErrorDialog(

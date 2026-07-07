@@ -28,6 +28,9 @@ class UnitDetails {
   final List<ImageAttachment>? imageAtt;
   final String? videoAtt;
   final String? districtName;
+  final String? stateName;
+  final String? blockName;
+  final int? noOfUnitsFunctional;
 
   UnitDetails({
     this.id,
@@ -54,6 +57,9 @@ class UnitDetails {
     //this.milestones = const [],
     this.videoAtt,
     this.districtName,
+    this.blockName,
+    this.stateName,
+    this.noOfUnitsFunctional,
   });
 
   factory UnitDetails.fromJson(Map<String, dynamic> json) {
@@ -81,8 +87,13 @@ class UnitDetails {
       visitCount: _parseInt(json['visitCount'] ?? project?['visitCount']),
       projectName: _stringValue(
         json['titleOrProjectName'] ??
+            project?['titleOrProjectName'] ??
             project?['projectName'] ??
-            json['projectName'],
+            json['projectName'] ??
+            json['title'] ??
+            project?['title'] ??
+            json['name'] ??
+            project?['name'],
       ),
       year: _stringValue(json['year'] ?? project?['year']),
       lat: _parseDouble(json['lat'] ?? project?['lat']),
@@ -114,6 +125,9 @@ class UnitDetails {
               ? UnitProject.fromJson(responseData)
               : null,
       districtName: _stringValue(json['districtName']),
+      stateName: _stringValue(json['stateName']),
+      blockName: _stringValue(json['blockName']),
+      noOfUnitsFunctional: _parseInt(json["noOfUnitsFunctional"] ?? -1),
     );
   }
 

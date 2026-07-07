@@ -39,4 +39,10 @@ class SvgAssets {
       "${Assets.svgFolderLocation}/non_geotagged.svg";
   static String get filterSvg => "${Assets.svgFolderLocation}/filter.svg";
   static String get cancelSvg => "${Assets.svgFolderLocation}/cancel.svg";
+  static String get workInProgressSvg =>
+      "${Assets.svgFolderLocation}/working_inprogress.svg";
+  static String get notFunctionalSvg =>
+      "${Assets.svgFolderLocation}/not_functional.svg";
+  static String get functionalSvg =>
+      "${Assets.svgFolderLocation}/functional.svg";
 }

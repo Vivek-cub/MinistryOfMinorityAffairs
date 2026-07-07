@@ -1,6 +1,3 @@
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/upload_project_details.dart';
-import 'package:ministry_of_minority_affairs/app/modules/proposals/binding/update_proposal_latlng_binding.dart';
-
 /// Application route names
 /// All route names are defined here as constants for type-safe navigation
 abstract class AppRoutes {
@@ -21,8 +18,11 @@ abstract class AppRoutes {
   static const projectList = '/project-list';
   static const calendarProject = '/calendar-project';
   static const uploadProjectDetails = '/upload-project-details';
+  static const projectFunctional = '/project-functional';
   static const updateProposalLatlng = '/upload-proposal-latlng';
   static const seeImageList = '/see-image-list';
+  static const stateDashboard = '/state-dashboard';
+  static const officerList = '/officer-list';
 
   // Add more routes as needed
 }

@@ -41,6 +41,11 @@ sealed class AppColors {
 
   static const Color lightGrey = Color(0xFFD3D3D3);
   static const Color transparent = Color(0x4D000000);
+
+  static const Color newPrimary = Color(0xFF124f7c);
+  static const Color newPrimaryLight = Color(0xFF1a556c);
+  static const Color newSecondary = Color(0xFF215c60);
+  static const Color newSecondaryLight = Color(0xFF1e5963);
 }
 
 sealed class AppDimensions {
@@ -79,7 +84,12 @@ sealed class CardShadow {
 
 sealed class AppGradientColor {
   static Gradient get gradient => LinearGradient(
-    colors: [Color(0xFF0F4C81), Color(0xFF205B5F)],
+    colors: [
+      AppColors.newPrimary,
+      AppColors.newPrimaryLight,
+      AppColors.newSecondary,
+      AppColors.newSecondaryLight,
+    ],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -106,5 +116,18 @@ sealed class OldAppButtonGradientColor {
     colors: [AppColors.primaryLight, AppColors.primary, AppColors.primaryDark],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
+  );
+}
+
+sealed class AppButtonGradientColor {
+  static Gradient get gradient => LinearGradient(
+    colors: [
+      AppColors.newPrimary,
+      AppColors.newPrimaryLight,
+      AppColors.newSecondary,
+      AppColors.newSecondaryLight,
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
 }

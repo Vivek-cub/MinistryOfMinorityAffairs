@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 enum SStorageKeys {
   token,
   userId,
+  userRole,
   mobilePin,
   simFingerprint,
-
 }
 
 class SStorageService extends GetxService {

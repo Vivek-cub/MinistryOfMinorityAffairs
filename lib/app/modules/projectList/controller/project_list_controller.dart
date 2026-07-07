@@ -32,7 +32,8 @@ class ProjectListController extends GetxController
   final isYearDropdownOpen = false.obs;
 
   // Loading state
-  final isLoading = true.obs;
+  RxBool isLoading = true.obs;
+  RxBool isDataLoaded = false.obs;
 
   RxString status = "".obs;
   RxBool geoStatus = false.obs;
@@ -46,8 +47,17 @@ class ProjectListController extends GetxController
   final RxList<Category> category = <Category>[].obs;
   final RxList<FinancialYearName> yearName = <FinancialYearName>[].obs;
   final Rx<Category?> selectedCategory = Rx<Category?>(null);
+  RxBool showFunctionalButton = false.obs;
 
   RxBool isFilterSelected = false.obs;
+  RxString userId = "".obs;
+  final searchController = TextEditingController();
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
 
   @override
   void onInit() {
@@ -59,6 +69,7 @@ class ProjectListController extends GetxController
       geoStatus.value = args['geoStatus'] ?? false;
       isShowingCalendar.value = args['showCalendar'] ?? false;
       statusFilter.value = args['statusFilter']?.toString() ?? '';
+      userId.value = args['userId']?.toString() ?? '';
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!isClosed) {
@@ -66,6 +77,7 @@ class ProjectListController extends GetxController
         checkParamToLoadProject();
       }
     });
+
     getAllSector();
     getAllFinancialYears();
   }
@@ -77,6 +89,8 @@ class ProjectListController extends GetxController
       loadOfflineProjects();
     } else if (paramName.value == "pending") {
       loadPendingProjects();
+    } else if (paramName.value == "officer") {
+      getOfficerDetails();
     } else {
       loadProjects();
     }
@@ -85,6 +99,8 @@ class ProjectListController extends GetxController
   void loadProjects() async {
     try {
       isLoading(true);
+      isDataLoaded(false);
+
       String sectorId = "";
       if (selectedCategory.value != null) {
         sectorId = selectedCategory.value?.id ?? "";
@@ -104,12 +120,15 @@ class ProjectListController extends GetxController
       // isLoading(false);
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
-          projects.value = modelData!.data?.projects ?? [];
-          allProjects.value = List.from(modelData.data?.projects ?? []);
+          final fetchedProjects = modelData?.data?.projects ?? [];
+
+          projects.assignAll(fetchedProjects);
+          allProjects.assignAll(fetchedProjects);
+          // projects.value = modelData!.data?.projects ?? [];
+          // allProjects.value = List.from(modelData.data?.projects ?? []);
         }
-      } else {
-        Get.snackbar("Error", "Failed to fetch dashboard data");
       }
+      isDataLoaded(true);
     } catch (e) {
       throw Exception(e);
     } finally {
@@ -120,6 +139,7 @@ class ProjectListController extends GetxController
   void loadProjectsbyGeoTagged() async {
     try {
       isLoading(true);
+      isDataLoaded(false);
       String sectorId = "";
       if (selectedCategory.value != null) {
         sectorId = selectedCategory.value?.id ?? "";
@@ -139,12 +159,15 @@ class ProjectListController extends GetxController
 
       if (modelData?.statusCode == "200") {
         if (modelData?.data != null && modelData?.data?.projects != null) {
-          projects.value = modelData!.data?.projects ?? [];
-          allProjects.value = List.from(modelData.data?.projects ?? []);
+          final fetchedProjects = modelData?.data?.projects ?? [];
+
+          projects.assignAll(fetchedProjects);
+          allProjects.assignAll(fetchedProjects);
+          // projects.value = modelData!.data?.projects ?? [];
+          // allProjects.value = List.from(modelData.data?.projects ?? []);
         }
-      } else {
-        Get.snackbar("Error", "Failed to fetch dashboard data");
       }
+      isDataLoaded(true);
     } catch (e) {
       throw e;
     } finally {
@@ -154,6 +177,7 @@ class ProjectListController extends GetxController
 
   Future<void> loadOfflineProjects() async {
     isLoading(true);
+    isDataLoaded(false);
 
     try {
       final userId = await authService.getUserToken();
@@ -181,6 +205,7 @@ class ProjectListController extends GetxController
               .toList();
 
       allProjects.value = List.from(projects);
+      isDataLoaded(true);
     } finally {
       isLoading(false);
     }
@@ -200,11 +225,19 @@ class ProjectListController extends GetxController
 
     final filtered =
         allProjects.where((project) {
-          final name = project.unitDetails?.projectName?.toLowerCase() ?? '';
+          final unitDetails = project.displayUnitDetails;
+          final name =
+              (unitDetails.projectName ??
+                      unitDetails.unitProject?.projectName ??
+                      '')
+                  .toLowerCase();
           final address =
-              project.unitDetails?.unitProject?.districtName?.toLowerCase() ??
-              '';
-          final id = project.unitDetails?.unitCode?.toLowerCase() ?? '';
+              (unitDetails.address ??
+                      unitDetails.unitProject?.districtName ??
+                      unitDetails.districtName ??
+                      '')
+                  .toLowerCase();
+          final id = unitDetails.unitCode?.toLowerCase() ?? '';
           debugPrint("check $id");
 
           return name.contains(query) ||
@@ -221,6 +254,13 @@ class ProjectListController extends GetxController
     required String id,
     required UserProject? userProject,
   }) {
+    // if (projectStatus == "Completed") {
+    //   Get.toNamed(
+    //     AppRoutes.projectFunctional,
+    //     arguments: {"project": project, "status": projectStatus},
+    //   );
+    //   return;
+    // }
     if (isShowingCalendar.value == true) {
       Get.toNamed(
         AppRoutes.calendarProject,
@@ -237,34 +277,7 @@ class ProjectListController extends GetxController
         },
       );
     }
-    // if (status.value == "Proposal") {
-    //   Get.toNamed(
-    //     AppRoutes.uploadProjectDetails,
-    //     arguments: {"project": project, "status": projectStatus},
-    //   );
-    // } else {
-    //   Get.toNamed(
-    //     AppRoutes.workDetail,
-    //     arguments: {"project": project, "status": projectStatus},
-    //   );
-    // }
   }
-
-  // List<String> get years => [
-  //   '2013',
-  //   '2014',
-  //   '2015',
-  //   '2016',
-  //   '2017',
-  //   '2018',
-  //   '2019',
-  //   '2020',
-  //   '2021',
-  //   '2022',
-  //   '2023',
-  //   '2024',
-  //   '2025',
-  // ];
 
   Future<void> getAllSector() async {
     try {
@@ -307,6 +320,7 @@ class ProjectListController extends GetxController
   void loadPendingProjects() async {
     try {
       isLoading(true);
+      isDataLoaded(false);
 
       final modelData = await repo.getPendingProjectList();
 
@@ -315,9 +329,28 @@ class ProjectListController extends GetxController
           projects.value = modelData!.data?.projects ?? [];
           allProjects.value = List.from(modelData.data?.projects ?? []);
         }
-      } else {
-        Get.snackbar("Error", "Failed to fetch dashboard data");
       }
+      isDataLoaded(true);
+    } catch (e) {
+      throw Exception(e);
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  void getOfficerDetails() async {
+    try {
+      isLoading(true);
+      isDataLoaded(false);
+      final modelData = await repo.getOfficerDetails(userId: userId.value);
+      // isLoading(false);
+      if (modelData?.statusCode == "200") {
+        if (modelData?.data != null && modelData?.data?.projects != null) {
+          projects.value = modelData!.data?.projects ?? [];
+          allProjects.value = List.from(modelData.data?.projects ?? []);
+        }
+      }
+      isDataLoaded(true);
     } catch (e) {
       throw Exception(e);
     } finally {
@@ -325,3 +358,32 @@ class ProjectListController extends GetxController
     }
   }
 }
+
+// List<String> get years => [
+  //   '2013',
+  //   '2014',
+  //   '2015',
+  //   '2016',
+  //   '2017',
+  //   '2018',
+  //   '2019',
+  //   '2020',
+  //   '2021',
+  //   '2022',
+  //   '2023',
+  //   '2024',
+  //   '2025',
+  // ];
+
+
+  // if (status.value == "Proposal") {
+    //   Get.toNamed(
+    //     AppRoutes.uploadProjectDetails,
+    //     arguments: {"project": project, "status": projectStatus},
+    //   );
+    // } else {
+    //   Get.toNamed(
+    //     AppRoutes.workDetail,
+    //     arguments: {"project": project, "status": projectStatus},
+    //   );
+    // }

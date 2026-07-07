@@ -62,91 +62,130 @@ class BuildStatCard extends StatelessWidget {
             ),
             child: SvgPicture.asset(icon ?? "", color: iconColor),
           ),
+
           //const SizedBox(height: 12),
-          CustomText(
-            text: title ?? "",
-            textAlign: TextAlign.center,
-            color: AppColors.textPrimary,
-            maxLines: 3,
+          // SizedBox(
+          //   // height: 35,
+          //   child: CustomText(
+          //     text: title ?? "",
+          //     textAlign: TextAlign.center,
+          //     color: AppColors.textPrimary,
+          //     maxLines: 3,
+          //   ),
+          // ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final textPainter = TextPainter(
+                text: TextSpan(
+                  text: title ?? "",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                textDirection: TextDirection.ltr,
+                maxLines: 3,
+              )..layout(maxWidth: constraints.maxWidth);
+
+              final isSingleLine = textPainter.computeLineMetrics().length == 1;
+
+              return SizedBox(
+                height: 35,
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: isSingleLine ? 10 : 0),
+                    child: CustomText(
+                      text: title ?? "",
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-          HeaderText(text: "($value) ", color: AppColors.textPrimary),
+          Spacer(),
+          HeaderText(text: "$value ", color: AppColors.textPrimary),
         ],
       ),
     );
   }
 }
 
-class BuildModernStatCard extends StatelessWidget {
-  final String title;
-  final int value;
-  final String icon;
-  final VoidCallback onTap;
+// class BuildModernStatCard extends StatelessWidget {
+//   final String title;
+//   final int value;
+//   final String icon;
+//   final VoidCallback onTap;
 
-  const BuildModernStatCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.onTap,
-  });
+//   const BuildModernStatCard({
+//     super.key,
+//     required this.title,
+//     required this.value,
+//     required this.icon,
+//     required this.onTap,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
+//   @override
+//   Widget build(BuildContext context) {
+//     return InkWell(
+//       borderRadius: BorderRadius.circular(18),
+//       onTap: onTap,
+//       child: Container(
+//         padding: const EdgeInsets.all(16),
 
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+//         decoration: BoxDecoration(
+//           color: Colors.white.withValues(alpha: 0.12),
 
-          borderRadius: BorderRadius.circular(18),
+//           borderRadius: BorderRadius.circular(18),
 
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+//           border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
 
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black.withValues(alpha: 0.08),
+//               blurRadius: 16,
+//               offset: const Offset(0, 4),
+//             ),
+//           ],
+//         ),
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(icon, height: 28, color: Colors.white),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             SvgPicture.asset(icon, height: 28, color: Colors.white),
 
-            const SizedBox(height: 12),
+//             const SizedBox(height: 12),
 
-            Text(
-              value.toString(),
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
+//             SizedBox(
+//               child: Text(
+//                 value.toString(),
+//                 style: const TextStyle(
+//                   fontSize: 24,
+//                   fontWeight: FontWeight.w700,
+//                   color: Colors.white,
+//                 ),
+//               ),
+//             ),
 
-            const SizedBox(height: 6),
+//             const SizedBox(height: 6),
 
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+//             Text(
+//               title,
+//               textAlign: TextAlign.center,
+//               maxLines: 2,
+//               overflow: TextOverflow.ellipsis,
 
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.3,
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//               style: TextStyle(
+//                 fontSize: 13,
+//                 height: 1.3,
+//                 color: Colors.white.withValues(alpha: 0.9),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

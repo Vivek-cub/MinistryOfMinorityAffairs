@@ -48,12 +48,14 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Location is required for attendance verification</string>
+	<string>Location is required for Geofencing</string>
 
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Location is required for attendance verification</string>
+	<string>Location is required for Geofencing</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Audio recording is required for this feature</string>
+	<string>This permission is required to record the audio</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Permission is required to upload images</string>
 
 
 </dict>

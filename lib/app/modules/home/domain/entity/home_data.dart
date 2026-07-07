@@ -9,6 +9,8 @@ class HomeData {
   int? nonGeoTagged;
   int? totalCompleted;
   int? projectsNotVisitedFor3Months;
+  int? totalFunctional;
+  int? totalNonFunctional;
   User? user;
 
   HomeData({
@@ -20,6 +22,8 @@ class HomeData {
     this.nonGeoTagged,
     this.totalCompleted,
     this.projectsNotVisitedFor3Months,
+    this.totalFunctional,
+    this.totalNonFunctional,
     this.user,
   });
 
@@ -32,6 +36,8 @@ class HomeData {
     nonGeoTagged: json['nonGeoTagged'],
     totalCompleted: json['totalCompleted'],
     projectsNotVisitedFor3Months: json['projectsNotVisitedFor3Months'],
+    totalFunctional: json['totalFunctional'],
+    totalNonFunctional: json['totalNonFunctional'],
     user: json['user'] != null ? User.fromJson(json['user']) : null,
   );
 }

@@ -1,11 +1,12 @@
 class ImageAttachment {
   final DateTime? date;
   final String? images;
-  // final String? userRole;
+  final String? uploadedBy;
 
   ImageAttachment({
     this.date,
     this.images,
+    this.uploadedBy,
     // this.userRole
   });
 
@@ -13,6 +14,7 @@ class ImageAttachment {
     return ImageAttachment(
       date: _parseDate(json['createdAt']),
       images: json['path'],
+      uploadedBy: json['uploadedBy'],
       // userRole: json['userRole'],
       // images: (json['path'] as List?)?.map((e) => e.toString()).toList(),
     );

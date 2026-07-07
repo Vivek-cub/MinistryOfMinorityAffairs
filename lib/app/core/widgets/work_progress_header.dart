@@ -44,7 +44,7 @@ class WorkProgressHeader extends StatelessWidget {
           bottomLeft: Radius.circular(12),
           bottomRight: Radius.circular(12),
         ),
-        gradient: OldAppGradientColor.gradient,
+        gradient: AppGradientColor.gradient,
       ),
       padding: EdgeInsets.fromLTRB(2, statusBarHeight + 20, 4, 20),
       child: Column(

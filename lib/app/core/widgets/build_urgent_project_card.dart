@@ -15,11 +15,15 @@ class BuildUrgentProjectCard extends StatelessWidget {
   final VoidCallback? onPressed;
   bool? isUrgent = false;
   bool? isShowingCalendar = false;
+  bool? showFunctionalButton = false;
+  bool? hideButton = false;
   BuildUrgentProjectCard({
     required this.project,
     required this.onPressed,
     required this.isUrgent,
     required this.isShowingCalendar,
+    required this.showFunctionalButton,
+    required this.hideButton,
   });
   @override
   Widget build(BuildContext context) {
@@ -184,18 +188,22 @@ class BuildUrgentProjectCard extends StatelessWidget {
           //     )
           //     : SizedBox.shrink(),
           const SizedBox(height: AppDimensions.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GradientButton(
-                text:
-                    isShowingCalendar == false
-                        ? "Update Current Status"
-                        : "View Images",
-                onPressed: onPressed,
-              ),
-            ],
-          ),
+          hideButton == false
+              ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GradientButton(
+                    text:
+                        isShowingCalendar == false
+                            ? showFunctionalButton == false
+                                ? "Update Current Status"
+                                : "Update Functionality"
+                            : "View Images",
+                    onPressed: onPressed,
+                  ),
+                ],
+              )
+              : SizedBox.shrink(),
           // AuthSubmitButton(
           //   title: "Update Current Status",
           //   isEnabled: true,

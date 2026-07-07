@@ -5,14 +5,13 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
-import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import 'package:ministry_of_minority_affairs/app/utils/lanuage_constant.dart';
 
 class BuildDrawer extends StatelessWidget {
-  HomeController controller;
+  final dynamic controller;
   BuildDrawer({super.key, required this.controller});
 
   @override
@@ -25,7 +24,9 @@ class BuildDrawer extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-              decoration: BoxDecoration(gradient: OldAppGradientColor.gradient),
+              decoration: BoxDecoration(
+                gradient: AppButtonGradientColor.gradient,
+              ),
 
               child: Column(
                 children: [
@@ -133,13 +134,40 @@ class BuildDrawer extends StatelessWidget {
                                   color: AppColors.textPrimary,
                                 ),
                               ),
-
-                              CustomText(
-                                text:
-                                    controller.data.value.user?.phoneNumber ??
-                                    "",
-                                color: AppColors.textSecondary,
+                              Obx(
+                                () => CustomText(
+                                  text:
+                                      controller.data.value.user?.phoneNumber ??
+                                      "",
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
+                              Obx(
+                                //sew
+                                () => CustomText(
+                                  text: controller.userRole.value,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+
+                              // FutureBuilder<bool>(
+                              //   future: controller.authService.isStateOfficer(),
+                              //   builder: (context, snapshot) {
+                              //     if (snapshot.data != false) {
+                              //       return const SizedBox.shrink();
+                              //     }
+                              //     return CustomText(
+                              //       text:
+                              //           controller
+                              //               .data
+                              //               .value
+                              //               .user
+                              //               ?.phoneNumber ??
+                              //           "",
+                              //       color: AppColors.textSecondary,
+                              //     );
+                              //   },
+                              // ),
                             ],
                           ),
                         ),
@@ -150,52 +178,65 @@ class BuildDrawer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            _buildDrawerItem(
-              icon: Icons.dashboard,
-              title: 'Dashboard',
-              onTap: () {
-                Get.back();
-                Get.toNamed(AppRoutes.home);
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.task,
-              title: 'Completed Project',
-              onTap: () {
-                Get.back();
-                Get.toNamed(
-                  AppRoutes.projectList,
-                  arguments: {
-                    'status': "Completed",
-                    'paramName': "status",
-                    'statusFilter': "completed",
-                  },
+            FutureBuilder<bool>(
+              future: controller.authService.isStateOfficer(),
+              builder: (context, snapshot) {
+                if (snapshot.data != false) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  children: [
+                    _buildDrawerItem(
+                      icon: Icons.dashboard,
+                      title: 'Dashboard',
+                      onTap: () {
+                        Get.back();
+                        Get.toNamed(AppRoutes.home);
+                      },
+                    ),
+                    _buildDrawerItem(
+                      icon: Icons.task,
+                      title: 'Completed Project',
+                      onTap: () {
+                        Get.back();
+                        Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "Completed",
+                            'paramName': "status",
+                            'statusFilter': "completed",
+                          },
+                        );
+                      },
+                    ),
+                    _buildDrawerItem(
+                      icon: Icons.lock_outline,
+                      title: 'Change PIN',
+                      onTap: () {
+                        Get.back();
+                        Get.toNamed(AppRoutes.oldPinCheck);
+                      },
+                    ),
+                    _buildDrawerItem(
+                      icon: Icons.calendar_month,
+                      title: 'Calender',
+                      onTap: () {
+                        Get.back();
+                        Get.toNamed(
+                          AppRoutes.projectList,
+                          arguments: {
+                            'status': "All",
+                            'paramName': "status",
+                            'statusFilter': "All",
+                            'showCalendar': true,
+                          },
+                        );
+                        // Get.toNamed(AppRoutes.calendarProject);
+                      },
+                    ),
+                  ],
                 );
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.lock_outline,
-              title: 'Change PIN',
-              onTap: () {
-                Get.back();
-                Get.toNamed(AppRoutes.oldPinCheck);
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.calendar_month,
-              title: 'Calender',
-              onTap: () {
-                Get.back();
-                Get.toNamed(
-                  AppRoutes.projectList,
-                  arguments: {
-                    'status': "All",
-                    'paramName': "status",
-                    'statusFilter': "All",
-                    'showCalendar': true,
-                  },
-                );
-                // Get.toNamed(AppRoutes.calendarProject);
               },
             ),
             const Spacer(),

@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/modules/calender/bindings/calendar_project_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/calender/views/calendar_project.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/binding/project_functional_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/view/project_functional_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/pin/bindings/check_old_pin_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/pin/views/check_old_pin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/upload_project_details_binding.dart';
@@ -26,6 +28,10 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/views/pin_login_vi
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/binding/work_detail_binding.dart';
 
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/views/work_detail_view.dart';
+import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/binding/state_dashboard_binding.dart';
+import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/view/state_dashboard.dart';
+import 'package:ministry_of_minority_affairs/app/stateModules/officerLIst/binding/officer_list_view_binding.dart';
+import 'package:ministry_of_minority_affairs/app/stateModules/officerLIst/view/officer_list_view.dart';
 import 'app_routes.dart';
 
 /// Application pages and route configuration
@@ -107,6 +113,13 @@ class AppPages {
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
+      name: AppRoutes.projectFunctional,
+      page: () => const ProjectFunctionalView(),
+      binding: ProjectFunctionalBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
       name: AppRoutes.calendarProject,
       page: () => CalendarProject(),
       binding: CalendarProjectBinding(),
@@ -124,6 +137,20 @@ class AppPages {
       name: AppRoutes.seeImageList,
       page: () => ImageListView(),
       binding: ImageListBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.stateDashboard,
+      page: () => StateDashboard(),
+      binding: StateDashboardBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.officerList,
+      page: () => OfficerListView(),
+      binding: OfficerListViewBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

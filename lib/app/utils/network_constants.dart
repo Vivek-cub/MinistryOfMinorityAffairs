@@ -10,8 +10,8 @@ sealed class NetworkConstants {
   static final String projectList = "api/v1/pms/mobile/getProjectByStatus";
   static final String uploadMilestoneFiles =
       "api/v1/pms/mobile/uploadMilestoneFiles";
-  static final String assignedProjectList =
-      "api/v1/pms/mobile/getAllAssignedProjects";
+  // static final String assignedProjectList =
+  //     "api/v1/pms/mobile/getAllAssignedProjects";
   static final String getAllSector = "api/v1/pms/master/getAllSectors";
   static final String getAllFinancialYears =
       "api/v1/pms/master/getAllFinancialYears";
@@ -19,4 +19,9 @@ sealed class NetworkConstants {
   static final String updateLatLng = "api/v1/pms/mobile/updateLatLng";
   static final String pendingProjectList =
       "api/v1/pms/mobile/getProjectNotVisited";
+  static final String stateDashboard = "api/v1/pms/mobile/stateDashboard";
+  static final String stateOfficerList =
+      "api/v1/pms/mobile/getStateProjectByStatus";
+
+  static final String getOfficerDetails = "api/v1/pms/mobile/getOfficerDetails";
 }

@@ -99,6 +99,13 @@ class BuildUrgentWorkList extends StatelessWidget {
                                 },
                                 isUrgent: true,
                                 isShowingCalendar: false,
+                                showFunctionalButton:
+                                    project.unitDetails?.noOfUnitsFunctional ==
+                                    0,
+                                hideButton:
+                                    project.unitDetails?.noOfUnitsFunctional ==
+                                        1 &&
+                                    project.status == "Completed",
                               ),
                             ),
                           );
