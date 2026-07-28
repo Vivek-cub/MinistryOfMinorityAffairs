@@ -13,6 +13,7 @@ class AuthService extends GetxService {
   final RxBool _loggedIn = false.obs;
   final RxnString _token = RxnString();
   final RxnString _userId = RxnString();
+  final RxnString _fcmToken = RxnString();
   final RxnString _userRole = RxnString();
   final RxnString _pin = RxnString();
   final RxBool _isPinSet = false.obs;
@@ -43,7 +44,6 @@ class AuthService extends GetxService {
     if (tokenValue == null) return false;
 
     await storage.writeKey(key: SStorageKeys.token, value: tokenValue);
-
     _token(tokenValue);
     _loggedIn(true);
     return true;
@@ -112,6 +112,11 @@ class AuthService extends GetxService {
     _userId(userId);
   }
 
+  Future<void> setFcmToken(String fcmToken) async {
+    await storage.writeKey(key: SStorageKeys.fcmToken, value: fcmToken);
+    _fcmToken(fcmToken);
+  }
+
   Future<void> setUserRole(String role) async {
     await storage.writeKey(key: SStorageKeys.userRole, value: role);
     _userRole(role);
@@ -131,6 +136,8 @@ class AuthService extends GetxService {
 
   Future<String?> getUserToken() async =>
       storage.readKey(key: SStorageKeys.token);
+  Future<String?> getFcmToken() async =>
+      storage.readKey(key: SStorageKeys.fcmToken);
 
   Future<String?> getUserId() async =>
       storage.readKey(key: SStorageKeys.userId);

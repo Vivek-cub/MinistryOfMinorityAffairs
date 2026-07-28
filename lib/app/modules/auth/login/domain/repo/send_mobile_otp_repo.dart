@@ -3,10 +3,10 @@ import 'package:ministry_of_minority_affairs/app/modules/auth/login/data/model/v
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/domain/entity/verify_mobile_otp.dart';
 
 abstract class SendMobileOtpRepo {
-  Future<SendMobileOtpRespModel?> sendMobileOtp({
-      required String mobileNo
-  });
+  Future<SendMobileOtpRespModel?> sendMobileOtp({required String mobileNo});
   Future<VerifyMobileOtpRespModel?> verifyOTP({
-      required String mobileNo,required String otp
+    required String mobileNo,
+    required String otp,
+    required String fcmToken,
   });
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
@@ -5,6 +6,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart'
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/domain/repo/send_mobile_otp_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/firebaseService/firebase_notification_service.dart';
 
 class OtpVerificationController extends GetxController
     with SnackBarMixin, PopupMixin {
@@ -39,8 +41,13 @@ class OtpVerificationController extends GetxController
   void verifyOTP(String otp) async {
     // if (!isButtonEnabled.value) return;
     // String enteredOtp=getOTP();
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+
+    debugPrint("Fcm Token: $fcmToken");
+
     if (otp.length != 4) {
       showErrorDialog(Get.context!, message: "Please fill correct otp");
+      return;
     }
 
     try {
@@ -51,14 +58,15 @@ class OtpVerificationController extends GetxController
       final modelData = await sendMobileOtpRepo.verifyOTP(
         mobileNo: phoneNumber.value,
         otp: otp,
+        fcmToken: fcmToken ?? "",
       );
 
       if (modelData?.statusCode == '200') {
         Get.back();
         await authService.onLogin(modelData?.data?.token ?? '');
         final role =
-            modelData?.data?.user?.role?.label ??
             modelData?.data?.user?.role?.name ??
+            modelData?.data?.user?.role?.label ??
             '';
         if (role.isNotEmpty) {
           await authService.setUserRole(role);

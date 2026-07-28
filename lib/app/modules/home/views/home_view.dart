@@ -243,48 +243,48 @@ class HomeView extends GetView<HomeController> {
                     ],
                   ),
 
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: BuildStatCard(
-                  //         title: 'Functional',
-                  //         value: controller.data.value.totalFunctional ?? 0,
-                  //         icon: SvgAssets.functionalSvg,
-                  //         iconColor: AppColors.info,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Functional',
+                          value: controller.data.value.totalFunctional ?? 0,
+                          icon: SvgAssets.functionalSvg,
+                          iconColor: AppColors.info,
 
-                  //         onTap: () {
-                  //           Get.toNamed(
-                  //             AppRoutes.projectList,
-                  //             arguments: {
-                  //               'status': "Functional",
-                  //               'paramName': "status",
-                  //               'statusFilter': "completed",
-                  //             },
-                  //           );
-                  //         },
-                  //       ),
-                  //     ),
-                  //     Expanded(
-                  //       child: BuildStatCard(
-                  //         title: 'Not Functional',
-                  //         value: controller.data.value.totalNonFunctional ?? 0,
-                  //         icon: SvgAssets.notFunctionalSvg,
-                  //         iconColor: AppColors.warning,
-                  //         onTap: () {
-                  //           Get.toNamed(
-                  //             AppRoutes.projectList,
-                  //             arguments: {
-                  //               'status': "Not Functional",
-                  //               //'status': "All",
-                  //               'paramName': "status",
-                  //               'statusFilter': "completed",
-                  //             },
-                  //           );
-                  //         },
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "Functional",
+                                'paramName': "status",
+                                'statusFilter': "completed",
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: BuildStatCard(
+                          title: 'Not Functional',
+                          value: controller.data.value.totalNonFunctional ?? 0,
+                          icon: SvgAssets.notFunctionalSvg,
+                          iconColor: AppColors.warning,
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.projectList,
+                              arguments: {
+                                'status': "Not Functional",
+                                //'status': "All",
+                                'paramName': "status",
+                                'statusFilter': "completed",
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             );

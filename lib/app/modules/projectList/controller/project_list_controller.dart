@@ -169,7 +169,7 @@ class ProjectListController extends GetxController
       }
       isDataLoaded(true);
     } catch (e) {
-      throw e;
+      throw Exception(e);
     } finally {
       isLoading(false);
     }
@@ -253,14 +253,16 @@ class ProjectListController extends GetxController
     required String projectStatus,
     required String id,
     required UserProject? userProject,
+    required int noOfUnitsFunctional,
   }) {
-    // if (projectStatus == "Completed") {
-    //   Get.toNamed(
-    //     AppRoutes.projectFunctional,
-    //     arguments: {"project": project, "status": projectStatus},
-    //   );
-    //   return;
-    // }
+    if (projectStatus == "Completed" &&
+        (noOfUnitsFunctional == -1 || noOfUnitsFunctional == 0)) {
+      Get.toNamed(
+        AppRoutes.projectFunctional,
+        arguments: {"project": project, "status": projectStatus, "id": id},
+      );
+      return;
+    }
     if (isShowingCalendar.value == true) {
       Get.toNamed(
         AppRoutes.calendarProject,
@@ -292,7 +294,7 @@ class ProjectListController extends GetxController
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
     } catch (e) {
-      throw e;
+      throw Exception(e);
     } finally {
       isLoading(false);
     }
@@ -311,7 +313,7 @@ class ProjectListController extends GetxController
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
     } catch (e) {
-      throw e;
+      throw Exception(e);
     } finally {
       isLoading(false);
     }

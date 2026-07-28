@@ -24,4 +24,6 @@ sealed class NetworkConstants {
       "api/v1/pms/mobile/getStateProjectByStatus";
 
   static final String getOfficerDetails = "api/v1/pms/mobile/getOfficerDetails";
+  static final String updateFunctionality =
+      "api/v1/pms/mobile/updateFunctionality";
 }

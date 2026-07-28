@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
+import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
@@ -31,6 +33,7 @@ class HomeController extends GetxController
   final AuthService authService;
   final SubmissionRepository submissionRepo;
   final ProjectDetailRepo projectRepo;
+  final ProjectFunctionalRepo functionalRepo;
 
   HomeController(
     this.repo,
@@ -38,6 +41,7 @@ class HomeController extends GetxController
     this.submissionRepo,
     this.projectRepo,
     this.projectListRepo,
+    this.functionalRepo,
   );
   final userName = ''.obs;
   final assignedState = ''.obs;
@@ -125,7 +129,16 @@ class HomeController extends GetxController
     String id,
     UserProject userProject,
     bool fromUrgentList,
+    int noOfUnitsFunctional,
   ) {
+    if (status == "Completed" &&
+        (noOfUnitsFunctional == -1 || noOfUnitsFunctional == 0)) {
+      Get.toNamed(
+        AppRoutes.projectFunctional,
+        arguments: {"project": project, "status": status, "id": id},
+      );
+      return;
+    }
     Get.toNamed(
       AppRoutes.uploadProjectDetails,
       arguments: {
@@ -165,7 +178,9 @@ class HomeController extends GetxController
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
-    } catch (e) {}
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   Future<void> syncPendingSubmissions() async {
@@ -179,6 +194,20 @@ class HomeController extends GetxController
 
     for (final item in pendingList) {
       try {
+        if (item.submission.progress ==
+            OfflineSubmissionType.functionalProject) {
+          final response = await functionalRepo.updateFunctionality(
+            projectId: item.submission.projectId,
+            isFunctional: item.submission.projectStatus == 'true',
+            videoPath: item.video?.filePath,
+          );
+
+          if (response.statusCode == '200') {
+            await _cleanupUploadedSubmission(item, userId);
+          }
+          continue;
+        }
+
         await _logUploadMediaSizes(
           imagePaths: item.images.map((e) => e.filePath).toList(),
           audioPath: item.audio?.filePath,
@@ -200,7 +229,9 @@ class HomeController extends GetxController
         if (response.statusCode == '200') {
           await _cleanupUploadedSubmission(item, userId);
         }
-      } catch (_) {}
+      } catch (e) {
+        throw Exception(e);
+      }
     }
   }
 
@@ -285,7 +316,7 @@ class HomeController extends GetxController
       }
     } catch (e) {
       Get.back();
-    } finally {}
+    }
   }
 
   Future<void> takePhoto() async {
@@ -317,7 +348,7 @@ class HomeController extends GetxController
       }
     } catch (e) {
       Get.snackbar("Error", "Failed to fetch dashboard");
-    } finally {}
+    }
   }
 
   Future<void> loadPendingProjectList() async {
@@ -332,7 +363,7 @@ class HomeController extends GetxController
       }
     } catch (e) {
       Get.snackbar("Error", "Failed to fetch dashboard data");
-    } finally {}
+    }
   }
 }
 

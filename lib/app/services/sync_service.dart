@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_disposable.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
+import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
@@ -15,8 +17,9 @@ import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 class SyncService extends GetxService {
   final SubmissionRepository repository;
   final ProjectDetailRepo repo;
+  final ProjectFunctionalRepo functionalRepo;
 
-  SyncService(this.repository, this.repo);
+  SyncService(this.repository, this.repo, this.functionalRepo);
 
   Future<void> _syncPendingSubmissions() async {
     final hasInternet = await NetworkService.hasInternet();
@@ -28,6 +31,20 @@ class SyncService extends GetxService {
 
     for (final item in pendingList) {
       try {
+        if (item.submission.progress ==
+            OfflineSubmissionType.functionalProject) {
+          final response = await functionalRepo.updateFunctionality(
+            projectId: item.submission.projectId,
+            isFunctional: item.submission.projectStatus == 'true',
+            videoPath: item.video?.filePath,
+          );
+
+          if (response.statusCode == '200') {
+            await _cleanupUploadedSubmission(item, userId);
+          }
+          continue;
+        }
+
         await _logUploadMediaSizes(
           imagePaths: item.images.map((e) => e.filePath).toList(),
           audioPath: item.audio?.filePath,
@@ -49,7 +66,9 @@ class SyncService extends GetxService {
         if (response.statusCode == '200') {
           await _cleanupUploadedSubmission(item, userId);
         }
-      } catch (_) {}
+      } catch (e) {
+        throw Exception(e);
+      }
     }
   }
 

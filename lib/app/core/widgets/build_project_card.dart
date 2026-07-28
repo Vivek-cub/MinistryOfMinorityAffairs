@@ -3,6 +3,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/project_details_bottom_sheet.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
@@ -104,14 +105,18 @@ class BuildProjectCard extends StatelessWidget {
             children: [
               Expanded(
                 flex: 5,
-                child: TitleText(
-                  text: projectTitle,
-                  fontWeight: FontWeight.bold,
-                  maxLines: 2,
-                  color:
-                      isUrgent == false
-                          ? AppColors.textPrimary
-                          : AppColors.error,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(4),
+                  onTap: () => _showProjectDetails(project),
+                  child: TitleText(
+                    text: projectTitle,
+                    fontWeight: FontWeight.bold,
+                    maxLines: 2,
+                    color:
+                        isUrgent == false
+                            ? AppColors.textPrimary
+                            : AppColors.error,
+                  ),
                 ),
               ),
               thumbnail != "" && thumbnail != null
@@ -251,6 +256,14 @@ class BuildProjectCard extends StatelessWidget {
               : SizedBox.shrink(),
         ],
       ),
+    );
+  }
+
+  void _showProjectDetails(UnitDetails project) {
+    Get.bottomSheet(
+      ProjectDetailsBottomSheet(project: project),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:ministry_of_minority_affairs/app/utils/app_constants.dart';
 import 'package:ministry_of_minority_affairs/firebase_options.dart';
 import 'package:ministry_of_minority_affairs/inject.dart';
 import 'app/core/theme/app_theme.dart';
@@ -16,7 +16,6 @@ void main() async {
   //   fileName: ".env.prod",
   //   //  fileName: "assets/.env.dev",
   // );
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await InjectDependencies.inject();
   runApp(const MyApp());
 }
@@ -62,5 +61,31 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class CrashlyticsRouteObserver extends NavigatorObserver {
+  void _updateRoute(String? routeName, String? prevRoute) {
+    if (routeName != null) {
+      FirebaseCrashlytics.instance.setCustomKey('current_route', routeName);
+    }
+    if (prevRoute != null) {
+      FirebaseCrashlytics.instance.setCustomKey('previous_route', prevRoute);
+    }
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? prev) {
+    _updateRoute(route.settings.name, prev?.settings.name);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _updateRoute(newRoute?.settings.name, oldRoute?.settings.name);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? prev) {
+    _updateRoute(prev?.settings.name, prev?.settings.name);
   }
 }

@@ -99,33 +99,27 @@ class UploadProjectDetailsController extends GetxController
     try {
       debugPrint("1. Before capture");
       final File? image = await captureImage();
+      if (image == null) return;
 
-      photos[index] = image?.path;
-      photos.refresh();
       debugPrint("2. After capture");
+      showAlertCustom(backBtnDisable: true, title: "Setting Image");
 
-      try {
-        debugPrint("3. Before location");
-        final position = await LocationService.getAccurateLocation();
-        debugPrint("4. After location");
-
-        await Helpers().addExifData(
-          image?.path ?? "",
-          lat: position.latitude,
-          lng: position.longitude,
-          time: DateTime.now().toString(),
-        );
-        debugPrint("5. EXIF completed");
-        // await readExif(image?.path ?? "");
-      } catch (e) {
-        debugPrint('Failed to add image EXIF data: $e');
+      final exifAdded = await _addExifToImage(image.path);
+      if (!exifAdded) {
+        Helpers.showError("Could not tag photo location. Please retake photo.");
+        return;
       }
 
-      if (image != null) {
-        final sizeKb = await image.length() / 1024;
-        debugPrint('📸 Final image size: ${sizeKb.toStringAsFixed(2)} KB');
-      }
-    } catch (e) {}
+      photos[index] = image.path;
+      photos.refresh();
+
+      final sizeKb = await image.length() / 1024;
+      debugPrint('Final image size: ${sizeKb.toStringAsFixed(2)} KB');
+    } catch (e) {
+      throw Exception(e);
+    } finally {
+      Get.back();
+    }
   }
 
   List<String> get selectedImages => photos.whereType<String>().toList();
@@ -143,6 +137,15 @@ class UploadProjectDetailsController extends GetxController
 
   /// Submit work detail update
   Future<void> saveOffline({bool showMessage = true}) async {
+    // final exifReady = await _ensureExifOnSelectedImages();
+    // if (!exifReady) {
+    //   showErrorDialog(
+    //     Get.context!,
+    //     message: "Could not tag all photos with location. Please retake them.",
+    //   );
+    //   return;
+    // }
+
     final userId = await authService.getUserToken();
     if (userId == null || userId.isEmpty) {
       showErrorDialog(Get.context!, message: "Unable to identify current user");
@@ -181,6 +184,16 @@ class UploadProjectDetailsController extends GetxController
   void submitOnline() async {
     try {
       showAlertCustom(backBtnDisable: true, title: "Uploading...");
+      // final exifReady = await _ensureExifOnSelectedImages();
+      // if (!exifReady) {
+      //   Get.back();
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         "Could not tag all photos with location. Please retake them.",
+      //   );
+      //   return;
+      // }
       await _logUploadMediaSizes(
         imagePaths: selectedImages,
         audioPath: audioPath,
@@ -223,7 +236,7 @@ class UploadProjectDetailsController extends GetxController
     } catch (e) {
       Get.back();
       //debugPrint(e.toString());
-    } finally {}
+    }
   }
 
   @override
@@ -257,19 +270,19 @@ class UploadProjectDetailsController extends GetxController
       //   );
       //   return;
       // }
-      if (selectedProgress.value == "Completed" &&
-          isFunctionalProject.value == null) {
-        showErrorDialog(
-          Get.context!,
-          message: "Please select Is this project functional or not",
-        );
-        return;
-      }
+      // if (selectedProgress.value == "Completed" &&
+      //     isFunctionalProject.value == null) {
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message: "Please select Is this project functional or not",
+      //   );
+      //   return;
+      // }
 
-      if (isFunctionalProject.value == true && finalVideoPath == "") {
-        showErrorDialog(Get.context!, message: "Please upload video");
-        return;
-      }
+      // if (isFunctionalProject.value == true && finalVideoPath == "") {
+      //   showErrorDialog(Get.context!, message: "Please upload video");
+      //   return;
+      // }
 
       if (projectOrUnitId.value.isEmpty) {
         projectOrUnitId.value = data.value.id ?? "";
@@ -293,7 +306,56 @@ class UploadProjectDetailsController extends GetxController
       isSubmitting.value = false;
     } catch (e) {
       // Get.back();
+      throw Exception(e);
     }
+  }
+
+  Future<bool> _addExifToImage(String path) async {
+    try {
+      debugPrint("3. Before EXIF");
+      // var lat = userLat.value;
+      // var lng = userLng.value;
+
+      // if (lat == 0.0 && lng == 0.0) {
+      debugPrint("4. Before fallback location");
+      final position = await LocationService.getAccurateLocation();
+      var poslat = position.latitude;
+      var poslong = position.longitude;
+      var accuracy = position.accuracy;
+      var altitude = position.altitude;
+      var speed = position.speed;
+      var heading = position.heading;
+      // userLat(lat);
+      // userLng(lng);
+      debugPrint(
+        "5. After fallback location  ${poslat.toString()}  ${poslong.toString()}",
+      );
+      //  }
+
+      await Helpers().addExifData(
+        path,
+        lat: poslat,
+        lng: poslong,
+        accuracy: accuracy,
+        altitude: altitude,
+        speed: speed,
+        heading: heading,
+        time: DateTime.now().toString(),
+      );
+      debugPrint("6. EXIF completed");
+      return true;
+    } catch (e) {
+      debugPrint('Failed to add image EXIF data: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _ensureExifOnSelectedImages() async {
+    for (final path in selectedImages) {
+      final exifAdded = await _addExifToImage(path);
+      if (!exifAdded) return false;
+    }
+    return true;
   }
 
   void selectProgress(String value) {
@@ -454,11 +516,14 @@ class UploadProjectDetailsController extends GetxController
 
       videoPath.value = compressedFile.path;
       finalVideoPath = compressedFile.path;
-    } finally {
-      // if (showedLoading && (Get.isDialogOpen ?? false)) {
-      //   Get.back();
-      // }
+    } catch (e) {
+      throw Exception(e);
     }
+    // finally {
+    //   // if (showedLoading && (Get.isDialogOpen ?? false)) {
+    //   //   Get.back();
+    //   // }
+    // }
   }
 
   void clearVideoSelection() {

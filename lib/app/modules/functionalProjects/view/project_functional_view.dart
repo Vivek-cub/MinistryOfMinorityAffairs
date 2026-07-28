@@ -57,7 +57,7 @@ class ProjectFunctionalView extends GetView<ProjectFunctionalController> {
                           onChanged: controller.selectFunctionalProject,
                         ),
                         if (controller.isFunctionalProject.value == true) ...[
-                          const ProjectFunctionalQuestionnaire(),
+                          // const ProjectFunctionalQuestionnaire(),
                           const SizedBox(height: AppDimensions.lg),
                           CapturedVideoPreview(
                             videoPath: controller.displayedVideoPath,

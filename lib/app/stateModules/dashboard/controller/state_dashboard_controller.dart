@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
+import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
@@ -34,12 +36,14 @@ class StateDashboardController extends GetxController
   final AuthService authService;
   final SubmissionRepository submissionRepo;
   final ProjectDetailRepo projectRepo;
+  final ProjectFunctionalRepo functionalRepo;
 
   StateDashboardController(
     this.repo,
     this.authService,
     this.submissionRepo,
     this.projectRepo,
+    this.functionalRepo,
   );
   final userName = ''.obs;
   final assignedState = ''.obs;
@@ -163,7 +167,9 @@ class StateDashboardController extends GetxController
       } else {
         Get.snackbar("Error", "Failed to fetch dashboard data");
       }
-    } catch (e) {}
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   Future<void> syncPendingSubmissions() async {
@@ -177,6 +183,20 @@ class StateDashboardController extends GetxController
 
     for (final item in pendingList) {
       try {
+        if (item.submission.progress ==
+            OfflineSubmissionType.functionalProject) {
+          final response = await functionalRepo.updateFunctionality(
+            projectId: item.submission.projectId,
+            isFunctional: item.submission.projectStatus == 'true',
+            videoPath: item.video?.filePath,
+          );
+
+          if (response.statusCode == '200') {
+            await _cleanupUploadedSubmission(item, userId);
+          }
+          continue;
+        }
+
         await _logUploadMediaSizes(
           imagePaths: item.images.map((e) => e.filePath).toList(),
           audioPath: item.audio?.filePath,
@@ -198,7 +218,9 @@ class StateDashboardController extends GetxController
         if (response.statusCode == '200') {
           await _cleanupUploadedSubmission(item, userId);
         }
-      } catch (_) {}
+      } catch (e) {
+        throw Exception(e);
+      }
     }
   }
 

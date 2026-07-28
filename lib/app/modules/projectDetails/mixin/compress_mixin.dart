@@ -30,6 +30,7 @@ mixin CompressMixin {
         minWidth: 1280,
         minHeight: 1280,
         format: CompressFormat.jpeg,
+        keepExif: true,
       );
 
       if (result == null) continue;

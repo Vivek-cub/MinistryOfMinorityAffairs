@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/controllers/home_controller.dart';
@@ -8,11 +9,12 @@ import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
-import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Utility helper functions
 class Helpers {
+  static const MethodChannel _exifChannel = MethodChannel('app.exif');
+
   // ==================== Date & Time ====================
 
   /// Format date to dd/MM/yyyy
@@ -251,64 +253,68 @@ class Helpers {
     String path, {
     double? lat,
     double? lng,
+    double? accuracy,
+    double? altitude,
+    double? speed,
+    double? heading,
     String? time,
   }) async {
-    AuthService authService = Get.find<AuthService>();
-    final exif = await Exif.fromPath(path);
+    if (path.trim().isEmpty) return;
+    if (!Platform.isAndroid) return;
+    final exifPath =
+        path.startsWith('file://') ? Uri.parse(path).toFilePath() : path;
 
+    AuthService authService = Get.find<AuthService>();
     String userId = await authService.getUserId() ?? "";
 
     String formatDate(String? input) {
       if (input == null || input.isEmpty) return "";
-      final date = DateTime.parse(input);
+      final date = DateTime.tryParse(input);
+      if (date == null) return "";
       return "${date.year}:${date.month.toString().padLeft(2, '0')}:${date.day.toString().padLeft(2, '0')} "
           "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     }
 
-    /// Convert decimal to DMS
-    List<String> toDMS(double coord) {
-      final abs = coord.abs();
-      final deg = abs.floor();
-      final minFloat = (abs - deg) * 60;
-      final min = minFloat.floor();
-      final sec = ((minFloat - min) * 60);
+    debugPrint(
+      "Adding EXIF to $exifPath | exists: ${File(exifPath).existsSync()}",
+    );
 
-      return ["$deg/1", "$min/1", "${(sec * 100).round()}/100"];
+    await _exifChannel.invokeMethod<void>('addExifData', {
+      'path': exifPath,
+      'lat': lat,
+      'lng': lng,
+      'accuracy': accuracy,
+      'altitude': altitude,
+      'speed': speed,
+      'heading': heading,
+      'time': formatDate(time),
+      'userId': userId,
+    });
+
+    // accuracy
+    //altitude
+    //speed
+    //heading
+    try {
+      await readExif(path);
+    } catch (e) {
+      debugPrint("Failed to read image EXIF data: $e");
     }
-
-    Map<String, String> attributes = {
-      "DateTimeOriginal": formatDate(time),
-      "UserComment": "UserId:$userId",
-    };
-
-    if (lat != null && lng != null) {
-      attributes.addAll({
-        "GPSLatitude": lat.toString(),
-        "GPSLatitudeRef": lat >= 0 ? "N" : "S",
-        "GPSLongitude": lng.toString(),
-        "GPSLongitudeRef": lng >= 0 ? "E" : "W",
-      });
-    }
-
-    await exif.writeAttributes(attributes);
-    await exif.close();
   }
 
   Future<void> readExif(String path) async {
-    final exif = await Exif.fromPath(path);
+    if (path.trim().isEmpty) return;
+    if (!Platform.isAndroid) return;
+    final exifPath =
+        path.startsWith('file://') ? Uri.parse(path).toFilePath() : path;
 
-    if (exif == null) {
-      print("No EXIF found");
-      return;
-    }
-
-    final attributes = await exif.getAttributes();
-
+    final attributes = await _exifChannel.invokeMapMethod<String, dynamic>(
+      'readExifData',
+      {'path': exifPath},
+    );
     attributes?.forEach((key, value) {
-      print("print $key : $value");
+      debugPrint("print $key : ${value ?? ''}");
     });
-
-    await exif.close();
   }
 
   void refreshHomeIfAvailable() {

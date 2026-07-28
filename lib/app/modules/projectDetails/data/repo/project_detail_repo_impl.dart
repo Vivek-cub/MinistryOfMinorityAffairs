@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/model/common_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
+import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
 class ProjectDetailRepoImpl extends ProjectDetailRepo
@@ -37,6 +39,8 @@ class ProjectDetailRepoImpl extends ProjectDetailRepo
 
       // Multiple images
       for (final path in imagePaths) {
+        debugPrint("Uploading $path");
+        await Helpers().readExif(path);
         formData.files.add(
           MapEntry(
             'image',

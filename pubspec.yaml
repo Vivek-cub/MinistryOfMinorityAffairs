@@ -75,7 +75,6 @@ dependencies:
   ffmpeg_kit_flutter_minimal: ^6.0.8
   syncfusion_flutter_datepicker: ^32.2.5
   custom_date_range_picker: ^1.2.0
-  native_exif: ^0.7.0
   device_info_plus: ^13.2.0
   photo_view: ^0.15.0
   flutter_map: ^8.3.0
@@ -87,6 +86,9 @@ dependencies:
   upgrader: ^13.5.0
   #new_version_plus: ^1.0.1
   flutter_local_notifications: ^22.0.1
+  firebase_crashlytics: ^5.2.4
+  timezone: ^0.11.1
+  flutter_new_badger: ^1.1.1
 
 
 dev_dependencies:

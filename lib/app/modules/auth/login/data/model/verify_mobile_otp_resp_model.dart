@@ -44,7 +44,7 @@ class User {
   String? updatedAt;
   Role? role;
   State? state;
-  District? district;
+  // District? district;
 
   User({
     this.id,
@@ -64,7 +64,7 @@ class User {
     this.updatedAt,
     this.role,
     this.state,
-    this.district,
+    // this.district,
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -85,10 +85,10 @@ class User {
     updatedAt = json['updatedAt'];
     role = json['role'] != null ? new Role.fromJson(json['role']) : null;
     state = json['state'] != null ? new State.fromJson(json['state']) : null;
-    district =
-        json['district'] != null
-            ? new District.fromJson(json['district'])
-            : null;
+    // district =
+    //     json['district'] != null
+    //         ? new District.fromJson(json['district'])
+    //         : null;
   }
 }
 

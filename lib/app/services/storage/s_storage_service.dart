@@ -7,6 +7,7 @@ enum SStorageKeys {
   userRole,
   mobilePin,
   simFingerprint,
+  fcmToken,
 }
 
 class SStorageService extends GetxService {
@@ -24,26 +25,17 @@ class SStorageService extends GetxService {
     super.onInit();
   }
 
-  Future<String?> readKey({
-    required SStorageKeys key,
-  }) async =>
-      await _storage.read(
-        key: key.toString(),
-      );
+  Future<String?> readKey({required SStorageKeys key}) async =>
+      await _storage.read(key: key.toString());
 
   Future<Map<String, String>> get allValues async => await _storage.readAll();
 
-  Future<void> deleteKey(SStorageKeys key) async => await _storage.delete(
-        key: key.toString(),
-      );
+  Future<void> deleteKey(SStorageKeys key) async =>
+      await _storage.delete(key: key.toString());
   Future<void> deleteAll() async => await _storage.deleteAll();
 
   Future<void> writeKey({
     required SStorageKeys key,
     required String value,
-  }) async =>
-      await _storage.write(
-        key: key.toString(),
-        value: value,
-      );
+  }) async => await _storage.write(key: key.toString(), value: value);
 }

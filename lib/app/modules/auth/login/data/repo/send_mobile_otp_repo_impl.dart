@@ -45,6 +45,7 @@ class SendMobileOtpRepoImpl extends SendMobileOtpRepo
   Future<VerifyMobileOtpRespModel?> verifyOTP({
     required String mobileNo,
     required String otp,
+    required String fcmToken,
   }) async {
     try {
       final resp = await apiService.post(
@@ -54,10 +55,16 @@ class SendMobileOtpRepoImpl extends SendMobileOtpRepo
       if (resp.statusCode == HttpStatus.ok && resp.data != null) {
         return VerifyMobileOtpRespModel.fromJson(resp.data);
       } else {
-        throw dio.DioException(requestOptions: dio.RequestOptions());
+        VerifyMobileOtpRespModel modelData = VerifyMobileOtpRespModel();
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: modelData.statusMessage ?? "Something Went Wrong",
+        );
+        return modelData;
       }
-    } on dio.DioException catch (e) {
-      throw dio.DioException(requestOptions: dio.RequestOptions());
+    } catch (e) {
+      throw Exception(e);
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
+import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/photo_upload_widget.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/remarks_input_widget.dart';
@@ -93,15 +94,20 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                 child: PhotoUploadWidget(
                                   imagePath: controller.photos[index],
                                   onTap: () async {
+                                    SnackBarMixin().showAlertCustom(
+                                      backBtnDisable: true,
+                                      title: "Fetching Location...",
+                                    );
                                     final insideGeofence = await controller
                                         .checkGeoFence(
                                           controller.data.value.lat ?? 0.0,
                                           controller.data.value.lng ?? 0.0,
                                         );
+                                    Get.back();
                                     debugPrint("1. After Gepfence");
                                     if (insideGeofence) {
                                       //controller.showPhotoSourceDialog(index);
-                                      controller.takePhoto(index);
+                                      await controller.takePhoto(index);
                                     } else {
                                       PopupMixin().showErrorDialog(
                                         Get.context!,
@@ -172,29 +178,29 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
 
                       const SizedBox(height: 16),
 
-                      Obx(() {
-                        return controller.selectedProgress.value == "Completed"
-                            ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const TitleText(
-                                  text: 'Is this Project Functional?',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                const SizedBox(height: AppDimensions.sm),
-                                FunctionalYesNoSelector(
-                                  value: controller.isFunctionalProject.value,
-                                  onChanged: (value) {
-                                    controller.isFunctionalProject.value =
-                                        value;
-                                  },
-                                ),
-                              ],
-                            )
-                            : SizedBox.shrink();
-                      }),
+                      // Obx(() {
+                      //   return controller.selectedProgress.value == "Completed"
+                      //       ? Column(
+                      //         crossAxisAlignment: CrossAxisAlignment.start,
+                      //         children: [
+                      //           const TitleText(
+                      //             text: 'Is this Project Functional?',
+                      //             fontWeight: FontWeight.w600,
+                      //           ),
+                      //           const SizedBox(height: AppDimensions.sm),
+                      //           FunctionalYesNoSelector(
+                      //             value: controller.isFunctionalProject.value,
+                      //             onChanged: (value) {
+                      //               controller.isFunctionalProject.value =
+                      //                   value;
+                      //             },
+                      //           ),
+                      //         ],
+                      //       )
+                      //       : SizedBox.shrink();
+                      // }),
 
-                      const SizedBox(height: 16),
+                      // const SizedBox(height: 16),
 
                       // Project Overall Progress Section
                       const TitleText(
@@ -219,26 +225,25 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                         ),
                       ),
 
-                      Obx(
-                        () =>
-                            controller.isFunctionalProject.value == true
-                                ? Column(
-                                  children: [
-                                    const SizedBox(height: 12),
-                                    CapturedVideoPreview(
-                                      videoPath: controller.displayedVideoPath,
-                                      onCaptureTap: controller.onCaptureVideo,
-                                      onRemoveTap:
-                                          controller.clearVideoSelection,
-                                      showRemoveButton:
-                                          controller.isShowingApiVideoOnly ==
-                                          false,
-                                    ),
-                                  ],
-                                )
-                                : SizedBox.shrink(),
-                      ),
-
+                      // Obx(
+                      //   () =>
+                      //       controller.isFunctionalProject.value == true
+                      //           ? Column(
+                      //             children: [
+                      //               const SizedBox(height: 12),
+                      //               CapturedVideoPreview(
+                      //                 videoPath: controller.displayedVideoPath,
+                      //                 onCaptureTap: controller.onCaptureVideo,
+                      //                 onRemoveTap:
+                      //                     controller.clearVideoSelection,
+                      //                 showRemoveButton:
+                      //                     controller.isShowingApiVideoOnly ==
+                      //                     false,
+                      //               ),
+                      //             ],
+                      //           )
+                      //           : SizedBox.shrink(),
+                      // ),
                       const SizedBox(height: AppDimensions.lg),
 
                       // Remarks Section

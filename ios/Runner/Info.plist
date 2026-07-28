@@ -56,7 +56,10 @@
 	<string>This permission is required to record the audio</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Permission is required to upload images</string>
-
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 
 </dict>
 </plist>

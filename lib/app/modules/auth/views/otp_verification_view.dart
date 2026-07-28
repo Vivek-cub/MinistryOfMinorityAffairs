@@ -90,22 +90,19 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
                     const SizedBox(height: AppDimensions.xxl),
 
                     // Enter OTP Button
-                    Obx(() {
-                      final isEnabled = controller.isButtonEnabled.value;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: AuthSubmitButton(
-                          title: "Verify",
-                          isEnabled: true,
-                          isAuthButton: true,
-                          onPressed: () {
-                            if (isEnabled) {
-                              controller.verifyOTP(controller.otp.value);
-                            }
-                          },
-                        ),
-                      );
-                    }),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: AuthSubmitButton(
+                        title: "Verify",
+                        isEnabled: true,
+                        isAuthButton: true,
+                        onPressed: () {
+                          // if (isEnabled) {
+                          controller.verifyOTP(controller.otp.value);
+                          // }
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),

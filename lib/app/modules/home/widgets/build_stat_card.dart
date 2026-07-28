@@ -44,7 +44,7 @@ class BuildStatCard extends StatelessWidget {
   Widget cardContent() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      height: 130,
+      height: 150,
       decoration: BoxDecoration(
         color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(12),
@@ -73,37 +73,19 @@ class BuildStatCard extends StatelessWidget {
           //     maxLines: 3,
           //   ),
           // ),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final textPainter = TextPainter(
-                text: TextSpan(
+          SizedBox(
+            height: 50,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 0),
+                child: CustomText(
                   text: title ?? "",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                  color: AppColors.textPrimary,
                 ),
-                textDirection: TextDirection.ltr,
-                maxLines: 3,
-              )..layout(maxWidth: constraints.maxWidth);
-
-              final isSingleLine = textPainter.computeLineMetrics().length == 1;
-
-              return SizedBox(
-                height: 35,
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: isSingleLine ? 10 : 0),
-                    child: CustomText(
-                      text: title ?? "",
-                      textAlign: TextAlign.center,
-                      maxLines: 3,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              );
-            },
+              ),
+            ),
           ),
           Spacer(),
           HeaderText(text: "$value ", color: AppColors.textPrimary),

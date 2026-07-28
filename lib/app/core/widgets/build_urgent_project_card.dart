@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/project_details_bottom_sheet.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/widgets.dart';
-import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/milestone_card.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
-import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
 class BuildUrgentProjectCard extends StatelessWidget {
   final UserProject project;
@@ -93,11 +90,19 @@ class BuildUrgentProjectCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          TitleText(
-            text: project.unitDetails?.projectName ?? "",
-            fontWeight: FontWeight.bold,
-            maxLines: 2,
-            color: isUrgent == false ? AppColors.textPrimary : AppColors.error,
+          InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: () => _showProjectDetails(project),
+            child: TitleText(
+              text:
+                  project.unitDetails?.projectName ??
+                  project.titleOrProjectName ??
+                  "",
+              fontWeight: FontWeight.bold,
+              maxLines: 2,
+              color:
+                  isUrgent == false ? AppColors.textPrimary : AppColors.error,
+            ),
           ),
 
           //  const SizedBox(height: AppDimensions.md),
@@ -213,6 +218,14 @@ class BuildUrgentProjectCard extends StatelessWidget {
           // ),
         ],
       ),
+    );
+  }
+
+  void _showProjectDetails(UserProject project) {
+    Get.bottomSheet(
+      ProjectDetailsBottomSheet(project: project.displayUnitDetails),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 }
