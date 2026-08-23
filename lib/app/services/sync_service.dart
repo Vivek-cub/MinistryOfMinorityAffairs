@@ -7,7 +7,7 @@ import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart
 import 'package:ministry_of_minority_affairs/app/core/database/pending_submission.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
-import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/project_functional_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/repo/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';

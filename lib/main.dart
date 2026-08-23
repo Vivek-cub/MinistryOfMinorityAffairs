@@ -17,6 +17,7 @@ void main() async {
   //   //  fileName: "assets/.env.dev",
   // );
   await InjectDependencies.inject();
+
   runApp(const MyApp());
 }
 
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Pmjvk Nigrani",
+      title: "PMJVK Nigrani",
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

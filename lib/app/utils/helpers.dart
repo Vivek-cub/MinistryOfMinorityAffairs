@@ -260,7 +260,7 @@ class Helpers {
     String? time,
   }) async {
     if (path.trim().isEmpty) return;
-    if (!Platform.isAndroid) return;
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     final exifPath =
         path.startsWith('file://') ? Uri.parse(path).toFilePath() : path;
 
@@ -304,7 +304,7 @@ class Helpers {
 
   Future<void> readExif(String path) async {
     if (path.trim().isEmpty) return;
-    if (!Platform.isAndroid) return;
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     final exifPath =
         path.startsWith('file://') ? Uri.parse(path).toFilePath() : path;
 

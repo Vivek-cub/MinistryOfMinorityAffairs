@@ -16,7 +16,7 @@
 
 
     <application
-        android:label="Pmjvk Nigrani"
+        android:label="PMJVK Nigrani"
         android:name="${applicationName}"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"

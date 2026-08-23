@@ -28,26 +28,40 @@ class ImageListController extends GetxController
     }
   }
 
-  Map<String, Map<String, List<ImageAttachment>>> groupImages(
+  List<ImageAttachmentGroup> groupImages(
     List<ImageAttachment> attachments,
   ) {
-    final Map<String, Map<String, List<ImageAttachment>>> grouped = {};
+    final groups = <ImageAttachmentGroup>[];
 
     for (final item in attachments) {
       if (item.date == null) continue;
 
       final dateKey = DateFormat('dd MMM yyyy').format(item.date!);
+      final progressKey = _cleanText(item.progress);
+      final statusKey = _cleanText(item.status);
+      final roleKey = _cleanText(item.uploadedBy) ?? 'Officer';
 
-      final roleKey = item.uploadedBy ?? ' Officer';
-      //final roleKey = 'Field Officer';
-      debugPrint("$roleKey  ${item.uploadedBy}");
+      final group = groups.firstWhere(
+        (group) =>
+            group.date == dateKey &&
+            group.progress == progressKey &&
+            group.status == statusKey,
+        orElse: () {
+          final newGroup = ImageAttachmentGroup(
+            date: dateKey,
+            progress: progressKey,
+            status: statusKey,
+          );
+          groups.add(newGroup);
+          return newGroup;
+        },
+      );
 
-      grouped.putIfAbsent(dateKey, () => {});
-      grouped[dateKey]!.putIfAbsent(roleKey, () => []);
-      grouped[dateKey]![roleKey]!.add(item);
+      group.roleGroups.putIfAbsent(roleKey, () => []);
+      group.roleGroups[roleKey]!.add(item);
     }
 
-    return grouped;
+    return groups;
   }
 
   void openImageViewer(BuildContext context, List<String> images, int index) {
@@ -59,4 +73,23 @@ class ImageListController extends GetxController
       },
     );
   }
+
+  String? _cleanText(String? value) {
+    final text = value?.trim();
+    if (text == null || text.isEmpty) return null;
+    return text;
+  }
+}
+
+class ImageAttachmentGroup {
+  final String date;
+  final String? progress;
+  final String? status;
+  final Map<String, List<ImageAttachment>> roleGroups = {};
+
+  ImageAttachmentGroup({
+    required this.date,
+    required this.progress,
+    required this.status,
+  });
 }

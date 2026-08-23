@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,6 +11,7 @@ class AudioRecorderService {
 
   Future<bool> _hasPermission() async {
     final status = await Permission.microphone.request();
+    debugPrint('MIC PERMISSION: $status');
     return status.isGranted;
   }
 
@@ -25,22 +27,32 @@ class AudioRecorderService {
   }
 
   Future<String?> startRecording() async {
-    if (!await _hasPermission()) return null;
+    try {
+      //if (!await _hasPermission()) return null;
 
-    final path = await _generateFilePath();
+      final hasPermission = await _record.hasPermission();
 
-    _recordingStartTime = DateTime.now();
+      debugPrint('MIC PERMISSION: $hasPermission');
+      if (hasPermission == false) return null;
+      final path = await _generateFilePath();
+      debugPrint('RECORDING PATH: $path');
+      _recordingStartTime = DateTime.now();
 
-    await _record.start(
-      RecordConfig(
-        encoder: AudioEncoder.aacLc,
-        bitRate: 64000,
-        sampleRate: 44100,
-      ),
-      path: path,
-    );
+      await _record.start(
+        RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 64000,
+          sampleRate: 44100,
+        ),
+        path: path,
+      );
 
-    return path;
+      return path;
+    } catch (e) {
+      debugPrint('RECORDING ERROR: $e');
+
+      return null;
+    }
   }
 
   Future<int?> stopRecording() async {
@@ -50,9 +62,8 @@ class AudioRecorderService {
 
     if (_recordingStartTime == null) return null;
 
-    final duration = DateTime.now()
-        .difference(_recordingStartTime!)
-        .inMilliseconds;
+    final duration =
+        DateTime.now().difference(_recordingStartTime!).inMilliseconds;
 
     _recordingStartTime = null;
 

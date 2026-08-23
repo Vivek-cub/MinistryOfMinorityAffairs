@@ -24,6 +24,10 @@ sealed class NetworkConstants {
       "api/v1/pms/mobile/getStateProjectByStatus";
 
   static final String getOfficerDetails = "api/v1/pms/mobile/getOfficerDetails";
+  static final String exportAssignedProjects =
+      "api/v1/pms/mobile/exportAssignedProjects";
   static final String updateFunctionality =
       "api/v1/pms/mobile/updateFunctionality";
+  static final String getQuestionnaire = "api/v1/pms/mobile/questionnaire";
+  static final String postQuestionnaire = "api/v1/pms/mobile/questionnaire";
 }

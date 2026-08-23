@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class FunctionalYesNoSelector extends StatelessWidget {
   final bool? value;
   final ValueChanged<bool> onChanged;
+  final bool? isFunctional;
 
   const FunctionalYesNoSelector({
     super.key,
     required this.value,
     required this.onChanged,
+    required this.isFunctional,
   });
 
   @override
@@ -17,14 +19,18 @@ class FunctionalYesNoSelector extends StatelessWidget {
         _option(
           title: "Yes",
           selected: value == true,
-          onTap: () => onChanged(true),
+          onTap: () {
+            onChanged(true);
+          },
         ),
         const SizedBox(width: 12),
-        _option(
-          title: "No",
-          selected: value == false,
-          onTap: () => onChanged(false),
-        ),
+        isFunctional == false
+            ? _option(
+              title: "No",
+              selected: value == false,
+              onTap: () => onChanged(false),
+            )
+            : SizedBox.shrink(),
       ],
     );
   }

@@ -1,9 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/multipart/form_data.dart'
-    hide FormData;
-import 'package:get/get_connect/http/src/multipart/multipart_file.dart'
-    hide MultipartFile;
 import 'package:get/get_connect/http/src/status/http_status.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -12,7 +8,6 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart'
 import 'package:ministry_of_minority_affairs/app/core/model/common_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/data/model/home_resp_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/project_response.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
@@ -86,6 +81,30 @@ class HomeRepoImpl extends HomeRepo with PopupMixin, SnackBarMixin {
         return CommonResponseModel();
       }
     } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  @override
+  Future<List<int>?> exportAssignedProjects({required String userId}) async {
+    try {
+      final resp = await apiService.get(
+        NetworkConstants.exportAssignedProjects,
+        query: {"userId": userId},
+        options: Options(responseType: ResponseType.bytes),
+      );
+      if (resp.statusCode == HttpStatus.ok) {
+        return List<int>.from(resp.data as List);
+      } else {
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: "Something Went Wrong",
+        );
+        return null;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
       throw Exception(e);
     }
   }

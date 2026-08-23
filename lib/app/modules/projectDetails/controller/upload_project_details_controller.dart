@@ -84,6 +84,12 @@ class UploadProjectDetailsController extends GetxController
       projectStatus.value = args['status'];
       projectOrUnitId.value = args["id"];
       userProject = args["userProject"];
+      if (data.value.imageAtt?.isNotEmpty ?? false) {
+        statusProgressValue.value =
+            int.tryParse(data.value.imageAtt?[0].progress ?? '') ?? 0;
+        selectedProgress.value =
+            data.value.imageAtt?[0].status ?? "Not Started";
+      }
     }
 
     saveToLocalDb();
@@ -96,6 +102,7 @@ class UploadProjectDetailsController extends GetxController
   }
 
   Future<void> takePhoto(int index) async {
+    bool dialogShown = false;
     try {
       debugPrint("1. Before capture");
       final File? image = await captureImage();
@@ -103,6 +110,7 @@ class UploadProjectDetailsController extends GetxController
 
       debugPrint("2. After capture");
       showAlertCustom(backBtnDisable: true, title: "Setting Image");
+      dialogShown = true;
 
       final exifAdded = await _addExifToImage(image.path);
       if (!exifAdded) {
@@ -118,7 +126,9 @@ class UploadProjectDetailsController extends GetxController
     } catch (e) {
       throw Exception(e);
     } finally {
-      Get.back();
+      if (dialogShown == true) {
+        Get.back();
+      }
     }
   }
 

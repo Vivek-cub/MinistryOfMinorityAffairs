@@ -255,29 +255,40 @@ class ProjectListController extends GetxController
     required UserProject? userProject,
     required int noOfUnitsFunctional,
   }) {
-    if (projectStatus == "Completed" &&
-        (noOfUnitsFunctional == -1 || noOfUnitsFunctional == 0)) {
-      Get.toNamed(
-        AppRoutes.projectFunctional,
-        arguments: {"project": project, "status": projectStatus, "id": id},
-      );
-      return;
-    }
     if (isShowingCalendar.value == true) {
       Get.toNamed(
         AppRoutes.calendarProject,
         arguments: {"project": project, "status": projectStatus},
       );
     } else {
-      Get.toNamed(
-        AppRoutes.uploadProjectDetails,
-        arguments: {
-          "project": project,
-          "status": projectStatus,
-          "id": id,
-          "userProject": userProject,
-        },
-      );
+      if (projectStatus == "Completed") {
+        bool isFunctional = false;
+        if ((noOfUnitsFunctional == -1 || noOfUnitsFunctional == 0)) {
+          isFunctional = false;
+        } else {
+          isFunctional = true;
+        }
+        Get.toNamed(
+          AppRoutes.projectFunctional,
+          arguments: {
+            "project": project,
+            "status": projectStatus,
+            "id": id,
+            "isFunctional": isFunctional,
+          },
+        );
+        return;
+      } else {
+        Get.toNamed(
+          AppRoutes.uploadProjectDetails,
+          arguments: {
+            "project": project,
+            "status": projectStatus,
+            "id": id,
+            "userProject": userProject,
+          },
+        );
+      }
     }
   }
 

@@ -34,6 +34,7 @@ class ProjectFunctionalQuestionnaire
             value: controller.stillWorkingOnProject.value,
             onChanged:
                 (value) => controller.stillWorkingOnProject.value = value,
+            isFunctional: controller.isFunctional.value,
           ),
         ),
       ],
@@ -102,9 +103,14 @@ class _PercentageQuestion extends StatelessWidget {
 }
 
 class _StillWorkingQuestion extends StatelessWidget {
-  const _StillWorkingQuestion({required this.value, required this.onChanged});
+  const _StillWorkingQuestion({
+    required this.value,
+    required this.onChanged,
+    required this.isFunctional,
+  });
 
   final bool? value;
+  final bool? isFunctional;
   final ValueChanged<bool> onChanged;
 
   @override
@@ -118,7 +124,11 @@ class _StillWorkingQuestion extends StatelessWidget {
           maxLines: 2,
         ),
         const SizedBox(height: AppDimensions.sm),
-        FunctionalYesNoSelector(value: value, onChanged: onChanged),
+        FunctionalYesNoSelector(
+          value: value,
+          onChanged: onChanged,
+          isFunctional: isFunctional,
+        ),
       ],
     );
   }

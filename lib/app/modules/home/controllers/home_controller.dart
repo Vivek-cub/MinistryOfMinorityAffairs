@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:ministry_of_minority_affairs/app/core/database/pending_submissio
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
-import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/project_functional_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/repo/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
@@ -18,13 +19,16 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/ca
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/compress_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/firebaseService/firebase_notification_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:public_file_saver/public_file_saver.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomeController extends GetxController
     with SnackBarMixin, CompressMixin, CaptureImageMixin {
@@ -52,9 +56,12 @@ class HomeController extends GetxController
   final scaffoldKey = GlobalKey<ScaffoldState>();
   RxString profileImage = "".obs;
   final isSyncing = false.obs;
+  final isExportingAssignedProjects = false.obs;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final isLoading = true.obs;
   RxString userRole = "".obs;
+  final FirebaseNotificationService notificationService =
+      Get.find<FirebaseNotificationService>();
 
   @override
   void onInit() {
@@ -131,11 +138,21 @@ class HomeController extends GetxController
     bool fromUrgentList,
     int noOfUnitsFunctional,
   ) {
-    if (status == "Completed" &&
-        (noOfUnitsFunctional == -1 || noOfUnitsFunctional == 0)) {
+    if (status == "Completed") {
+      bool isFunctional = false;
+      if ((noOfUnitsFunctional == -1 || noOfUnitsFunctional == 0)) {
+        isFunctional = false;
+      } else {
+        isFunctional = true;
+      }
       Get.toNamed(
         AppRoutes.projectFunctional,
-        arguments: {"project": project, "status": status, "id": id},
+        arguments: {
+          "project": project,
+          "status": status,
+          "id": id,
+          "isFunctional": isFunctional,
+        },
       );
       return;
     }
@@ -319,6 +336,131 @@ class HomeController extends GetxController
     }
   }
 
+  Future<void> exportAssignedProjectsExcel() async {
+    if (isExportingAssignedProjects.value) return;
+
+    final online = await NetworkService.hasInternet();
+
+    if (!online) {
+      Get.snackbar("No Internet", "Please connect to internet and try again");
+      return;
+    }
+
+    final userId = await authService.getUserId();
+
+    if (userId == null || userId.isEmpty) {
+      Get.snackbar("Error", "User id is missing");
+      return;
+    }
+
+    const notificationId = 98765;
+    final fileName = _exportFileName();
+
+    try {
+      isExportingAssignedProjects.value = true;
+
+      await notificationService.showDownloadProgress(
+        notificationId: notificationId,
+        fileName: fileName,
+        progress: 0,
+      );
+
+      // Download Excel from API
+      final bytes = await repo.exportAssignedProjects(userId: userId);
+
+      if (bytes == null || bytes.isEmpty) {
+        await notificationService.showDownloadFailed(
+          notificationId: notificationId,
+          fileName: fileName,
+        );
+
+        Get.snackbar("Error", "Unable to download assigned projects");
+
+        return;
+      }
+
+      final Uint8List fileBytes = Uint8List.fromList(bytes);
+
+      String? fileReference;
+
+      if (Platform.isAndroid) {
+        final savedFile = await PublicFileSaver().saveBytes(
+          bytes: fileBytes,
+          fileName: fileName,
+          mimeType:
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          subDir: 'MoMA',
+        );
+
+        fileReference = savedFile?.uri ?? savedFile?.path;
+
+        if (savedFile?.isSuccess != true || fileReference == null) {
+          await notificationService.showDownloadFailed(
+            notificationId: notificationId,
+            fileName: fileName,
+          );
+
+          Get.snackbar("Error", "Unable to save assigned projects");
+
+          return;
+        }
+
+        await notificationService.showDownloadComplete(
+          notificationId: notificationId,
+          fileName: fileName,
+          filePath: fileReference,
+        );
+
+        Get.snackbar(
+          "Download Complete",
+          "Assigned projects exported to Downloads/MoMA",
+        );
+      } else if (Platform.isIOS) {
+        final directory = await getApplicationDocumentsDirectory();
+
+        final file = File('${directory.path}/$fileName');
+
+        await file.writeAsBytes(fileBytes, flush: true);
+
+        final filePath = file.path;
+
+        // Notification with actual file path
+        await notificationService.showDownloadComplete(
+          notificationId: notificationId,
+          fileName: fileName,
+          filePath: filePath,
+        );
+
+        Get.snackbar(
+          "Download Complete",
+          "Assigned projects Excel file is ready",
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint("Failed to export assigned projects: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      await notificationService.showDownloadFailed(
+        notificationId: notificationId,
+        fileName: fileName,
+      );
+
+      Get.snackbar("Error", "Failed to download assigned projects");
+    } finally {
+      isExportingAssignedProjects.value = false;
+    }
+  }
+
+  String _exportFileName() {
+    final timestamp = DateTime.now().toIso8601String().replaceAll(
+      RegExp(r'[:.]'),
+      '-',
+    );
+
+    return 'assigned_projects_$timestamp.xlsx';
+  }
+
   Future<void> takePhoto() async {
     try {
       final File? image = await captureImage();
@@ -442,16 +584,16 @@ Future<File> compressIfNeeded(File file) async {
 
 */
 
-  // List<PendingSubmission> _uniqueByProjectId(List<PendingSubmission> list) {
-  //   final seen = <String>{};
-  //   final result = <PendingSubmission>[];
+// List<PendingSubmission> _uniqueByProjectId(List<PendingSubmission> list) {
+//   final seen = <String>{};
+//   final result = <PendingSubmission>[];
 
-  //   for (final item in list) {
-  //     final projectId = item.submission.projectId;
-  //     if (seen.add(projectId)) {
-  //       result.add(item); // first occurrence kept
-  //     }
-  //   }
+//   for (final item in list) {
+//     final projectId = item.submission.projectId;
+//     if (seen.add(projectId)) {
+//       result.add(item); // first occurrence kept
+//     }
+//   }
 
-  //   return result;
-  // }
+//   return result;
+// }

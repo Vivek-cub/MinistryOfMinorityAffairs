@@ -96,11 +96,7 @@ class BuildWorkList extends StatelessWidget {
                         isUrgent: false,
                         isShowingCalendar: false,
                         thumbnail: imageUrl,
-                        showFunctionalButton:
-                            (project.unitDetails?.noOfUnitsFunctional == -1 ||
-                                project.unitDetails?.noOfUnitsFunctional ==
-                                    0) &&
-                            project.status == "Completed",
+                        showFunctionalButton: project.status == "Completed",
                         hideButton:
                             project.unitDetails?.noOfUnitsFunctional == 1 &&
                             project.status == "Completed",

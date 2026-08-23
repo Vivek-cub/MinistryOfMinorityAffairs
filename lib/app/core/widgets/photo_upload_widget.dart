@@ -8,9 +8,16 @@ import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 class PhotoUploadWidget extends StatelessWidget {
   final String? imagePath;
   final VoidCallback? onTap;
+  final VoidCallback? onRemove;
   final String? label;
 
-  const PhotoUploadWidget({super.key, this.imagePath, this.onTap, this.label});
+  const PhotoUploadWidget({
+    super.key,
+    this.imagePath,
+    this.onTap,
+    this.onRemove,
+    this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +78,27 @@ class PhotoUploadWidget extends StatelessWidget {
                 ),
                 child: Container(),
               ),
+              if (imagePath != null)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: GestureDetector(
+                    onTap: onRemove,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

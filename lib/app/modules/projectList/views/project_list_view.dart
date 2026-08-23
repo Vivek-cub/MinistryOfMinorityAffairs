@@ -267,16 +267,8 @@ class ProjectListView extends GetView<ProjectListController> {
                                                         .isShowingCalendar
                                                         .value,
                                                 showFunctionalButton:
-                                                    (project
-                                                                .unitDetails
-                                                                ?.noOfUnitsFunctional ==
-                                                            -1 ||
-                                                        project
-                                                                .unitDetails
-                                                                ?.noOfUnitsFunctional ==
-                                                            0) &&
                                                     project.status ==
-                                                        "Completed",
+                                                    "Completed",
                                                 thumbnail: imageUrl,
                                                 hideButton:
                                                     project
@@ -313,16 +305,8 @@ class ProjectListView extends GetView<ProjectListController> {
                                                 isUrgent: true,
                                                 isShowingCalendar: false,
                                                 showFunctionalButton:
-                                                    (project
-                                                                .unitDetails
-                                                                ?.noOfUnitsFunctional ==
-                                                            -1 ||
-                                                        project
-                                                                .unitDetails
-                                                                ?.noOfUnitsFunctional ==
-                                                            0) &&
                                                     project.status ==
-                                                        "Completed",
+                                                    "Completed",
                                                 hideButton:
                                                     project
                                                             .unitDetails

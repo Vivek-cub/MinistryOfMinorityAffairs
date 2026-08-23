@@ -41,7 +41,7 @@ class OtpVerificationController extends GetxController
   void verifyOTP(String otp) async {
     // if (!isButtonEnabled.value) return;
     // String enteredOtp=getOTP();
-    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final fcmToken = Get.find<FirebaseNotificationService>().fcmToken ?? "";
 
     debugPrint("Fcm Token: $fcmToken");
 

@@ -87,4 +87,11 @@ class AppTextTheme {
       height: 1.3,
     ),
   );
+
+  static TextStyle get bodySmall1 =>
+      TextStyle(fontSize: 13.0, height: 20.0 / 14.0, letterSpacing: 0);
+  static TextStyle get bodyVSmall =>
+      TextStyle(fontSize: 12.0, height: 20.0 / 14.0, letterSpacing: 0);
+  static TextStyle get bodyVVSmall =>
+      TextStyle(fontSize: 10.0, height: 20.0 / 14.0, letterSpacing: 0);
 }

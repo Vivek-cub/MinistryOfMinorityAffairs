@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_new_badger/flutter_new_badger.dart';
@@ -5,15 +7,23 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_disposable.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:open_filex/open_filex.dart';
 
 class FirebaseNotificationService extends GetxService {
+  String? fcmToken;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
   Future<void> initialize() async {
     await _requestPermission();
     await _initializeLocalNotifications();
     await _configureListeners();
-    await getToken();
+
+    fcmToken = await getToken();
+
+    FirebaseMessaging.instance.onTokenRefresh.listen((token) {
+      fcmToken = token;
+      debugPrint("New FCM Token: $token");
+    });
   }
 
   static int badgeCount = 0;
@@ -46,6 +56,7 @@ class FirebaseNotificationService extends GetxService {
         if (response.payload != null && response.payload!.isNotEmpty) {
           debugPrint("Payload: ${response.payload}");
         }
+        _onNotificationTap(response);
       },
     );
 
@@ -81,14 +92,37 @@ class FirebaseNotificationService extends GetxService {
     }
   }
 
-  Future<void> getToken() async {
-    final token = await FirebaseMessaging.instance.getToken();
-    debugPrint("FCM Token: $token");
+  // Future<void> getToken() async {
+  //   final token = await FirebaseMessaging.instance.getToken();
+  //   debugPrint("FCM Token: $token");
 
-    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      debugPrint("New FCM Token: $newToken");
-    });
-    //await AuthService().setFcmToken(token);
+  //   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+  //     debugPrint("New FCM Token: $newToken");
+  //   });
+  //   //await AuthService().setFcmToken(token);
+  // }
+
+  Future<String> getToken() async {
+    try {
+      if (Platform.isIOS) {
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        debugPrint("APNS Token: $apnsToken");
+
+        if (apnsToken == null) {
+          debugPrint("APNS token not available. Continuing without FCM.");
+          return "";
+        }
+      }
+
+      final token = await FirebaseMessaging.instance.getToken();
+      debugPrint("FCM Token: $token");
+      return token ?? "";
+    } catch (e, s) {
+      debugPrint("Unable to get FCM token: $e");
+      debugPrintStack(stackTrace: s);
+
+      return "";
+    }
   }
 
   void _onForegroundMessage(RemoteMessage message) async {
@@ -128,5 +162,94 @@ class FirebaseNotificationService extends GetxService {
       notificationDetails: notificationDetails,
       payload: message.data.toString(),
     );
+  }
+
+  Future<void> showDownloadProgress({
+    required int notificationId,
+    required String fileName,
+    required int progress,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'file_download_channel',
+      'File Downloads',
+      channelDescription: 'Notifications for file downloads',
+      importance: Importance.high,
+      priority: Priority.high,
+      onlyAlertOnce: true,
+      showProgress: true,
+      maxProgress: 100,
+      channelShowBadge: false,
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    await _localNotifications.show(
+      id: notificationId,
+      title: 'Downloading',
+      body: fileName,
+      notificationDetails: notificationDetails,
+    );
+  }
+
+  Future<void> showDownloadComplete({
+    required int notificationId,
+    required String fileName,
+    required String filePath,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'file_download_channel',
+      'File Downloads',
+      channelDescription: 'Notifications for file downloads',
+      importance: Importance.high,
+      priority: Priority.high,
+      onlyAlertOnce: true,
+      channelShowBadge: false,
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    await _localNotifications.show(
+      id: notificationId,
+      title: 'Download Complete',
+      body: fileName,
+      notificationDetails: notificationDetails,
+      payload: filePath,
+    );
+  }
+
+  Future<void> showDownloadFailed({
+    required int notificationId,
+    required String fileName,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'file_download_channel',
+      'File Downloads',
+      channelDescription: 'Notifications for file downloads',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    await _localNotifications.show(
+      id: notificationId,
+      title: 'Download Failed',
+      body: 'Unable to download $fileName',
+      notificationDetails: notificationDetails,
+    );
+  }
+
+  Future<void> _onNotificationTap(NotificationResponse response) async {
+    final filePath = response.payload;
+
+    if (filePath == null || filePath.isEmpty) {
+      return;
+    }
+
+    try {
+      await OpenFilex.open(filePath);
+    } catch (e) {
+      debugPrint('Failed to open downloaded file: $e');
+    }
   }
 }

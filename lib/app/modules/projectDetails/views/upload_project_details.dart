@@ -93,6 +93,10 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                 ),
                                 child: PhotoUploadWidget(
                                   imagePath: controller.photos[index],
+                                  onRemove: () {
+                                    controller.photos[index] = null;
+                                    controller.photos.refresh();
+                                  },
                                   onTap: () async {
                                     SnackBarMixin().showAlertCustom(
                                       backBtnDisable: true,
@@ -104,7 +108,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                           controller.data.value.lng ?? 0.0,
                                         );
                                     Get.back();
-                                    debugPrint("1. After Gepfence");
+                                    debugPrint("1. After Geofence");
                                     if (insideGeofence) {
                                       //controller.showPhotoSourceDialog(index);
                                       await controller.takePhoto(index);

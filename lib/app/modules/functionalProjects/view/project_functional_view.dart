@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/state_manager.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/work_progress_header.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/controller/project_functional_controller.dart';
-import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/widget/project_functional_questionnaire.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/widget/switch_form_field_widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/capture_video_previews.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/function_toggle.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
@@ -53,11 +54,41 @@ class ProjectFunctionalView extends GetView<ProjectFunctionalController> {
                         ),
                         const SizedBox(height: AppDimensions.sm),
                         FunctionalYesNoSelector(
-                          value: controller.isFunctionalProject.value,
+                          value:
+                              controller.isFunctional.value == false
+                                  ? controller.isFunctionalProject.value
+                                  : true,
                           onChanged: controller.selectFunctionalProject,
+                          isFunctional: controller.isFunctional.value,
                         ),
                         if (controller.isFunctionalProject.value == true) ...[
-                          // const ProjectFunctionalQuestionnaire(),
+                          const SizedBox(height: AppDimensions.lg),
+                          // if (controller.dynamicFormHeading.value.isNotEmpty)
+                          //   TitleText(
+                          //     text: controller.dynamicFormHeading.value,
+                          //     fontWeight: FontWeight.w600,
+                          //   ),
+                          // const SizedBox(height: AppDimensions.sm),
+                          FormBuilder(
+                            key: controller.formKey,
+                            initialValue: Map<String, dynamic>.from(
+                              controller.initialValue,
+                            ),
+                            onChanged: controller.onDynamicFormChanged,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children:
+                                  controller.dynamicFormConfig.value?.fields
+                                      .map(
+                                        (field) => SwitchFormFieldWidgets(
+                                          field: field,
+                                          controller: controller,
+                                        ),
+                                      )
+                                      .toList() ??
+                                  const [],
+                            ),
+                          ),
                           const SizedBox(height: AppDimensions.lg),
                           CapturedVideoPreview(
                             videoPath: controller.displayedVideoPath,

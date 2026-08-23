@@ -50,7 +50,7 @@ class SendMobileOtpRepoImpl extends SendMobileOtpRepo
     try {
       final resp = await apiService.post(
         NetworkConstants.verifyOtp,
-        data: {"phoneNumber": mobileNo, "otp": otp},
+        data: {"phoneNumber": mobileNo, "otp": otp, "fcmToken": fcmToken},
       );
       if (resp.statusCode == HttpStatus.ok && resp.data != null) {
         return VerifyMobileOtpRespModel.fromJson(resp.data);

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
@@ -25,6 +27,27 @@ class CheckOldPin extends GetView<CheckOldPinController> {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                //const SizedBox(height: AppDimensions.lg),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: AppDimensions.lg,
+                        bottom: AppDimensions.lg,
+                        right: AppDimensions.lg,
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        size: 24,
+                        color: AppColors.cardBackground,
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: AppDimensions.gigantic),
                 AuthHeader(),
                 // Main Heading

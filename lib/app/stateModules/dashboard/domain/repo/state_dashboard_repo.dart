@@ -7,4 +7,5 @@ abstract class StateDashboardRepo {
   Future<StateDashboardResponseModel?> getStateDashboardData();
   Future<ProjectResponse?> getNonWorkingOfficerList();
   Future<CommonResponseModel?> uploadProfileImage({required String image});
+  Future<List<int>?> exportAssignedProjects({required String userId});
 }

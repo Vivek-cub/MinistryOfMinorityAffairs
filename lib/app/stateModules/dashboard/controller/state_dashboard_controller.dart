@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,7 @@ import 'package:ministry_of_minority_affairs/app/core/database/pending_submissio
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
-import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/project_functional_repo.dart';
-import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
-import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/repo/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/capture_image_mixin.dart';
@@ -19,16 +18,15 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/co
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/projectDb/project_dao.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
-import 'package:ministry_of_minority_affairs/app/modules/projectList/domain/repo/project_list_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/firebaseService/firebase_notification_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
-import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/data/model/state_dashboard_response_model.dart';
-import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/data/repo/state_dashboard_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/domain/entity/field_officer_not_visited.dart';
 import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/domain/entity/state_dashboard_data.dart';
 import 'package:ministry_of_minority_affairs/app/stateModules/dashboard/domain/repo/state_dashboard_repo.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
+import 'package:public_file_saver/public_file_saver.dart';
 
 class StateDashboardController extends GetxController
     with SnackBarMixin, CompressMixin, CaptureImageMixin {
@@ -57,6 +55,9 @@ class StateDashboardController extends GetxController
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final isLoading = true.obs;
   RxString userRole = "".obs;
+  final FirebaseNotificationService notificationService =
+      Get.find<FirebaseNotificationService>();
+  final isExportingAssignedProjects = false.obs;
 
   @override
   void onInit() {
@@ -316,5 +317,106 @@ class StateDashboardController extends GetxController
     } catch (e) {
       Helpers.showError("Failed to capture photo");
     }
+  }
+
+  Future<void> exportAssignedProjectsExcel() async {
+    if (isExportingAssignedProjects.value) return;
+
+    final online = await NetworkService.hasInternet();
+
+    if (!online) {
+      Get.snackbar("No Internet", "Please connect to internet and try again");
+      return;
+    }
+
+    final userId = await authService.getUserId();
+
+    if (userId == null || userId.isEmpty) {
+      Get.snackbar("Error", "User id is missing");
+      return;
+    }
+
+    const notificationId = 98765;
+
+    final fileName = _exportFileName();
+
+    try {
+      isExportingAssignedProjects.value = true;
+
+      // Show initial notification
+      await notificationService.showDownloadProgress(
+        notificationId: notificationId,
+        fileName: fileName,
+        progress: 0,
+      );
+
+      final bytes = await repo.exportAssignedProjects(userId: userId);
+
+      if (bytes == null || bytes.isEmpty) {
+        await notificationService.showDownloadFailed(
+          notificationId: notificationId,
+          fileName: fileName,
+        );
+
+        Get.snackbar("Error", "Unable to download assigned projects");
+
+        return;
+      }
+
+      final savedFile = await PublicFileSaver().saveBytes(
+        bytes: Uint8List.fromList(bytes),
+        fileName: fileName,
+        mimeType:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        subDir: 'MoMA',
+      );
+
+      final fileReference = savedFile?.uri ?? savedFile?.path;
+
+      if (savedFile?.isSuccess != true || fileReference == null) {
+        await notificationService.showDownloadFailed(
+          notificationId: notificationId,
+          fileName: fileName,
+        );
+
+        Get.snackbar("Error", "Unable to save assigned projects");
+
+        return;
+      }
+
+      // Complete notification
+      await notificationService.showDownloadComplete(
+        notificationId: notificationId,
+        fileName: fileName,
+        filePath: fileReference,
+      );
+
+      Get.snackbar(
+        "Download Complete",
+        "Assigned projects exported to Downloads/MoMA",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Failed to export assigned projects: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      await notificationService.showDownloadFailed(
+        notificationId: notificationId,
+        fileName: fileName,
+      );
+
+      Get.snackbar("Error", "Failed to download assigned projects");
+    } finally {
+      isExportingAssignedProjects.value = false;
+    }
+  }
+
+  String _exportFileName() {
+    final timestamp = DateTime.now().toIso8601String().replaceAll(
+      RegExp(r'[:.]'),
+      '-',
+    );
+
+    return 'assigned_projects_$timestamp.xlsx';
   }
 }

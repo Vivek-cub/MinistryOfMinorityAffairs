@@ -193,22 +193,20 @@ class BuildUrgentProjectCard extends StatelessWidget {
           //     )
           //     : SizedBox.shrink(),
           const SizedBox(height: AppDimensions.md),
-          hideButton == false
-              ? Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GradientButton(
-                    text:
-                        isShowingCalendar == false
-                            ? showFunctionalButton == false
-                                ? "Update Current Status"
-                                : "Update Functionality"
-                            : "View Images",
-                    onPressed: onPressed,
-                  ),
-                ],
-              )
-              : SizedBox.shrink(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GradientButton(
+                text:
+                    isShowingCalendar == false
+                        ? showFunctionalButton == false
+                            ? "Update Current Status"
+                            : "Update Functionality"
+                        : "View Images",
+                onPressed: onPressed,
+              ),
+            ],
+          ),
           // AuthSubmitButton(
           //   title: "Update Current Status",
           //   isEnabled: true,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -50,5 +51,29 @@ class StateDashboardRepoImpl extends StateDashboardRepo
   Future<CommonResponseModel?> uploadProfileImage({required String image}) {
     // TODO: implement uploadProfileImage
     throw UnimplementedError();
+  }
+
+  @override
+  Future<List<int>?> exportAssignedProjects({required String userId}) async {
+    try {
+      final resp = await apiService.get(
+        NetworkConstants.exportAssignedProjects,
+        query: {"userId": userId},
+        options: Options(responseType: ResponseType.bytes),
+      );
+      if (resp.statusCode == HttpStatus.ok) {
+        return List<int>.from(resp.data as List);
+      } else {
+        showErrorDialog(
+          Get.context!,
+          title: "Error",
+          message: "Something Went Wrong",
+        );
+        return null;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      throw Exception(e);
+    }
   }
 }

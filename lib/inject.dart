@@ -57,7 +57,7 @@ class InjectDependencies {
     );
     Get.put(FirebaseNotificationService(), permanent: true);
 
-    // await Get.find<FirebaseNotificationService>().initialize();
+    await Get.find<FirebaseNotificationService>().initialize();
 
     return await Future(() async => await Get.find<AuthService>().isLoggedIn());
   }
