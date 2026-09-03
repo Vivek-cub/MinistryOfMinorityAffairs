@@ -5,6 +5,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/dio_error_handler.da
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/interceptor/network_interceptor.dart';
 import 'package:ministry_of_minority_affairs/app/services/interceptor/curl_interceptor.dart';
+import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
 class ApiService extends GetxService {
   final network.Dio _dio = network.Dio();
@@ -12,7 +13,7 @@ class ApiService extends GetxService {
 
   @override
   void onInit() {
-    _dio.options.baseUrl = "http://49.249.23.234:80/";
+    _dio.options.baseUrl = NetworkConstants.baseUrl;
     _dio.options.connectTimeout = const Duration(minutes: 3);
     _dio.options.receiveTimeout = const Duration(minutes: 3);
 

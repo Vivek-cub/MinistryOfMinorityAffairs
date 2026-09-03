@@ -95,6 +95,7 @@ dependencies:
   public_file_saver: ^1.1.0
   path_provider: ^2.1.6
   share_plus: ^13.3.0
+  geocoding: ^5.0.0
 
 
 dev_dependencies:

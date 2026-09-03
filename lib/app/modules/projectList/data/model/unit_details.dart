@@ -30,6 +30,7 @@ class UnitDetails {
   final String? districtName;
   final String? stateName;
   final String? blockName;
+  final String? msdpSectorName;
   final int? noOfUnitsFunctional;
 
   UnitDetails({
@@ -59,6 +60,7 @@ class UnitDetails {
     this.districtName,
     this.blockName,
     this.stateName,
+    this.msdpSectorName,
     this.noOfUnitsFunctional,
   });
 
@@ -127,6 +129,7 @@ class UnitDetails {
       districtName: _stringValue(json['districtName']),
       stateName: _stringValue(json['stateName']),
       blockName: _stringValue(json['blockName']),
+      msdpSectorName: _stringValue(json['msdpSectorName']),
       noOfUnitsFunctional: _parseInt(json["noOfUnitsFunctional"] ?? -1),
     );
   }

@@ -58,4 +58,12 @@ mixin class SnackBarMixin {
       },
     );
   }
+
+  Future<void> closeLoadingDialog() async {
+    if (Get.context != null) {
+      Navigator.of(Get.context!).pop();
+    }
+
+    await Future.delayed(const Duration(milliseconds: 200));
+  }
 }

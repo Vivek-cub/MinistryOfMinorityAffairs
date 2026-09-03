@@ -1,8 +1,8 @@
-class WomenCentricInfrastructureJson {
-  static Map<String, dynamic> get womenCentricInfrastructureSection => {
-    "pageHeading": "Women-centric Infrastructure - Working Women Hostel",
-    "section": "womenCentricInfrastructureSector",
-    "apiPaths": {"post": "v1/candidate/education", "get": ""},
+class ToiletJson {
+  static Map<String, dynamic> get toiletSection => {
+    "pageHeading": "Toilet Complex",
+    "section": "toiletSector",
+    "apiPaths": {"post": "v1/candidate/education"},
     "fields": [
       {
         "name": "state",
@@ -143,52 +143,48 @@ class WomenCentricInfrastructureJson {
           {"key": "assetOptional", "value": true},
         ],
       },
+
+      // Toilet Complex
       {
-        "name": "capacityAfterConstruction",
-        "label": "17. Capacity (After construction)",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter the capacity after construction.",
-      },
-      {
-        "name": "occupancy",
-        "label": "18. Occupancy",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter occupancy.",
-      },
-      {
-        "name": "security",
-        "label": "19. Security",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter number of security personnel.",
-      },
-      {
-        "name": "cctv",
-        "label": "20. CCTV",
+        "name": "seatsAvailable",
+        "label": "17. Seats available",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg": "Please select whether CCTV is available.",
+        "validationMsg": "Please select whether seats are available.",
       },
       {
-        "name": "warden",
-        "label": "21. Warden",
+        "name": "toiletDailyUsers",
+        "label": "18. Daily users (Approx)",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter number of wardens.",
+        "validationMsg": "Please enter approximate daily users.",
       },
       {
-        "name": "childcareFacility",
-        "label": "22. Childcare facility",
+        "name": "runningWaterAvailable",
+        "label": "19. Running Water available",
+        "type": "radio",
+        "required": true,
+        "options": [
+          {"label": "Yes", "value": true},
+          {"label": "No", "value": false},
+        ],
+        "validationMsg": "Please select whether running water is available.",
+      },
+      {
+        "name": "cleaningFrequency",
+        "label": "20. Cleaning frequency (Daily/Weekly)",
+        "type": "text",
+        "required": true,
+        "validationMsg": "Please enter cleaning frequency.",
+      },
+      {
+        "name": "separateFacilityForWomen",
+        "label": "21. Separate facility for women",
         "type": "radio",
         "required": true,
         "options": [
@@ -196,14 +192,19 @@ class WomenCentricInfrastructureJson {
           {"label": "No", "value": false},
         ],
         "validationMsg":
-            "Please select whether childcare facility is available.",
+            "Please select whether a separate facility for women is available.",
       },
       {
-        "name": "maintenanceLastDoneDate",
-        "label": "23. Maintenance (Last done date)",
-        "type": "date",
+        "name": "divyangAccessible",
+        "label": "22. Divyang accessible",
+        "type": "radio",
         "required": true,
-        "validationMsg": "Please select the last maintenance date.",
+        "options": [
+          {"label": "Yes", "value": true},
+          {"label": "No", "value": false},
+        ],
+        "validationMsg":
+            "Please select whether the facility is Divyang accessible.",
       },
     ],
   };

@@ -18,24 +18,18 @@ class ProjectFunctionalRepoImpl extends ProjectFunctionalRepo
   final ApiService apiService;
   ProjectFunctionalRepoImpl(this.apiService);
   @override
+  @override
   Future<CommonResponseModel> updateFunctionality({
     required String projectId,
     required bool isFunctional,
-    // Map<String, dynamic> formValues = const {},
     String? videoPath,
   }) async {
     try {
-      //final formData = FormData();
       final formData = FormData.fromMap({
         'projectId': projectId,
-        'isFunctional': isFunctional,
+        'isFunctional': isFunctional.toString(),
       });
-      // formData.fields.addAll([
-      //   MapEntry('projectId', projectId),
-      //   MapEntry('isFunctional', isFunctional),
-      // ]);
 
-      // Optional video
       if (videoPath != null && videoPath.isNotEmpty) {
         formData.files.add(
           MapEntry(
@@ -48,17 +42,41 @@ class ProjectFunctionalRepoImpl extends ProjectFunctionalRepo
         );
       }
 
+      debugPrint('========== UPDATE FUNCTIONALITY ==========');
+      debugPrint('projectId: $projectId');
+      debugPrint('isFunctional: $isFunctional');
+      debugPrint('videoPath: $videoPath');
+      debugPrint('===========================================');
+
       final response = await apiService.post(
         NetworkConstants.updateFunctionality,
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
+
+      debugPrint('Status: ${response.statusCode}');
+      debugPrint('Response: ${response.data}');
+
       if (response.statusCode == 200) {
         return CommonResponseModel.fromJson(response.data);
-      } else {
-        return CommonResponseModel();
       }
+
+      return CommonResponseModel(
+        statusCode: response.statusCode?.toString(),
+        error:
+            response.data?['message']?.toString() ??
+            response.data?['error']?.toString(),
+      );
+    } on DioException catch (e) {
+      debugPrint('========== UPDATE FUNCTIONALITY ERROR ==========');
+      debugPrint('Status: ${e.response?.statusCode}');
+      debugPrint('Response: ${e.response?.data}');
+      debugPrint('Request: ${e.requestOptions.data}');
+      debugPrint('=================================================');
+
+      rethrow;
     } catch (e) {
+      debugPrint('updateFunctionality error: $e');
       rethrow;
     }
   }

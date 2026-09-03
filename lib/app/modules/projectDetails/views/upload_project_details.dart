@@ -106,6 +106,7 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                         .checkGeoFence(
                                           controller.data.value.lat ?? 0.0,
                                           controller.data.value.lng ?? 0.0,
+                                          controller.data.value.stateName ?? "",
                                         );
                                     Get.back();
                                     debugPrint("1. After Geofence");

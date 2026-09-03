@@ -6,6 +6,7 @@ class UnitProject {
   String? blockTownName;
   int? visitCount;
   String? msdpItemsName;
+  String? msdpSectorName;
 
   UnitProject({
     this.id,
@@ -14,6 +15,7 @@ class UnitProject {
     this.districtName,
     this.blockTownName,
     this.msdpItemsName,
+    this.msdpSectorName,
   });
 
   UnitProject.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class UnitProject {
     blockTownName = json['blockTownName'];
     visitCount = json['visitCount'];
     msdpItemsName = json['msdpItemsName'];
+    msdpSectorName = json['msdpSectorName'];
   }
 
   Map<String, dynamic> toJson() {
@@ -35,6 +38,7 @@ class UnitProject {
     data['blockTownName'] = this.blockTownName;
     data['visitCount'] = this.visitCount;
     data['msdpItemsName'] = this.msdpItemsName;
+    data['msdpSectorName'] = this.msdpSectorName;
     return data;
   }
 }

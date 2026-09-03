@@ -1,8 +1,8 @@
-class WomenCentricInfrastructureJson {
-  static Map<String, dynamic> get womenCentricInfrastructureSection => {
-    "pageHeading": "Women-centric Infrastructure - Working Women Hostel",
-    "section": "womenCentricInfrastructureSector",
-    "apiPaths": {"post": "v1/candidate/education", "get": ""},
+class IndoorSportsJson {
+  static Map<String, dynamic> get indoorSportsection => {
+    "pageHeading": "Sports Infrastructure - Indoor",
+    "section": "indoorSportsSector",
+    "apiPaths": {"post": "v1/candidate/education"},
     "fields": [
       {
         "name": "state",
@@ -143,67 +143,61 @@ class WomenCentricInfrastructureJson {
           {"key": "assetOptional", "value": true},
         ],
       },
+
+      // Indoor Stadium / Sports Complex
       {
-        "name": "capacityAfterConstruction",
-        "label": "17. Capacity (After construction)",
+        "name": "seatingCapacity",
+        "label": "17. Seating capacity",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter the capacity after construction.",
+        "validationMsg": "Please enter seating capacity.",
       },
       {
-        "name": "occupancy",
-        "label": "18. Occupancy",
+        "name": "sportsDisciplinesConducted",
+        "label": "18. Sports disciplines conducted",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter occupancy.",
+        "validationMsg": "Please enter number of sports disciplines conducted.",
       },
       {
-        "name": "security",
-        "label": "19. Security",
+        "name": "registeredDailyUsers",
+        "label": "19. Registered daily users",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter number of security personnel.",
+        "validationMsg": "Please enter number of registered daily users.",
       },
       {
-        "name": "cctv",
-        "label": "20. CCTV",
+        "name": "competitionsOrganised",
+        "label": "20. Competitions organised",
+        "type": "text",
+        "required": true,
+        "keyboardType": "number",
+        "validationMsg": "Please enter number of competitions organised.",
+      },
+      {
+        "name": "indoorEquipmentAvailable",
+        "label": "21. Equipment available",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg": "Please select whether CCTV is available.",
+        "validationMsg": "Please select whether equipment is available.",
       },
       {
-        "name": "warden",
-        "label": "21. Warden",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter number of wardens.",
-      },
-      {
-        "name": "childcareFacility",
-        "label": "22. Childcare facility",
+        "name": "washroomsFunctional",
+        "label": "22. Washrooms functional",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg":
-            "Please select whether childcare facility is available.",
-      },
-      {
-        "name": "maintenanceLastDoneDate",
-        "label": "23. Maintenance (Last done date)",
-        "type": "date",
-        "required": true,
-        "validationMsg": "Please select the last maintenance date.",
+        "validationMsg": "Please select whether washrooms are functional.",
       },
     ],
   };

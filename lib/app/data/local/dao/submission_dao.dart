@@ -36,6 +36,7 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
     String? userLng,
     String? progress,
     String? projectStatus,
+    String? questionnairePayload,
   }) async {
     await transaction(() async {
       final existing =
@@ -55,6 +56,7 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
             userLng: userLng ?? "",
             progress: progress ?? "",
             projectStatus: projectStatus ?? "",
+            questionnairePayload: Value(questionnairePayload ?? ""),
           ),
         );
       } else {
@@ -68,6 +70,7 @@ class SubmissionDao extends DatabaseAccessor<AppDatabase>
             userLng: Value(userLng ?? ""),
             progress: Value(progress ?? ""),
             projectStatus: Value(projectStatus ?? ""),
+            questionnairePayload: Value(questionnairePayload ?? ""),
           ),
         );
 

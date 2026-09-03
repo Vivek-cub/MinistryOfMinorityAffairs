@@ -35,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => instance;
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -61,6 +61,8 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(localProjects);
         await m.createTable(localMilestones);
         await m.createTable(localMilestoneAttachments);
+      } else if (from < 18) {
+        await m.addColumn(submissions, submissions.questionnairePayload);
       }
     },
   );

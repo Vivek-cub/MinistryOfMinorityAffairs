@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -213,6 +214,9 @@ class HomeController extends GetxController
       try {
         if (item.submission.progress ==
             OfflineSubmissionType.functionalProject) {
+          final questionnaireSynced = await _syncFunctionalQuestionnaire(item);
+          if (!questionnaireSynced) continue;
+
           final response = await functionalRepo.updateFunctionality(
             projectId: item.submission.projectId,
             isFunctional: item.submission.projectStatus == 'true',
@@ -250,6 +254,36 @@ class HomeController extends GetxController
         throw Exception(e);
       }
     }
+  }
+
+  Future<bool> _syncFunctionalQuestionnaire(PendingSubmission item) async {
+    if (item.submission.projectStatus != 'true') return true;
+
+    final formValues = _decodeQuestionnairePayload(
+      item.submission.questionnairePayload,
+    );
+    if (formValues.isEmpty) return true;
+
+    final response = await functionalRepo.submitQuestionnaire(
+      unitId: item.submission.projectId,
+      formValues: formValues,
+    );
+
+    return response.statusCode == '200';
+  }
+
+  Map<String, dynamic> _decodeQuestionnairePayload(String? payload) {
+    if (payload == null || payload.trim().isEmpty) return <String, dynamic>{};
+
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (e) {
+      debugPrint('Failed to decode offline questionnaire payload: $e');
+    }
+
+    return <String, dynamic>{};
   }
 
   Future<void> _cleanupUploadedSubmission(
@@ -382,6 +416,7 @@ class HomeController extends GetxController
       final Uint8List fileBytes = Uint8List.fromList(bytes);
 
       String? fileReference;
+      String? openFilePath;
 
       if (Platform.isAndroid) {
         final savedFile = await PublicFileSaver().saveBytes(
@@ -393,6 +428,19 @@ class HomeController extends GetxController
         );
 
         fileReference = savedFile?.uri ?? savedFile?.path;
+
+        final tempDirectory = await getTemporaryDirectory();
+
+        final localFile = File('${tempDirectory.path}/$fileName');
+
+        await localFile.writeAsBytes(fileBytes, flush: true);
+
+        openFilePath = localFile.path;
+
+        debugPrint("========== LOCAL FILE DEBUG ==========");
+        debugPrint("openFilePath: $openFilePath");
+        debugPrint("exists: ${await localFile.exists()}");
+        debugPrint("======================================");
 
         if (savedFile?.isSuccess != true || fileReference == null) {
           await notificationService.showDownloadFailed(
@@ -408,13 +456,20 @@ class HomeController extends GetxController
         await notificationService.showDownloadComplete(
           notificationId: notificationId,
           fileName: fileName,
-          filePath: fileReference,
+          filePath: openFilePath,
         );
 
         Get.snackbar(
           "Download Complete",
           "Assigned projects exported to Downloads/MoMA",
         );
+
+        debugPrint("========== FILE SAVE DEBUG ==========");
+        debugPrint("isSuccess: ${savedFile?.isSuccess}");
+        debugPrint("uri: ${savedFile?.uri}");
+        debugPrint("path: ${savedFile?.path}");
+        debugPrint("fileName: $fileName");
+        debugPrint("====================================");
       } else if (Platform.isIOS) {
         final directory = await getApplicationDocumentsDirectory();
 

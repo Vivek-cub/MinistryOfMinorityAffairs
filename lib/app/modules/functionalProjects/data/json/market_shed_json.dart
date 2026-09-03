@@ -1,8 +1,8 @@
-class WomenCentricInfrastructureJson {
-  static Map<String, dynamic> get womenCentricInfrastructureSection => {
-    "pageHeading": "Women-centric Infrastructure - Working Women Hostel",
-    "section": "womenCentricInfrastructureSector",
-    "apiPaths": {"post": "v1/candidate/education", "get": ""},
+class MarketShedJson {
+  static Map<String, dynamic> get marketShedSection => {
+    "pageHeading": "Market Shed",
+    "section": "marketShedSector",
+    "apiPaths": {"post": "v1/candidate/education"},
     "fields": [
       {
         "name": "state",
@@ -143,67 +143,63 @@ class WomenCentricInfrastructureJson {
           {"key": "assetOptional", "value": true},
         ],
       },
+
       {
-        "name": "capacityAfterConstruction",
-        "label": "17. Capacity (After construction)",
+        "name": "vendorsUsingFacility",
+        "label": "17. Vendors using facility",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter the capacity after construction.",
+        "validationMsg": "Please enter number of vendors using the facility.",
       },
       {
-        "name": "occupancy",
-        "label": "18. Occupancy",
+        "name": "weeklyMarketDays",
+        "label": "18. Weekly market days",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter occupancy.",
+        "validationMsg": "Please enter number of weekly market days.",
       },
       {
-        "name": "security",
-        "label": "19. Security",
+        "name": "averageVisitors",
+        "label": "19. Average visitors",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter number of security personnel.",
+        "validationMsg": "Please enter average number of visitors.",
       },
       {
-        "name": "cctv",
-        "label": "20. CCTV",
+        "name": "marketElectricity",
+        "label": "20. Electricity",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg": "Please select whether CCTV is available.",
+        "validationMsg": "Please select whether electricity is available.",
       },
       {
-        "name": "warden",
-        "label": "21. Warden",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter number of wardens.",
-      },
-      {
-        "name": "childcareFacility",
-        "label": "22. Childcare facility",
+        "name": "marketWater",
+        "label": "21. Water",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg":
-            "Please select whether childcare facility is available.",
+        "validationMsg": "Please select whether water is available.",
       },
       {
-        "name": "maintenanceLastDoneDate",
-        "label": "23. Maintenance (Last done date)",
-        "type": "date",
+        "name": "wasteManagement",
+        "label": "22. Waste management",
+        "type": "radio",
         "required": true,
-        "validationMsg": "Please select the last maintenance date.",
+        "options": [
+          {"label": "Yes", "value": true},
+          {"label": "No", "value": false},
+        ],
+        "validationMsg": "Please select whether waste management is available.",
       },
     ],
   };

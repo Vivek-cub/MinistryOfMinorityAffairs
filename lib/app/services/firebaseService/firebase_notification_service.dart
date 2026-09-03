@@ -207,7 +207,10 @@ class FirebaseNotificationService extends GetxService {
     );
 
     const notificationDetails = NotificationDetails(android: androidDetails);
-
+    debugPrint("========== SHOW DOWNLOAD COMPLETE ==========");
+    debugPrint("fileName: $fileName");
+    debugPrint("filePath: $filePath");
+    debugPrint("============================================");
     await _localNotifications.show(
       id: notificationId,
       title: 'Download Complete',
@@ -241,15 +244,21 @@ class FirebaseNotificationService extends GetxService {
 
   Future<void> _onNotificationTap(NotificationResponse response) async {
     final filePath = response.payload;
+    debugPrint("========== NOTIFICATION TAP ==========");
+    debugPrint("Payload: $filePath");
+    debugPrint("======================================");
 
     if (filePath == null || filePath.isEmpty) {
       return;
     }
 
     try {
-      await OpenFilex.open(filePath);
-    } catch (e) {
+      final result = await OpenFilex.open(filePath);
+      debugPrint("OpenFile result type: ${result.type}");
+      debugPrint("OpenFile result message: ${result.message}");
+    } catch (e, stackTrace) {
       debugPrint('Failed to open downloaded file: $e');
+      debugPrintStack(stackTrace: stackTrace);
     }
   }
 }

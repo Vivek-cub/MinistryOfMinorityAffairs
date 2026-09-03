@@ -14,6 +14,8 @@ class Submissions extends Table {
   TextColumn get userLng => text()();
   TextColumn get progress => text()();
   TextColumn get projectStatus => text()();
+  TextColumn get questionnairePayload =>
+      text().withDefault(const Constant(''))();
   @override
   List<Set<Column>> get uniqueKeys => [
     //{userId, projectId, milestoneId},

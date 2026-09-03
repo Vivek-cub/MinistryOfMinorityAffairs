@@ -1,8 +1,8 @@
 sealed class NetworkConstants {
-  static final String baseUrl = "baseUrl=http://49.249.23.234:80/";
+  static final String baseUrl = "http://49.249.23.234:80/";
   //http://49.249.23.234
 
-  // static final String baseUrl="baseUrl=http://49.249.23.234:80/api/v1/";
+  // static final String baseUrl = "https://msdp.minorityaffairs.gov.in/";
   static final String login = "api/v1/pms/login/login";
   static final String verifyOtp = "api/v1/pms/login/verifyOtp";
   static final String dashboard = "api/v1/pms/mobile/dashboard";

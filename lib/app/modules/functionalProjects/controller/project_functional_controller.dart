@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
@@ -5,7 +8,20 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/community_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/dwf_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/educational_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/girls_hostel_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/health_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/indoor_sports_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/laboratory_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/market_shed_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/operation_json.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/skill_development_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/playground_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/toilet_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/women_centric_infrastructure_json.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/json/women_community_json.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/model/dynamic_form_config_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/entity/dynamic_form_config.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/repo/project_functional_repo.dart';
@@ -62,6 +78,7 @@ class ProjectFunctionalController extends GetxController
   @override
   RxBool isInsideFence = false.obs;
   RxBool isFunctional = false.obs;
+  final RxBool isFormLoading = true.obs;
 
   @override
   void onInit() {
@@ -108,45 +125,18 @@ class ProjectFunctionalController extends GetxController
     initialValue.value = Map<String, dynamic>.from(initialValues);
 
     dynamicFormValue.value = Map<String, dynamic>.from(initialValues);
+
+    debugPrint('Dynamic form config loaded');
+
+    debugPrint('Initial values: ${initialValue.value}');
+
     _patchInitialValuesAfterBuild();
   }
 
-  Map<String, dynamic> _getFormConfig() {
-    //return EducationalJson.educationalSection;
-    return SkillDevelopmentJson.skillDevelopmentSection;
-
-    //   switch (data.value.sectorId) {
-    //   case 'EDUCATION':
-    //     return EducationalJson.educationalSection;
-
-    //   case 'HEALTH':
-    //     return HealthJson.healthSection;
-
-    //   case 'INFRASTRUCTURE':
-    //     return InfrastructureJson.infrastructureSection;
-
-    //   default:
-    //     return GeneralJson.generalSection;
-    // }
-  }
-
   void _patchInitialValuesAfterBuild() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryPatch());
-  }
-
-  int _patchRetries = 0;
-
-  void _tryPatch() {
-    final fields = formKey.currentState?.fields;
-    if (fields == null || fields.isEmpty) {
-      if (_patchRetries < 5) {
-        _patchRetries++;
-        WidgetsBinding.instance.addPostFrameCallback((_) => _tryPatch());
-      }
-      return;
-    }
-    _patchRetries = 0;
-    patchInitialValuesToForm();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      patchInitialValuesToForm();
+    });
   }
 
   void patchInitialValuesToForm() {
@@ -168,10 +158,27 @@ class ProjectFunctionalController extends GetxController
 
   dynamic _valueForFormField(String fieldName, dynamic value) {
     if (_fieldType(fieldName) == 'date') {
-      if (value is DateTime) return value;
-      if (value == null || value.toString().trim().isEmpty) return null;
-      return _parseDisplayDate(value.toString()) ??
+      if (value is DateTime) {
+        debugPrint('$fieldName → DateTime: $value');
+        return value;
+      }
+
+      if (value == null || value.toString().trim().isEmpty) {
+        debugPrint('$fieldName → NULL');
+        return null;
+      }
+
+      final parsed =
+          _parseDisplayDate(value.toString()) ??
           DateTime.tryParse(value.toString());
+
+      debugPrint(
+        '$fieldName → original: $value '
+        '(${value.runtimeType}) → parsed: $parsed '
+        '(${parsed.runtimeType})',
+      );
+
+      return parsed;
     }
 
     return value;
@@ -204,6 +211,11 @@ class ProjectFunctionalController extends GetxController
     return '$day/$month/${date.year}';
   }
 
+  String _formatGeoCoordinates(double? lat, double? lng) {
+    if (lat == null || lng == null) return '';
+    return '$lat, $lng';
+  }
+
   String? get displayedVideoPath {
     if (videoPath.value.isEmpty) return null;
     return videoPath.value;
@@ -215,8 +227,6 @@ class ProjectFunctionalController extends GetxController
     if (!value) {
       clearQuestionnaire();
       clearVideoSelection();
-    } else {
-      _patchInitialValuesAfterBuild();
     }
   }
 
@@ -260,10 +270,16 @@ class ProjectFunctionalController extends GetxController
   }
 
   Future<void> onCaptureVideo() async {
+    SnackBarMixin().showAlertCustom(
+      backBtnDisable: true,
+      title: "Fetching Location...",
+    );
     final insideGeofence = await checkGeoFence(
       data.value.lat ?? 0.0,
       data.value.lng ?? 0.0,
+      data.value.stateName ?? "",
     );
+    Get.back();
 
     if (insideGeofence == false) {
       //controller.showPhotoSourceDialog(index);
@@ -307,10 +323,10 @@ class ProjectFunctionalController extends GetxController
       return;
     }
 
-    // if (isFunctionalProject.value == true && videoPath.value.isEmpty) {
-    //   showErrorDialog(Get.context!, message: 'Please upload video.');
-    //   return;
-    // }
+    if (isFunctionalProject.value == true && videoPath.value.isEmpty) {
+      showErrorDialog(Get.context!, message: 'Please upload video.');
+      return;
+    }
 
     if (isSubmitting.value) return;
     isSubmitting.value = true;
@@ -333,61 +349,36 @@ class ProjectFunctionalController extends GetxController
 
   Future<void> submitOnline() async {
     try {
-      showAlertCustom(backBtnDisable: true, title: "Uploading...");
-
-      // 1. Submit dynamic questionnaire form data
+      // API 1: Submit questionnaire
       if (isFunctionalProject.value == true) {
-        final unitId = data.value.id ?? '';
-        if (unitId.isEmpty) throw Exception("Unit code is missing.");
+        final questionnaireSuccess = await submitQuestionnaireOnline();
 
-        final formValues = _buildSectionPostData();
-
-        final questionnaireResp = await repo.submitQuestionnaire(
-          unitId: unitId,
-          formValues: formValues,
-        );
-
-        if (questionnaireResp.statusCode != '200') {
-          Get.back();
-          showErrorDialog(
-            Get.context!,
-            title: "Error",
-            message: "Failed to submit questionnaire.",
-          );
+        if (!questionnaireSuccess) {
           return;
         }
       }
 
-      // 2. Submit functionality status + video
-      // final modelData = await repo.updateFunctionality(
-      //   projectId: projectId.value,
-      //   isFunctional: isFunctionalProject.value ?? false,
-      //   videoPath:
-      //       isFunctionalProject.value == true && videoPath.value.isNotEmpty
-      //           ? videoPath.value
-      //           : null,
-      // );
+      // API 2: Upload functionality + video
+      final uploadSuccess = await uploadFunctionalityOnline();
 
-      // if (modelData.statusCode == '200') {
-      //   Get.back();
+      if (!uploadSuccess) {
+        await closeLoadingDialog();
+        return;
+      }
 
-      //   showSuccessDialog(
-      //     Get.context!,
-      //     message: "Your data is submitted successfully",
-      //     onPressed: () async {
-      //       Helpers().refreshHomeIfAvailable();
-      //       await _navigateToDashboard();
-      //     },
-      //   );
-      // } else {
-      //   Get.back();
+      // Both APIs succeeded
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
 
-      //   showErrorDialog(
-      //     Get.context!,
-      //     title: "Error",
-      //     message: modelData.error ?? "Something went wrong.",
-      //   );
-      // }
+      showSuccessDialog(
+        Get.context!,
+        message: "Your data is submitted successfully",
+        onPressed: () async {
+          Helpers().refreshHomeIfAvailable();
+          await _navigateToDashboard();
+        },
+      );
     } catch (e) {
       debugPrint("submitOnline error: $e");
 
@@ -405,6 +396,159 @@ class ProjectFunctionalController extends GetxController
     }
   }
 
+  Future<bool> submitQuestionnaireOnline() async {
+    try {
+      final unitId = data.value.id ?? '';
+
+      if (unitId.isEmpty) {
+        throw Exception("Unit code is missing.");
+      }
+
+      showAlertCustom(backBtnDisable: true, title: "Submitting...");
+
+      final formValues = _buildSectionPostData();
+
+      debugPrint("========== QUESTIONNAIRE SUBMIT ==========");
+      debugPrint("Unit ID: $unitId");
+      debugPrint("Form Values: $formValues");
+
+      final response = await repo.submitQuestionnaire(
+        unitId: unitId,
+        formValues: formValues,
+      );
+
+      debugPrint("Questionnaire response: ${response.statusCode}");
+
+      if (response.statusCode == '200') {
+        return true;
+      }
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      showErrorDialog(
+        Get.context!,
+        title: "Error",
+        message: response.error ?? "Failed to submit questionnaire.",
+      );
+
+      return false;
+    } catch (e) {
+      debugPrint("submitQuestionnaireOnline error: $e");
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      showErrorDialog(
+        Get.context!,
+        title: "Error",
+        message: "Failed to submit questionnaire.",
+      );
+
+      return false;
+    }
+  }
+
+  Future<bool> uploadFunctionalityOnline() async {
+    try {
+      // Close "Submitting..." dialog
+      await closeLoadingDialog();
+
+      // Show "Uploading..." dialog
+      showAlertCustom(backBtnDisable: true, title: "Uploading...");
+
+      final response = await repo.updateFunctionality(
+        projectId: projectId.value,
+        isFunctional: isFunctionalProject.value ?? false,
+        videoPath:
+            isFunctionalProject.value == true && videoPath.value.isNotEmpty
+                ? videoPath.value
+                : null,
+      );
+
+      // API success
+      if (response.statusCode == '200') {
+        await closeLoadingDialog();
+
+        return true;
+      }
+
+      // API returned failure without throwing
+      await closeLoadingDialog();
+
+      showErrorDialog(
+        Get.context!,
+        title: "Upload Failed",
+        message: response.error ?? "Something went wrong.",
+      );
+
+      return false;
+    } on DioException catch (e) {
+      debugPrint('========== FUNCTIONALITY API ERROR ==========');
+      debugPrint('Status: ${e.response?.statusCode}');
+      debugPrint('Response: ${e.response?.data}');
+      debugPrint('=============================================');
+
+      // FIRST close "Uploading..." dialog
+      await closeLoadingDialog();
+
+      // THEN show error dialog
+      showErrorDialog(
+        Get.context!,
+        title: "Upload Failed",
+        message:
+            e.response?.data?['statusMessage']?.toString() ??
+            "Failed to upload functionality data.",
+      );
+
+      return false;
+    } catch (e) {
+      debugPrint("uploadFunctionalityOnline error: $e");
+
+      // FIRST close "Uploading..." dialog
+      await closeLoadingDialog();
+
+      // THEN show error dialog
+      showErrorDialog(
+        Get.context!,
+        title: "Upload Failed",
+        message: "Something went wrong while uploading.",
+      );
+
+      return false;
+    }
+  }
+
+  Map<String, dynamic> _jsonFormPayload() {
+    final savedValues =
+        formKey.currentState?.value ?? const <String, dynamic>{};
+    final instantValues =
+        formKey.currentState?.instantValue ?? const <String, dynamic>{};
+    final payload = <String, dynamic>{};
+
+    for (final field in dynamicFormConfig.value?.fields ?? []) {
+      if (field.type == 'labelText') continue;
+
+      final rawValue =
+          savedValues[field.name] ??
+          instantValues[field.name] ??
+          dynamicFormValue[field.name] ??
+          initialValue[field.name] ??
+          field.value;
+
+      payload[field.name] = _serializeFormValue(rawValue);
+    }
+
+    return payload;
+  }
+
+  dynamic _serializeFormValue(dynamic value) {
+    if (value is DateTime) return _formatDate(value);
+    return value ?? '';
+  }
+
   Future<void> saveOffline() async {
     final userId = await authService.getUserToken();
     if (userId == null || userId.isEmpty) {
@@ -412,6 +556,9 @@ class ProjectFunctionalController extends GetxController
       isSubmitting.value = false;
       return;
     }
+
+    final questionnairePayload =
+        isFunctionalProject.value == true ? jsonEncode(_jsonFormPayload()) : '';
 
     await repository.save(
       userId: userId,
@@ -422,6 +569,7 @@ class ProjectFunctionalController extends GetxController
               ? videoPath.value
               : null,
       remarks: '',
+      questionnairePayload: questionnairePayload,
       isSynced: false,
       userLat: userLat.value.toString(),
       userLng: userLng.value.toString(),
@@ -439,6 +587,10 @@ class ProjectFunctionalController extends GetxController
     isSubmitting.value = false;
   }
 
+  Future<void> _navigateToDashboard() async {
+    Get.offAllNamed(await authService.dashboardRoute());
+  }
+
   @override
   void onClose() {
     timelineController.dispose();
@@ -448,117 +600,101 @@ class ProjectFunctionalController extends GetxController
   Future<void> _loadCurrentForm() async {
     final config = _getFormConfig();
     final unitId = data.value.id ?? '';
+
     if (unitId.isEmpty) {
-      debugPrint('Unit code is empty');
+      debugPrint('Unit ID is empty');
+      isFormLoading(false);
       return;
     }
 
-    final resp = await repo.getQuestionaire(unitId: unitId);
-    final questionnaireData = _questionnaireDataFromResponse(resp);
+    try {
+      isFormLoading(true);
 
-    final initialValues = _getInitialValues(
-      formConfig: config,
-      apiValues: questionnaireData,
-    );
-    _loadDynamicForm(formConfig: config, initialValues: initialValues);
-  }
+      final response = await repo.getQuestionaire(unitId: unitId);
 
-  Map<String, dynamic> _questionnaireDataFromResponse(
-    Map<String, dynamic>? response,
-  ) {
-    if (response == null) return {};
+      if (response == null) {
+        debugPrint('Questionnaire response is null');
+        return;
+      }
 
-    final data = response['data'];
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
+      debugPrint('========== QUESTIONNAIRE RESPONSE ==========');
+      debugPrint(response.toString());
+      debugPrint('============================================');
+
+      // IMPORTANT:
+      // API fields are inside response['data']
+      final apiData = Map<String, dynamic>.from(response['data'] ?? {});
+
+      debugPrint('========== API DATA ==========');
+      debugPrint(apiData.toString());
+      debugPrint('==============================');
+
+      final initialValues = _getInitialValues(apiValues: apiData);
+
+      debugPrint('========== INITIAL FORM VALUES ==========');
+      debugPrint(initialValues.toString());
+      debugPrint('=========================================');
+
+      _loadDynamicForm(formConfig: config, initialValues: initialValues);
+
+      // Make sure FormBuilder receives the values
+      // _patchInitialValuesAfterBuild();
+    } catch (e, stackTrace) {
+      debugPrint('Questionnaire API error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      isFormLoading(false);
     }
-
-    return Map<String, dynamic>.from(response);
   }
 
   Map<String, dynamic> _getInitialValues({
-    required Map<String, dynamic> formConfig,
     required Map<String, dynamic> apiValues,
   }) {
+    final config = _getFormConfig();
+
     final initialValues = <String, dynamic>{};
 
-    for (final rawField in formConfig['fields'] ?? []) {
-      if (rawField is! Map) continue;
-
-      final field = Map<String, dynamic>.from(rawField);
+    for (final field in config['fields'] ?? []) {
       final fieldName = field['name']?.toString();
-      if (fieldName == null) continue;
+
+      if (fieldName == null) {
+        continue;
+      }
 
       dynamic value;
 
       if (fieldName == 'geoCoordinates') {
         final lat = apiValues['latitude'];
         final lng = apiValues['longitude'];
-        if (lat != null && lng != null) value = '$lat, $lng';
+
+        if (lat != null && lng != null) {
+          value = '$lat, $lng';
+        }
       } else {
         final apiKey = _fieldApiKeyMap[fieldName] ?? fieldName;
+
         value = apiValues[apiKey];
       }
 
-      value = _normalizeInitialValue(field: field, value: value);
-      if (value != null) initialValues[fieldName] = value;
+      if (value != null) {
+        initialValues[fieldName] = value;
+      }
     }
 
     debugPrint('DYNAMIC INITIAL VALUES: $initialValues');
+
     return initialValues;
   }
 
-  dynamic _normalizeInitialValue({
-    required Map<String, dynamic> field,
-    required dynamic value,
-  }) {
-    if (value == null) return null;
-
-    final fieldType = field['type']?.toString();
-    if (fieldType == 'date' || _isDateFieldValue(value)) {
-      final parsedDate =
-          value is DateTime
-              ? value
-              : _parseDisplayDate(value.toString()) ??
-                  DateTime.tryParse(value.toString());
-
-      if (parsedDate == null) {
-        return fieldType == 'date' ? null : value;
-      }
-
-      return _formatDate(parsedDate);
+  String _formatGeoCoordinatesFromString(String? latitude, String? longitude) {
+    if (latitude == null ||
+        longitude == null ||
+        latitude.isEmpty ||
+        longitude.isEmpty) {
+      return '';
     }
 
-    if (fieldType == 'radio') {
-      return _normalizeRadioValue(field, value);
-    }
-
-    return value;
-  }
-
-  bool _isDateFieldValue(dynamic value) {
-    if (value is DateTime) return true;
-    if (value is! String) return false;
-
-    return DateTime.tryParse(value) != null || _parseDisplayDate(value) != null;
-  }
-
-  dynamic _normalizeRadioValue(Map<String, dynamic> field, dynamic value) {
-    final options = field['options'];
-    if (options is! List) return value;
-
-    for (final option in options) {
-      if (option is! Map) continue;
-
-      final optionValue = option['value'];
-      if (optionValue == value) return optionValue;
-      if (optionValue?.toString().toLowerCase() ==
-          value.toString().toLowerCase()) {
-        return optionValue;
-      }
-    }
-
-    return value;
+    return '$latitude, $longitude';
   }
 
   Future<void> submitQuestionnaire() async {
@@ -635,5 +771,71 @@ class ProjectFunctionalController extends GetxController
     }
 
     return data;
+  }
+
+  Map<String, dynamic> _getFormConfig() {
+    final msdpName =
+        data.value.unitProject?.msdpSectorName?.trim().toLowerCase();
+
+    switch (msdpName) {
+      case 'skill':
+      case 'skill training':
+        return SkillDevelopmentJson.skillDevelopmentSection;
+
+      case 'education':
+        return EducationalJson.educationalSection;
+
+      case 'girls hostel':
+        return GirlsHostelJson.girlsHostelSection;
+
+      case 'laboratory':
+        return LaboratoryJson.laboratorySection;
+
+      case 'health':
+        return HealthJson.healthSection;
+
+      case 'playground':
+        return PlaygroundJson.playgroundSection;
+
+      case 'indoor':
+        return IndoorSportsJson.indoorSportsection;
+
+      case 'community':
+        return CommunityJson.communitySection;
+
+      case 'tc':
+      case 'toilet complex':
+        return ToiletJson.toiletSection;
+
+      case 'ms':
+      case 'market shed':
+        return MarketShedJson.marketShedSection;
+
+      case 'dws':
+      case 'drinking water infrastructure':
+      case 'drinking water facility':
+        return DwfJson.dwfSection;
+
+      case 'women centric infrastructure':
+      case 'wci':
+        return WomenCentricInfrastructureJson.womenCentricInfrastructureSection;
+
+      case 'women community centre':
+      case 'wcc':
+        return WomenCommunityJson.womencommunitySection;
+
+      case 'operation':
+      case 'maintenance':
+        return OperationJson.operationSection;
+
+      default:
+        debugPrint(
+          'No form config found for MSDP: ${data.value.unitProject?.msdpItemsName}',
+        );
+        return <String, dynamic>{
+          'pageHeading': '',
+          'fields': <Map<String, dynamic>>[],
+        };
+    }
   }
 }

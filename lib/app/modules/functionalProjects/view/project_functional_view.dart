@@ -63,33 +63,38 @@ class ProjectFunctionalView extends GetView<ProjectFunctionalController> {
                         ),
                         if (controller.isFunctionalProject.value == true) ...[
                           const SizedBox(height: AppDimensions.lg),
-                          // if (controller.dynamicFormHeading.value.isNotEmpty)
-                          //   TitleText(
-                          //     text: controller.dynamicFormHeading.value,
-                          //     fontWeight: FontWeight.w600,
-                          //   ),
-                          // const SizedBox(height: AppDimensions.sm),
-                          FormBuilder(
-                            key: controller.formKey,
-                            initialValue: Map<String, dynamic>.from(
-                              controller.initialValue,
+
+                          if (controller.isFormLoading.value)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          else
+                            FormBuilder(
+                              key: controller.formKey,
+                              initialValue: Map<String, dynamic>.from(
+                                controller.initialValue,
+                              ),
+                              onChanged: controller.onDynamicFormChanged,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children:
+                                    controller.dynamicFormConfig.value?.fields
+                                        .map(
+                                          (field) => SwitchFormFieldWidgets(
+                                            field: field,
+                                            controller: controller,
+                                          ),
+                                        )
+                                        .toList() ??
+                                    const [],
+                              ),
                             ),
-                            onChanged: controller.onDynamicFormChanged,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children:
-                                  controller.dynamicFormConfig.value?.fields
-                                      .map(
-                                        (field) => SwitchFormFieldWidgets(
-                                          field: field,
-                                          controller: controller,
-                                        ),
-                                      )
-                                      .toList() ??
-                                  const [],
-                            ),
-                          ),
+
                           const SizedBox(height: AppDimensions.lg),
+
                           CapturedVideoPreview(
                             videoPath: controller.displayedVideoPath,
                             onCaptureTap: controller.onCaptureVideo,

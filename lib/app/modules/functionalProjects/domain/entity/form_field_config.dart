@@ -48,7 +48,7 @@ class FormFieldConfig {
   final String name;
   final String label;
   final String type;
-  final String? value;
+  final dynamic value;
   final bool? disable;
   final bool? required;
   final String? info;

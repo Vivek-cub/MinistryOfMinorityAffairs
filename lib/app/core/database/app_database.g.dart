@@ -113,6 +113,18 @@ class $SubmissionsTable extends Submissions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _questionnairePayloadMeta =
+      const VerificationMeta('questionnairePayload');
+  @override
+  late final GeneratedColumn<String> questionnairePayload =
+      GeneratedColumn<String>(
+        'questionnaire_payload',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -124,6 +136,7 @@ class $SubmissionsTable extends Submissions
     userLng,
     progress,
     projectStatus,
+    questionnairePayload,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -203,6 +216,15 @@ class $SubmissionsTable extends Submissions
     } else if (isInserting) {
       context.missing(_projectStatusMeta);
     }
+    if (data.containsKey('questionnaire_payload')) {
+      context.handle(
+        _questionnairePayloadMeta,
+        questionnairePayload.isAcceptableOrUnknown(
+          data['questionnaire_payload']!,
+          _questionnairePayloadMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -261,6 +283,11 @@ class $SubmissionsTable extends Submissions
             DriftSqlType.string,
             data['${effectivePrefix}project_status'],
           )!,
+      questionnairePayload:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}questionnaire_payload'],
+          )!,
     );
   }
 
@@ -280,6 +307,7 @@ class Submission extends DataClass implements Insertable<Submission> {
   final String userLng;
   final String progress;
   final String projectStatus;
+  final String questionnairePayload;
   const Submission({
     required this.id,
     required this.userId,
@@ -290,6 +318,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     required this.userLng,
     required this.progress,
     required this.projectStatus,
+    required this.questionnairePayload,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -303,6 +332,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     map['user_lng'] = Variable<String>(userLng);
     map['progress'] = Variable<String>(progress);
     map['project_status'] = Variable<String>(projectStatus);
+    map['questionnaire_payload'] = Variable<String>(questionnairePayload);
     return map;
   }
 
@@ -317,6 +347,7 @@ class Submission extends DataClass implements Insertable<Submission> {
       userLng: Value(userLng),
       progress: Value(progress),
       projectStatus: Value(projectStatus),
+      questionnairePayload: Value(questionnairePayload),
     );
   }
 
@@ -335,6 +366,9 @@ class Submission extends DataClass implements Insertable<Submission> {
       userLng: serializer.fromJson<String>(json['userLng']),
       progress: serializer.fromJson<String>(json['progress']),
       projectStatus: serializer.fromJson<String>(json['projectStatus']),
+      questionnairePayload: serializer.fromJson<String>(
+        json['questionnairePayload'],
+      ),
     );
   }
   @override
@@ -350,6 +384,7 @@ class Submission extends DataClass implements Insertable<Submission> {
       'userLng': serializer.toJson<String>(userLng),
       'progress': serializer.toJson<String>(progress),
       'projectStatus': serializer.toJson<String>(projectStatus),
+      'questionnairePayload': serializer.toJson<String>(questionnairePayload),
     };
   }
 
@@ -363,6 +398,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     String? userLng,
     String? progress,
     String? projectStatus,
+    String? questionnairePayload,
   }) => Submission(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -373,6 +409,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     userLng: userLng ?? this.userLng,
     progress: progress ?? this.progress,
     projectStatus: projectStatus ?? this.projectStatus,
+    questionnairePayload: questionnairePayload ?? this.questionnairePayload,
   );
   Submission copyWithCompanion(SubmissionsCompanion data) {
     return Submission(
@@ -388,6 +425,10 @@ class Submission extends DataClass implements Insertable<Submission> {
           data.projectStatus.present
               ? data.projectStatus.value
               : this.projectStatus,
+      questionnairePayload:
+          data.questionnairePayload.present
+              ? data.questionnairePayload.value
+              : this.questionnairePayload,
     );
   }
 
@@ -402,7 +443,8 @@ class Submission extends DataClass implements Insertable<Submission> {
           ..write('userLat: $userLat, ')
           ..write('userLng: $userLng, ')
           ..write('progress: $progress, ')
-          ..write('projectStatus: $projectStatus')
+          ..write('projectStatus: $projectStatus, ')
+          ..write('questionnairePayload: $questionnairePayload')
           ..write(')'))
         .toString();
   }
@@ -418,6 +460,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     userLng,
     progress,
     projectStatus,
+    questionnairePayload,
   );
   @override
   bool operator ==(Object other) =>
@@ -431,7 +474,8 @@ class Submission extends DataClass implements Insertable<Submission> {
           other.userLat == this.userLat &&
           other.userLng == this.userLng &&
           other.progress == this.progress &&
-          other.projectStatus == this.projectStatus);
+          other.projectStatus == this.projectStatus &&
+          other.questionnairePayload == this.questionnairePayload);
 }
 
 class SubmissionsCompanion extends UpdateCompanion<Submission> {
@@ -444,6 +488,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   final Value<String> userLng;
   final Value<String> progress;
   final Value<String> projectStatus;
+  final Value<String> questionnairePayload;
   const SubmissionsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
@@ -454,6 +499,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.userLng = const Value.absent(),
     this.progress = const Value.absent(),
     this.projectStatus = const Value.absent(),
+    this.questionnairePayload = const Value.absent(),
   });
   SubmissionsCompanion.insert({
     this.id = const Value.absent(),
@@ -465,6 +511,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     required String userLng,
     required String progress,
     required String projectStatus,
+    this.questionnairePayload = const Value.absent(),
   }) : userId = Value(userId),
        projectId = Value(projectId),
        userLat = Value(userLat),
@@ -481,6 +528,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Expression<String>? userLng,
     Expression<String>? progress,
     Expression<String>? projectStatus,
+    Expression<String>? questionnairePayload,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -492,6 +540,8 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       if (userLng != null) 'user_lng': userLng,
       if (progress != null) 'progress': progress,
       if (projectStatus != null) 'project_status': projectStatus,
+      if (questionnairePayload != null)
+        'questionnaire_payload': questionnairePayload,
     });
   }
 
@@ -505,6 +555,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Value<String>? userLng,
     Value<String>? progress,
     Value<String>? projectStatus,
+    Value<String>? questionnairePayload,
   }) {
     return SubmissionsCompanion(
       id: id ?? this.id,
@@ -516,6 +567,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       userLng: userLng ?? this.userLng,
       progress: progress ?? this.progress,
       projectStatus: projectStatus ?? this.projectStatus,
+      questionnairePayload: questionnairePayload ?? this.questionnairePayload,
     );
   }
 
@@ -549,6 +601,11 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     if (projectStatus.present) {
       map['project_status'] = Variable<String>(projectStatus.value);
     }
+    if (questionnairePayload.present) {
+      map['questionnaire_payload'] = Variable<String>(
+        questionnairePayload.value,
+      );
+    }
     return map;
   }
 
@@ -563,7 +620,8 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
           ..write('userLat: $userLat, ')
           ..write('userLng: $userLng, ')
           ..write('progress: $progress, ')
-          ..write('projectStatus: $projectStatus')
+          ..write('projectStatus: $projectStatus, ')
+          ..write('questionnairePayload: $questionnairePayload')
           ..write(')'))
         .toString();
   }
@@ -3222,6 +3280,7 @@ typedef $$SubmissionsTableCreateCompanionBuilder =
       required String userLng,
       required String progress,
       required String projectStatus,
+      Value<String> questionnairePayload,
     });
 typedef $$SubmissionsTableUpdateCompanionBuilder =
     SubmissionsCompanion Function({
@@ -3234,6 +3293,7 @@ typedef $$SubmissionsTableUpdateCompanionBuilder =
       Value<String> userLng,
       Value<String> progress,
       Value<String> projectStatus,
+      Value<String> questionnairePayload,
     });
 
 final class $$SubmissionsTableReferences
@@ -3385,6 +3445,11 @@ class $$SubmissionsTableFilterComposer
 
   ColumnFilters<String> get projectStatus => $composableBuilder(
     column: $table.projectStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionnairePayload => $composableBuilder(
+    column: $table.questionnairePayload,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3542,6 +3607,11 @@ class $$SubmissionsTableOrderingComposer
     column: $table.projectStatus,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get questionnairePayload => $composableBuilder(
+    column: $table.questionnairePayload,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SubmissionsTableAnnotationComposer
@@ -3579,6 +3649,11 @@ class $$SubmissionsTableAnnotationComposer
 
   GeneratedColumn<String> get projectStatus => $composableBuilder(
     column: $table.projectStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get questionnairePayload => $composableBuilder(
+    column: $table.questionnairePayload,
     builder: (column) => column,
   );
 
@@ -3727,6 +3802,7 @@ class $$SubmissionsTableTableManager
                 Value<String> userLng = const Value.absent(),
                 Value<String> progress = const Value.absent(),
                 Value<String> projectStatus = const Value.absent(),
+                Value<String> questionnairePayload = const Value.absent(),
               }) => SubmissionsCompanion(
                 id: id,
                 userId: userId,
@@ -3737,6 +3813,7 @@ class $$SubmissionsTableTableManager
                 userLng: userLng,
                 progress: progress,
                 projectStatus: projectStatus,
+                questionnairePayload: questionnairePayload,
               ),
           createCompanionCallback:
               ({
@@ -3749,6 +3826,7 @@ class $$SubmissionsTableTableManager
                 required String userLng,
                 required String progress,
                 required String projectStatus,
+                Value<String> questionnairePayload = const Value.absent(),
               }) => SubmissionsCompanion.insert(
                 id: id,
                 userId: userId,
@@ -3759,6 +3837,7 @@ class $$SubmissionsTableTableManager
                 userLng: userLng,
                 progress: progress,
                 projectStatus: projectStatus,
+                questionnairePayload: questionnairePayload,
               ),
           withReferenceMapper:
               (p0) =>

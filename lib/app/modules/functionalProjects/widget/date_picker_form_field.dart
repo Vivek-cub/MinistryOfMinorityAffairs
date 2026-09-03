@@ -29,7 +29,7 @@ class MyDatePickerFormField extends StatelessWidget {
   });
   final String name;
   final String label;
-  final String? initialValue;
+  final DateTime? initialValue;
   final TextInputType keyboardType;
   final bool readOnly;
   final Function(String?)? onChanged;
@@ -79,10 +79,7 @@ class MyDatePickerFormField extends StatelessWidget {
           ).paddingOnly(bottom: AppDimensions.xs),
           FormBuilderDateTimePicker(
             name: name,
-            initialValue:
-                initialValue != null
-                    ? DateFormat('dd/MM/yyyy').parse(initialValue ?? '')
-                    : null,
+            initialValue: initialValue,
             format: DateFormat("dd/MM/yyyy"),
             firstDate: firstDate,
             lastDate: lastDate,
@@ -95,22 +92,36 @@ class MyDatePickerFormField extends StatelessWidget {
             onChanged:
                 onChanged != null
                     ? (value) {
-                      if (value != null) {
-                        final initialValue =
-                            Get.find<ProjectFunctionalController>()
-                                .initialValue[name];
-                        if (date_mixin.isSameDay(
-                              initialValue is DateTime ? initialValue : null,
-                              value,
-                            ) ==
-                            false) {
-                          onChanged!(value.toString());
+                      if (value == null) return;
+
+                      final controller =
+                          Get.find<ProjectFunctionalController>();
+
+                      final rawInitialValue = controller.initialValue[name];
+
+                      DateTime? initialDate;
+
+                      if (rawInitialValue is DateTime) {
+                        initialDate = rawInitialValue;
+                      } else if (rawInitialValue != null) {
+                        try {
+                          initialDate = DateFormat(
+                            'dd/MM/yyyy',
+                          ).parse(rawInitialValue.toString());
+                        } catch (_) {
+                          initialDate = DateTime.tryParse(
+                            rawInitialValue.toString(),
+                          );
                         }
+                      }
+
+                      if (!date_mixin.isSameDay(initialDate, value)) {
+                        onChanged!(value.toString());
                       }
                     }
                     : null,
             style: Get.textTheme.titleSmall?.copyWith(
-              color: AppColors.lightGrey,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
             decoration: InputDecoration(

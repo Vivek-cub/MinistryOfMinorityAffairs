@@ -19,6 +19,7 @@ class SubmissionRepository {
     String? userLng,
     String? progress,
     String? projectStatus,
+    String? questionnairePayload,
   }) {
     return dao.saveSubmission(
       userId: userId,
@@ -34,6 +35,7 @@ class SubmissionRepository {
       userLng: userLng,
       progress: progress,
       projectStatus: projectStatus,
+      questionnairePayload: questionnairePayload,
     );
   }
 

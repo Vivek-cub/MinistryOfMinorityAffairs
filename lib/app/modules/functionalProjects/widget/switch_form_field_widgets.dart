@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:intl/intl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/controller/project_functional_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/entity/form_field_config.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/mixin/condition_validators.dart';
@@ -93,7 +94,7 @@ class SwitchFormFieldWidgets extends StatelessWidget with ConditionValidators {
             hidden: field.hidden,
             name: field.name,
             label: field.label,
-            initialValue: controller.initialValue[field.name]?.toString(),
+            initialValue: _parseDate(controller.initialValue[field.name]),
             errorMessage: field.validationMsg,
             required:
                 field.required == true
@@ -101,9 +102,9 @@ class SwitchFormFieldWidgets extends StatelessWidget with ConditionValidators {
                     : false, //!disableWhen(field, controller.formKey, controller),
             readOnly: disableWhen(field, controller.formKey, controller),
             onChanged: (value) {
-              if (controller.initialValue[field.name] != null) {
-                controller.initialValue[field.name] = null;
-              }
+              // if (controller.initialValue[field.name] != null) {
+              //   controller.initialValue[field.name] = null;
+              // }
 
               controller.onDynamicFormChanged();
             },
@@ -129,6 +130,26 @@ class SwitchFormFieldWidgets extends StatelessWidget with ConditionValidators {
         );
       default:
         return const SizedBox.shrink();
+    }
+  }
+
+  DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+
+    if (value is DateTime) {
+      return value;
+    }
+
+    final stringValue = value.toString().trim();
+
+    if (stringValue.isEmpty) {
+      return null;
+    }
+
+    try {
+      return DateFormat('dd/MM/yyyy').parse(stringValue);
+    } catch (_) {
+      return DateTime.tryParse(stringValue);
     }
   }
 }

@@ -1,6 +1,6 @@
-class WomenCentricInfrastructureJson {
-  static Map<String, dynamic> get womenCentricInfrastructureSection => {
-    "pageHeading": "Women-centric Infrastructure - Working Women Hostel",
+class WomenCommunityJson {
+  static Map<String, dynamic> get womencommunitySection => {
+    "pageHeading": "Women Community Json",
     "section": "womenCentricInfrastructureSector",
     "apiPaths": {"post": "v1/candidate/education", "get": ""},
     "fields": [
@@ -143,67 +143,59 @@ class WomenCentricInfrastructureJson {
           {"key": "assetOptional", "value": true},
         ],
       },
+
+      // Women Community Centre
       {
-        "name": "capacityAfterConstruction",
-        "label": "17. Capacity (After construction)",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter the capacity after construction.",
-      },
-      {
-        "name": "occupancy",
-        "label": "18. Occupancy",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter occupancy.",
-      },
-      {
-        "name": "security",
-        "label": "19. Security",
-        "type": "text",
-        "required": true,
-        "keyboardType": "number",
-        "validationMsg": "Please enter number of security personnel.",
-      },
-      {
-        "name": "cctv",
-        "label": "20. CCTV",
+        "name": "shgsUsingCentre",
+        "label": "17. SHGs using centre",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg": "Please select whether CCTV is available.",
+        "validationMsg": "Please select whether SHGs are using the centre.",
       },
       {
-        "name": "warden",
-        "label": "21. Warden",
+        "name": "programmesConducted",
+        "label": "18. Programmes conducted",
         "type": "text",
         "required": true,
         "keyboardType": "number",
-        "validationMsg": "Please enter number of wardens.",
+        "validationMsg": "Please enter the number of programmes conducted.",
       },
       {
-        "name": "childcareFacility",
-        "label": "22. Childcare facility",
-        "type": "radio",
+        "name": "womenBeneficiaries",
+        "label": "19. Women beneficiaries",
+        "type": "text",
         "required": true,
-        "options": [
-          {"label": "Yes", "value": true},
-          {"label": "No", "value": false},
-        ],
+        "keyboardType": "number",
+        "validationMsg": "Please enter the number of women beneficiaries.",
+      },
+      {
+        "name": "skillProgrammesOrganised",
+        "label": "20. Skill programmes organised",
+        "type": "text",
+        "required": true,
+        "keyboardType": "number",
         "validationMsg":
-            "Please select whether childcare facility is available.",
+            "Please enter the number of skill programmes organised.",
       },
       {
-        "name": "maintenanceLastDoneDate",
-        "label": "23. Maintenance (Last done date)",
-        "type": "date",
+        "name": "healthCampsOrganised",
+        "label": "21. Health camps organised",
+        "type": "text",
         "required": true,
-        "validationMsg": "Please select the last maintenance date.",
+        "keyboardType": "number",
+        "validationMsg": "Please enter the number of health camps organised.",
+      },
+      {
+        "name": "otherEventsOrganised",
+        "label": "22. Other Events organised",
+        "type": "text",
+        "required": true,
+        "keyboardType": "number",
+        "validationMsg": "Please enter the number of other events organised.",
       },
     ],
   };
