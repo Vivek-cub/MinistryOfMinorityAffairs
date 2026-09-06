@@ -10,6 +10,9 @@ sealed class NetworkConstants {
   static final String projectList = "api/v1/pms/mobile/getProjectByStatus";
   static final String uploadMilestoneFiles =
       "api/v1/pms/mobile/uploadMilestoneFiles";
+
+  static final String uploadMilestoneFilesForTesting =
+      "api/v1/pms/mobile/uploadMilestoneFiles1";
   // static final String assignedProjectList =
   //     "api/v1/pms/mobile/getAllAssignedProjects";
   static final String getAllSector = "api/v1/pms/master/getAllSectors";

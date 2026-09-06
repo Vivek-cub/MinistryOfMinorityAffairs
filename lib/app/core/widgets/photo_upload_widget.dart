@@ -9,14 +9,18 @@ class PhotoUploadWidget extends StatelessWidget {
   final String? imagePath;
   final VoidCallback? onTap;
   final VoidCallback? onRemove;
+  final VoidCallback? onWarningTap;
   final String? label;
+  final bool hasError;
 
   const PhotoUploadWidget({
     super.key,
     this.imagePath,
     this.onTap,
     this.onRemove,
+    this.onWarningTap,
     this.label,
+    this.hasError = false,
   });
 
   @override
@@ -70,14 +74,35 @@ class PhotoUploadWidget extends StatelessWidget {
               // Dashed border
               CustomPaint(
                 painter: DashedBorderPainter(
-                  color: AppColors.border,
-                  strokeWidth: 1.5,
+                  color: hasError ? Colors.red : AppColors.border,
+                  strokeWidth: hasError ? 2 : 1.5,
                   dashWidth: 6,
                   dashSpace: 4,
                   borderRadius: 12,
                 ),
                 child: Container(),
               ),
+              if (hasError)
+                Positioned(
+                  top: 6,
+                  left: 6,
+                  child: GestureDetector(
+                    onTap: onWarningTap,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
               if (imagePath != null)
                 Positioned(
                   top: 6,

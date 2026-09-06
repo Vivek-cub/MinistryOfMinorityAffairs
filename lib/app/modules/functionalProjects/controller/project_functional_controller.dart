@@ -277,7 +277,7 @@ class ProjectFunctionalController extends GetxController
     final insideGeofence = await checkGeoFence(
       data.value.lat ?? 0.0,
       data.value.lng ?? 0.0,
-      data.value.stateName ?? "",
+      data.value.unitProject?.stateName ?? "",
     );
     Get.back();
 
@@ -774,64 +774,182 @@ class ProjectFunctionalController extends GetxController
   }
 
   Map<String, dynamic> _getFormConfig() {
-    final msdpName =
-        data.value.unitProject?.msdpSectorName?.trim().toLowerCase();
+    final subtype = data.value.unitProject?.msdpItemsName
+        ?.trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s*\[type\s*\d+\]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ');
 
-    switch (msdpName) {
-      case 'skill':
-      case 'skill training':
-        return SkillDevelopmentJson.skillDevelopmentSection;
-
-      case 'education':
+    switch (subtype) {
+      // =========================================================
+      // EDUCATION
+      // Education - School Building / Additional Classroom
+      // =========================================================
+      case 'acr blocks':
+      case 'computers':
+      case 'drinking water facilities':
+      case 'library':
+      case 'smart classrooms/equipment':
+      case 'agriculture college':
+      case 'degree college':
+      case 'medical college':
+      case 'nursing college':
+      case 'new school buidling':
+      case 'smart classroom/teaching aids':
+      case 'staff quarters':
+      case 'toilet':
+      case 'hostel for school':
+      case 'iay':
+      case 'classroom/ lecture hall':
+      case 'other infrastructure in existing school':
+      case 'addtional infrastructure':
+      case 'furniture':
+      case 'bicycle':
+      case 'room':
         return EducationalJson.educationalSection;
 
-      case 'girls hostel':
+      // =========================================================
+      // GIRLS HOSTEL
+      // =========================================================
+      case 'girls hostel for school':
+      case 'girls hostel for college/ university':
+      case 'girls hostel for iti’s':
+      case "girls hostel for iti's":
+      case 'girls hostel for polytechnic':
+      case 'girls hostel standalone':
+      case 'boundary walls for girls hostel':
+      case 'hostel facility':
         return GirlsHostelJson.girlsHostelSection;
 
+      // =========================================================
+      // LABORATORY
+      // Laboratory at School
+      // =========================================================
       case 'laboratory':
         return LaboratoryJson.laboratorySection;
 
-      case 'health':
+      // =========================================================
+      // HEALTH
+      // Health Sector - PHC / CHC / Hospital
+      // =========================================================
+      case 'general hospital':
+      case 'super speciality hospital':
+      case 'ayurvedic hospital':
+      case 'yoga & naturopathy hospital':
+      case 'unani hospital':
+      case 'siddha hospital':
+      case 'homeopathy hospital':
+      case 'ot (operation theatre)':
+      case 'nicu (neonatal intensive care unit)':
+      case 'opd (outpatient department)':
+      case 'ipd (in patient department)':
+      case 'machinery':
+      case 'chc (common service center)':
+      case 'phc (primary health center)':
+      case 'hsc (health sub center)':
+      case 'phsc (primary health sub center)':
+      case 'district hospital':
+      case 'sub-district hospital':
+      case 'chw (centre for health and wellness)':
+      case 'nursing hospital':
+      case 'dispensary':
+      case 'ayush':
+      case 'chc':
+      case 'hsc':
+      case 'phc':
+      case 'phsc':
         return HealthJson.healthSection;
 
-      case 'playground':
-        return PlaygroundJson.playgroundSection;
+      // =========================================================
+      // SKILL DEVELOPMENT
+      // Skill Development Centre / ITI / Polytechnic
+      // =========================================================
+      case 'new iti':
+      case 'new polytechnic':
+      case 'training':
+      case 'skill centres':
+      case 'additional building':
+      case 'workshop':
+      case 'equipment':
+      case 'boys hostel for iti’s':
+      case "boys hostel for iti's":
+      case 'boys hostel for polytechnic':
+      case 'hostel for iti':
+        return SkillDevelopmentJson.skillDevelopmentSection;
 
-      case 'indoor':
-        return IndoorSportsJson.indoorSportsection;
-
-      case 'community':
-        return CommunityJson.communitySection;
-
-      case 'tc':
-      case 'toilet complex':
-        return ToiletJson.toiletSection;
-
-      case 'ms':
-      case 'market shed':
-        return MarketShedJson.marketShedSection;
-
-      case 'dws':
-      case 'drinking water infrastructure':
-      case 'drinking water facility':
-        return DwfJson.dwfSection;
-
-      case 'women centric infrastructure':
-      case 'wci':
+      // =========================================================
+      // WOMEN-CENTRIC INFRASTRUCTURE
+      // Working Women Hostel
+      // =========================================================
+      case 'working women hostel':
         return WomenCentricInfrastructureJson.womenCentricInfrastructureSection;
 
+      // =========================================================
+      // WOMEN COMMUNITY CENTRE
+      // =========================================================
       case 'women community centre':
       case 'wcc':
         return WomenCommunityJson.womencommunitySection;
 
-      case 'operation':
-      case 'maintenance':
-        return OperationJson.operationSection;
+      // =========================================================
+      // SPORTS - PLAYGROUND
+      // =========================================================
+      case 'playground':
+      case 'sports-stadium':
+      case 'sports complex':
+      case 'football turf':
+      case 'swimming pool':
+      case 'hockey turf':
+      case 'stadium':
+      case 'volleyball court':
+      case 'basketball court':
+        return PlaygroundJson.playgroundSection;
 
+      // =========================================================
+      // SPORTS - INDOOR STADIUM / SPORTS COMPLEX
+      // =========================================================
+      case 'indoor hall':
+      case 'multipurpose hall':
+        return IndoorSportsJson.indoorSportsection;
+
+      // =========================================================
+      // COMMUNITY INFRASTRUCTURE
+      // Community Hall / Sadbhav Mandap
+      // =========================================================
+      case 'community service centre/ sadbhav mandap/ community hall':
+      case 'hunar hub':
+      case 'cybergram':
+        return CommunityJson.communitySection;
+
+      // =========================================================
+      // DRINKING WATER FACILITY
+      // =========================================================
+      case 'drinking water infrastructure':
+      case 'dws':
+      case 'hand pump':
+        return DwfJson.dwfSection;
+
+      // =========================================================
+      // TOILET COMPLEX
+      // =========================================================
+      case 'toilets':
+        return ToiletJson.toiletSection;
+
+      // =========================================================
+      // MARKET SHED
+      // =========================================================
+      case 'market shed':
+        return MarketShedJson.marketShedSection;
+
+      // =========================================================
+      // DEFAULT
+      // =========================================================
       default:
         debugPrint(
-          'No form config found for MSDP: ${data.value.unitProject?.msdpItemsName}',
+          'No form config found for MSDP subtype: '
+          '${data.value.unitProject?.msdpItemsName}',
         );
+
         return <String, dynamic>{
           'pageHeading': '',
           'fields': <Map<String, dynamic>>[],

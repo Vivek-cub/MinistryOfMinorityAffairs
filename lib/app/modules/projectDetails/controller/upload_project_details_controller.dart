@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/model/upload_resp_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/data/repo/project_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/repo/project_detail_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/usecases/capture_project_video.dart';
@@ -20,6 +21,13 @@ import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
 
+class ImageValidationState {
+  final bool isValid;
+  final String message;
+
+  const ImageValidationState({required this.isValid, required this.message});
+}
+
 class UploadProjectDetailsController extends GetxController
     with
         SnackBarMixin,
@@ -34,6 +42,7 @@ class UploadProjectDetailsController extends GetxController
   final CaptureProjectVideo captureProjectVideo;
 
   final photos = List<String?>.filled(3, null).obs;
+  final imageValidationStates = List<ImageValidationState?>.filled(3, null).obs;
 
   // Remarks controller
   final remarksController = TextEditingController();
@@ -118,8 +127,7 @@ class UploadProjectDetailsController extends GetxController
         return;
       }
 
-      photos[index] = image.path;
-      photos.refresh();
+      setPhoto(index, image.path);
 
       final sizeKb = await image.length() / 1024;
       debugPrint('Final image size: ${sizeKb.toStringAsFixed(2)} KB');
@@ -133,6 +141,51 @@ class UploadProjectDetailsController extends GetxController
   }
 
   List<String> get selectedImages => photos.whereType<String>().toList();
+
+  List<int> get selectedImageSlotIndexes {
+    final indexes = <int>[];
+    for (var i = 0; i < photos.length; i++) {
+      final photo = photos[i];
+      if (photo != null && photo.isNotEmpty) {
+        indexes.add(i);
+      }
+    }
+    return indexes;
+  }
+
+  void setPhoto(int index, String? path) {
+    if (index < 0 || index >= photos.length) return;
+    photos[index] = path;
+    imageValidationStates[index] = null;
+    photos.refresh();
+    imageValidationStates.refresh();
+  }
+
+  bool isPhotoLocked(int index) {
+    if (index < 0 || index >= imageValidationStates.length) return false;
+    return photos[index]?.isNotEmpty == true &&
+        imageValidationStates[index] != null;
+  }
+
+  bool isPhotoInvalid(int index) {
+    if (index < 0 || index >= imageValidationStates.length) return false;
+    return imageValidationStates[index]?.isValid == false;
+  }
+
+  String imageValidationMessage(int index) {
+    if (index < 0 || index >= imageValidationStates.length) {
+      return "Image validation failed.";
+    }
+    return imageValidationStates[index]?.message ?? "Image validation failed.";
+  }
+
+  void showImageValidationMessage(int index) {
+    showErrorDialog(
+      Get.context!,
+      title: "Image Validation",
+      message: imageValidationMessage(index),
+    );
+  }
 
   Future<String?> getAudioPath() async {
     final rawPath = Get.find<AudioRecorderController>().filePath.value;
@@ -191,7 +244,7 @@ class UploadProjectDetailsController extends GetxController
     }
   }
 
-  void submitOnline() async {
+  Future<void> submitOnline() async {
     try {
       showAlertCustom(backBtnDisable: true, title: "Uploading...");
       // final exifReady = await _ensureExifOnSelectedImages();
@@ -204,15 +257,18 @@ class UploadProjectDetailsController extends GetxController
       //   );
       //   return;
       // }
+      final uploadedImageSlotIndexes = selectedImageSlotIndexes;
+      final uploadedImagePaths =
+          uploadedImageSlotIndexes.map((index) => photos[index]!).toList();
       await _logUploadMediaSizes(
-        imagePaths: selectedImages,
+        imagePaths: uploadedImagePaths,
         audioPath: audioPath,
         videoPath: finalVideoPath,
         source: 'direct online upload',
       );
       final modelData = await repo.uploadMilestoneFiles(
         projectId: projectOrUnitId.value,
-        imagePaths: selectedImages,
+        imagePaths: uploadedImagePaths,
         videoPath: finalVideoPath,
         audioPath: audioPath,
         userLat: userLat.value.toString(),
@@ -221,19 +277,37 @@ class UploadProjectDetailsController extends GetxController
         projectStatus: selectedProgress.value,
         remarks: remarksController.text.toString(),
       );
-
+      Get.back();
       if (modelData.statusCode == '200') {
-        await _cleanupUploadedOnlineMedia();
-        Get.back();
-        showSuccessDialog(
-          Get.context!,
-          message: "Your data is submitted successfully",
-          onPressed: () async {
-            Helpers().refreshHomeIfAvailable();
-            await _navigateToDashboard();
-          },
+        final allImagesValid = _applyImageValidationResults(
+          modelData,
+          uploadedImageSlotIndexes,
         );
+        //Get.back();
+
+        if (allImagesValid) {
+          await _cleanupUploadedOnlineMedia();
+          showSuccessDialog(
+            Get.context!,
+            message: "Your data is submitted successfully",
+            onPressed: () async {
+              Helpers().refreshHomeIfAvailable();
+              await _navigateToDashboard();
+            },
+          );
+        }
+        // else {
+        //   showErrorDialog(
+        //     Get.context!,
+        //     title: "Error",
+        //     message: _firstInvalidImageMessage(uploadedImageSlotIndexes),
+        //     onPressed: () async {
+        //       //Get.back();
+        //     },
+        //   );
+        // }
       } else {
+        Get.back();
         showErrorDialog(
           Get.context!,
           title: "Error",
@@ -247,6 +321,67 @@ class UploadProjectDetailsController extends GetxController
       Get.back();
       //debugPrint(e.toString());
     }
+  }
+
+  bool _applyImageValidationResults(
+    UploadResponse modelData,
+    List<int> uploadedImageSlotIndexes,
+  ) {
+    final uploadedFiles = modelData.data?.data ?? [];
+
+    bool hasAnyInvalidImage = false;
+
+    // Process every uploaded image independently.
+    for (
+      var responseIndex = 0;
+      responseIndex < uploadedImageSlotIndexes.length;
+      responseIndex++
+    ) {
+      final slotIndex = uploadedImageSlotIndexes[responseIndex];
+
+      final validation =
+          responseIndex < uploadedFiles.length
+              ? uploadedFiles[responseIndex].validation
+              : null;
+
+      final isValid = validation?.verdict == "OK";
+
+      final messages = validation?.reasonMessages ?? const <String>[];
+
+      final errorMessage =
+          messages.isNotEmpty ? messages.first : "Image validation failed.";
+
+      // Keep validation state for THIS image/slot only.
+      imageValidationStates[slotIndex] = ImageValidationState(
+        isValid: isValid,
+        message: errorMessage,
+      );
+
+      if (!isValid) {
+        hasAnyInvalidImage = true;
+      }
+    }
+
+    // Update UI after all images have been processed.
+    imageValidationStates.refresh();
+
+    // Show the toast only once for this submission attempt.
+    if (hasAnyInvalidImage) {
+      Helpers.showError("Please upload correct image");
+    }
+
+    // Submission succeeds only when every uploaded image is valid.
+    return !hasAnyInvalidImage;
+  }
+
+  String _firstInvalidImageMessage(List<int> uploadedImageSlotIndexes) {
+    for (final slotIndex in uploadedImageSlotIndexes) {
+      final state = imageValidationStates[slotIndex];
+      if (state != null && state.isValid == false) {
+        return state.message;
+      }
+    }
+    return "One or more images failed validation.";
   }
 
   @override
@@ -300,7 +435,7 @@ class UploadProjectDetailsController extends GetxController
 
       if (hasInternet) {
         // Get.back();
-        submitOnline();
+        await submitOnline();
       } else {
         //Get.back();
         showMessageDialog(
@@ -500,7 +635,7 @@ class UploadProjectDetailsController extends GetxController
     final insideGeofence = await checkGeoFence(
       data.value.lat ?? 0.0,
       data.value.lng ?? 0.0,
-      data.value.stateName ?? "",
+      data.value.unitProject?.stateName ?? "",
     );
 
     if (insideGeofence == false) {

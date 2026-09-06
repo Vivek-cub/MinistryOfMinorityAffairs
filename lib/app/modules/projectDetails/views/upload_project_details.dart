@@ -93,33 +93,47 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                 ),
                                 child: PhotoUploadWidget(
                                   imagePath: controller.photos[index],
+                                  hasError: controller.isPhotoInvalid(index),
+                                  onWarningTap:
+                                      () => controller
+                                          .showImageValidationMessage(index),
                                   onRemove: () {
-                                    controller.photos[index] = null;
-                                    controller.photos.refresh();
+                                    controller.setPhoto(index, null);
                                   },
-                                  onTap: () async {
-                                    SnackBarMixin().showAlertCustom(
-                                      backBtnDisable: true,
-                                      title: "Fetching Location...",
-                                    );
-                                    final insideGeofence = await controller
-                                        .checkGeoFence(
-                                          controller.data.value.lat ?? 0.0,
-                                          controller.data.value.lng ?? 0.0,
-                                          controller.data.value.stateName ?? "",
-                                        );
-                                    Get.back();
-                                    debugPrint("1. After Geofence");
-                                    if (insideGeofence) {
-                                      //controller.showPhotoSourceDialog(index);
-                                      await controller.takePhoto(index);
-                                    } else {
-                                      PopupMixin().showErrorDialog(
-                                        Get.context!,
-                                        message: "You are outside the location",
-                                      );
-                                    }
-                                  },
+                                  onTap:
+                                      controller.isPhotoLocked(index)
+                                          ? null
+                                          : () async {
+                                            SnackBarMixin().showAlertCustom(
+                                              backBtnDisable: true,
+                                              title: "Fetching Location...",
+                                            );
+                                            final insideGeofence =
+                                                await controller.checkGeoFence(
+                                                  controller.data.value.lat ??
+                                                      0.0,
+                                                  controller.data.value.lng ??
+                                                      0.0,
+                                                  controller
+                                                          .data
+                                                          .value
+                                                          .unitProject
+                                                          ?.stateName ??
+                                                      "",
+                                                );
+                                            Get.back();
+                                            debugPrint("1. After Geofence");
+                                            if (insideGeofence) {
+                                              //controller.showPhotoSourceDialog(index);
+                                              await controller.takePhoto(index);
+                                            } else {
+                                              PopupMixin().showErrorDialog(
+                                                Get.context!,
+                                                message:
+                                                    "You are outside the location",
+                                              );
+                                            }
+                                          },
                                   label: 'Tap to take a photo',
                                 ),
                               );
