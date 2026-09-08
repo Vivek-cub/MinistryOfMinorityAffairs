@@ -500,7 +500,7 @@ class UploadProjectDetailsController extends GetxController
     final insideGeofence = await checkGeoFence(
       data.value.lat ?? 0.0,
       data.value.lng ?? 0.0,
-      data.value.stateName ?? "",
+      data.value.unitProject?.blockTownName ?? "",
     );
 
     if (insideGeofence == false) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/otp_section.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/login/domain/repo/send_mobile_otp_repo.dart';
 import 'package:ministry_of_minority_affairs/app/routes/app_routes.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
@@ -25,6 +26,8 @@ class OtpVerificationController extends GetxController
   final RxString phoneNumber = ''.obs;
   RxBool isVerifying = false.obs;
   RxString otp = "".obs;
+  final GlobalKey<MaskedOtpInternalState> otpKey =
+      GlobalKey<MaskedOtpInternalState>();
 
   @override
   void onInit() {
@@ -38,14 +41,14 @@ class OtpVerificationController extends GetxController
   }
 
   /// Verify OTP
-  void verifyOTP(String otp) async {
+  void verifyOTP(String otpNo) async {
     // if (!isButtonEnabled.value) return;
     // String enteredOtp=getOTP();
     final fcmToken = Get.find<FirebaseNotificationService>().fcmToken ?? "";
 
     debugPrint("Fcm Token: $fcmToken");
 
-    if (otp.length != 4) {
+    if (otpNo.length != 4) {
       showErrorDialog(Get.context!, message: "Please fill correct otp");
       return;
     }
@@ -57,7 +60,7 @@ class OtpVerificationController extends GetxController
       showAlertCustom(backBtnDisable: true, title: "Login...");
       final modelData = await sendMobileOtpRepo.verifyOTP(
         mobileNo: phoneNumber.value,
-        otp: otp,
+        otp: otpNo,
         fcmToken: fcmToken ?? "",
       );
 
@@ -74,8 +77,14 @@ class OtpVerificationController extends GetxController
         final hasPin = await authService.checkPinFromStorage();
 
         Get.offNamed(hasPin ? AppRoutes.pinLogin : AppRoutes.setPin);
+      } else {
+        otp.value = "";
+        otpKey.currentState?.clear();
+        Get.back();
       }
     } catch (e) {
+      otp.value = "";
+      otpKey.currentState?.clear();
       Get.back();
       //debugPrint(e.toString());
     } finally {

@@ -8,7 +8,7 @@ mixin GeofenceMixin on GetxController {
   RxDouble get userLat;
   RxDouble get userLng;
   RxBool get isInsideFence;
-  Future<bool> checkGeoFence(double lat, double lng, String stateName) async {
+  Future<bool> checkGeoFence(double lat, double lng, String blockName) async {
     debugPrint("1. before Gepfence");
     final granted = await LocationPermissionService.request();
     if (!granted) return false;
@@ -18,12 +18,12 @@ mixin GeofenceMixin on GetxController {
     userLng(position.longitude);
     debugPrint("1. After location");
     if (lat == 0.0 && lng == 0.0) {
-      String? state = await GeoFenceService.getStateFromPosition(position);
-      isInsideFence.value = GeoFenceService.isInsideState(
-        detectedState: state ?? "",
-        stateName: stateName,
+      String? block = await GeoFenceService.getBlockFromPosition(position);
+      isInsideFence.value = GeoFenceService.isInsideBlock(
+        detectedBlock: block ?? "",
+        blockName: blockName,
       );
-      debugPrint(state);
+      debugPrint(block);
     } else {
       isInsideFence.value = GeoFenceService.isInside(
         user: position,

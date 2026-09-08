@@ -77,6 +77,7 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
 
                     // OTP Input Fields
                     OtpSection(
+                      otpKey: controller.otpKey,
                       length: 4,
                       boxWidth: 62,
                       boxHeight: 58,

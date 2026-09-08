@@ -98,6 +98,25 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                     controller.photos.refresh();
                                   },
                                   onTap: () async {
+                                    // if (controller
+                                    //             .data
+                                    //             .value
+                                    //             .unitProject
+                                    //             ?.blockTownName ==
+                                    //         "" ||
+                                    //     controller
+                                    //             .data
+                                    //             .value
+                                    //             .unitProject
+                                    //             ?.blockTownName ==
+                                    //         null) {
+                                    //   PopupMixin().showErrorDialog(
+                                    //     context,
+                                    //     message:
+                                    //         "You are not allowed to capture as there is no blockname available",
+                                    //   );
+                                    //   return;
+                                    // }
                                     SnackBarMixin().showAlertCustom(
                                       backBtnDisable: true,
                                       title: "Fetching Location...",
@@ -106,7 +125,12 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                         .checkGeoFence(
                                           controller.data.value.lat ?? 0.0,
                                           controller.data.value.lng ?? 0.0,
-                                          controller.data.value.stateName ?? "",
+                                          controller
+                                                  .data
+                                                  .value
+                                                  .unitProject
+                                                  ?.blockTownName ??
+                                              "",
                                         );
                                     Get.back();
                                     debugPrint("1. After Geofence");

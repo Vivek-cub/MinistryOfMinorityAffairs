@@ -45,4 +45,31 @@ class GeoFenceService {
       return null;
     }
   }
+
+  static bool isInsideBlock({
+    required String detectedBlock,
+    required String blockName,
+  }) {
+    return detectedBlock.trim().toLowerCase() == blockName.trim().toLowerCase();
+  }
+
+  static Future<String?> getBlockFromPosition(Position user) async {
+    try {
+      final geocoding = Geocoding();
+
+      final placemarks = await geocoding.placemarkFromCoordinates(
+        user.latitude,
+        user.longitude,
+      );
+
+      if (placemarks.isEmpty) {
+        return null;
+      }
+
+      return placemarks.first.subAdministrativeArea;
+    } catch (e) {
+      debugPrint('Failed to get block: $e');
+      return null;
+    }
+  }
 }

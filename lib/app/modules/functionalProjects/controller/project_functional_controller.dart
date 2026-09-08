@@ -270,6 +270,15 @@ class ProjectFunctionalController extends GetxController
   }
 
   Future<void> onCaptureVideo() async {
+    // if (data.value.unitProject?.blockTownName == "" ||
+    //     data.value.unitProject?.blockTownName == null) {
+    //   PopupMixin().showErrorDialog(
+    //     Get.context!,
+    //     message:
+    //         "You are not allowed to capture as there is no blockname available",
+    //   );
+    //   return;
+    // }
     SnackBarMixin().showAlertCustom(
       backBtnDisable: true,
       title: "Fetching Location...",
@@ -277,7 +286,7 @@ class ProjectFunctionalController extends GetxController
     final insideGeofence = await checkGeoFence(
       data.value.lat ?? 0.0,
       data.value.lng ?? 0.0,
-      data.value.stateName ?? "",
+      data.value.unitProject?.blockTownName ?? "",
     );
     Get.back();
 
@@ -774,37 +783,109 @@ class ProjectFunctionalController extends GetxController
   }
 
   Map<String, dynamic> _getFormConfig() {
-    final msdpName =
-        data.value.unitProject?.msdpSectorName?.trim().toLowerCase();
+    final subtype =
+        data.value.unitProject?.projectSubType?.name?.trim().toLowerCase();
 
-    switch (msdpName) {
+    switch (subtype) {
       case 'skill':
       case 'skill training':
+      case 'new iti':
+      case 'new polytechnic':
+      case 'training':
+      case 'skill centres':
+      case 'workshop':
+      case 'equipment':
         return SkillDevelopmentJson.skillDevelopmentSection;
 
       case 'education':
+      case 'acr blocks':
+      case 'computers':
+      case 'library':
+      case 'smart classrooms/equipment':
+      case 'agriculture college':
+      case 'degree college':
+      case 'medical college':
+      case 'nursing college':
+      case 'new school buidling':
+      case 'smart classroom/teaching aids':
+      case 'staff quarters':
+      case 'hostel for school':
+      case 'iay':
+      case 'classroom/ lecture hall':
+      case 'other infrastructure in existing school':
+      case 'addtional infrastructure':
+      case 'furniture':
+      case 'bicycle':
+      case 'room':
         return EducationalJson.educationalSection;
 
       case 'girls hostel':
+      case 'girls hostel for school':
+      case 'girls hostel for college/ university':
+      case 'girls hostel for iti’s':
+      case "girls hostel for iti's":
+      case 'girls hostel for polytechnic':
+      case 'girls hostel standalone':
+      case 'boundary walls for girls hostel':
+      case 'hostel facility':
         return GirlsHostelJson.girlsHostelSection;
 
       case 'laboratory':
         return LaboratoryJson.laboratorySection;
 
-      case 'health':
+      case 'general hospital':
+      case 'super speciality hospital':
+      case 'ayurvedic hospital':
+      case 'yoga & naturopathy hospital':
+      case 'unani hospital':
+      case 'siddha hospital':
+      case 'homeopathy hospital':
+      case 'ot (operation theatre)':
+      case 'nicu (neonatal intensive care unit)':
+      case 'opd (outpatient department)':
+      case 'ipd (in patient department)':
+      case 'machinery':
+      case 'chc (common service center)':
+      case 'phc (primary health center)':
+      case 'hsc (health sub center)':
+      case 'phsc (primary health sub center)':
+      case 'district hospital':
+      case 'sub-district hospital':
+      case 'chw (centre for health and wellness)':
+      case 'nursing hospital':
+      case 'dispensary':
+      case 'ayush':
+      case 'chc':
+      case 'hsc':
+      case 'phc':
+      case 'phsc':
         return HealthJson.healthSection;
 
       case 'playground':
+      case 'sports-stadium':
+      case 'sports complex':
+      case 'football turf':
+      case 'swimming pool':
+      case 'hockey turf':
+      case 'stadium':
+      case 'volleyball court':
+      case 'basketball court':
         return PlaygroundJson.playgroundSection;
 
-      case 'indoor':
+      case 'indoor hall':
+      case 'multipurpose hall':
         return IndoorSportsJson.indoorSportsection;
 
       case 'community':
+      case 'community service centre/ sadbhav mandap/ community hall':
+      case 'hunar hub':
+      case 'cybergram':
         return CommunityJson.communitySection;
 
       case 'tc':
       case 'toilet complex':
+      case 'toilets':
+      case 'toilet':
         return ToiletJson.toiletSection;
 
       case 'ms':
@@ -814,10 +895,13 @@ class ProjectFunctionalController extends GetxController
       case 'dws':
       case 'drinking water infrastructure':
       case 'drinking water facility':
+      case 'hand pump':
+      case 'drinking water facilities':
         return DwfJson.dwfSection;
 
       case 'women centric infrastructure':
       case 'wci':
+      case 'working women hostel':
         return WomenCentricInfrastructureJson.womenCentricInfrastructureSection;
 
       case 'women community centre':
@@ -830,7 +914,7 @@ class ProjectFunctionalController extends GetxController
 
       default:
         debugPrint(
-          'No form config found for MSDP: ${data.value.unitProject?.msdpItemsName}',
+          'No form config found for Sub type: ${data.value.unitProject?.projectSubType?.name}',
         );
         return <String, dynamic>{
           'pageHeading': '',

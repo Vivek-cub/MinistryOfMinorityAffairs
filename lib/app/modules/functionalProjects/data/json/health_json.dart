@@ -5,147 +5,44 @@ class HealthJson {
     "apiPaths": {"post": "v1/candidate/education"},
     "fields": [
       {
-        "name": "state",
-        "label": "1. State",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "State is required.",
-      },
-      {
-        "name": "district",
-        "label": "2. District",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "District is required.",
-      },
-      {
-        "name": "blockTown",
-        "label": "3. Block/Town",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Block/Town is required.",
-      },
-      {
-        "name": "pmjvkProjectId",
-        "label": "4. PMJVK Project ID",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "PMJVK Project ID is required.",
-      },
-      {
-        "name": "projectName",
-        "label": "5. Project Name",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Project Name is required.",
-      },
-      {
-        "name": "sector",
-        "label": "6. Sector",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Sector is required.",
-      },
-      {
-        "name": "subSectorProjectType",
-        "label": "7. Sub-sector/Project Type",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Sub-sector/Project Type is required.",
-      },
-      {
-        "name": "responsibleDepartment",
-        "label": "8. Responsible Department",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Responsible Department is required.",
-      },
-      {
-        "name": "dateOfCompletion",
-        "label": "9. Date of Completion",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Date of Completion is required.",
-      },
-      {
         "name": "dateOfFunctionalityCheck",
-        "label": "10. Date of Functionality Check/Assessment",
+        "label": "1. Date of Functionality Check/Assessment",
         "type": "date",
         "required": true,
         "validationMsg": "Please select the date of functionality check.",
-      },
-      {
-        "name": "officerConductingCheck",
-        "label": "11. Officer Conducting Check/Assessment",
-        "type": "text",
-        "required": true,
-        "validationMsg": "Please enter the officer's name.",
-      },
-      {
-        "name": "mobileNumber",
-        "label": "12. Mobile Number",
-        "type": "text",
-        "required": true,
-        "maxLength": 10,
-        "keyboardType": "number",
-        "validationMsg": "Please enter a valid mobile number.",
-      },
-      {
-        "name": "geoCoordinates",
-        "label": "13. Geo Lat-Long Coordinates",
-        "type": "text",
-        "required": true,
-        "disable": true,
-        "validationMsg": "Location is required.",
       },
 
       {
-        "name": "inspectionRemarks",
-        "label": "14. Inspection Remarks",
-        "type": "textarea",
-        "required": false,
-        "maxLength": 500,
-      },
-      {
         "name": "openingDate",
-        "label": "15. Date of Opening/Inaugration",
+        "label": "2. Date of Opening/Inaugration",
         "type": "date",
         "required": true,
-        "validationMsg": "Please select the date of functionality check.",
+        "validationMsg": "Please select the opening date.",
       },
       {
         "name": "assetOptional",
-        "label": "16. Is the asset operational?",
+        "label": "3. Is the asset operational?",
         "type": "radio",
         "required": true,
         "options": [
           {"label": "Yes", "value": true},
           {"label": "No", "value": false},
         ],
-        "validationMsg": "Please select whether dropout has reduced.",
+        "validationMsg": "Please select asset is operational or not.",
       },
       {
         "name": "nonOperationalRemarks",
-        "label": "16.1. If non-operational, reason thereof",
+        "label": "3.1. If non-operational, reason thereof",
         "type": "text",
         "required": true,
-        "validationMsg": "Please enter current student enrolment.",
+        "validationMsg": "Please Enter reason of non-operational.",
         "visibleWhen": [
-          {"key": "assetOptional", "value": true},
+          {"key": "assetOptional", "value": false},
         ],
       },
       {
         "name": "doctorsPosted",
-        "label": "17. Doctors posted as on date",
+        "label": "4. Doctors posted as on date",
         "type": "text",
         "required": true,
         "keyboardType": "number",
@@ -153,7 +50,7 @@ class HealthJson {
       },
       {
         "name": "nursesPosted",
-        "label": "18. Nurses posted as on date",
+        "label": "5. Nurses posted as on date",
         "type": "text",
         "required": true,
         "keyboardType": "number",
@@ -161,7 +58,7 @@ class HealthJson {
       },
       {
         "name": "bedsAvailable",
-        "label": "19. Beds available as on date",
+        "label": "6. Beds available as on date",
         "type": "text",
         "required": true,
         "keyboardType": "number",
@@ -169,7 +66,7 @@ class HealthJson {
       },
       {
         "name": "bedOccupancy",
-        "label": "20. Bed occupancy (%)",
+        "label": "7. Bed occupancy (%)",
         "type": "text",
         "disable": true,
         "required": false,
@@ -177,7 +74,7 @@ class HealthJson {
       },
       {
         "name": "averageOpdPerMonth",
-        "label": "21. Average OPD/month",
+        "label": "8. Average OPD/month",
         "type": "text",
         "required": true,
         "keyboardType": "number",
@@ -185,7 +82,7 @@ class HealthJson {
       },
       {
         "name": "deliveriesPerMonth",
-        "label": "22. Deliveries/month",
+        "label": "9. Deliveries/month",
         "type": "text",
         "required": true,
         "keyboardType": "number",
@@ -193,7 +90,7 @@ class HealthJson {
       },
       {
         "name": "diagnosticServicesAvailable",
-        "label": "23. Diagnostic services available?",
+        "label": "10. Diagnostic services available?",
         "type": "radio",
         "required": true,
         "options": [
@@ -205,7 +102,7 @@ class HealthJson {
       },
       {
         "name": "medicineAvailability",
-        "label": "24. Medicine availability",
+        "label": "11. Medicine availability",
         "type": "radio",
         "required": true,
         "options": [
@@ -216,7 +113,7 @@ class HealthJson {
       },
       {
         "name": "ambulanceAvailable",
-        "label": "25. Ambulance available?",
+        "label": "12. Ambulance available?",
         "type": "radio",
         "required": true,
         "options": [
@@ -227,7 +124,7 @@ class HealthJson {
       },
       {
         "name": "electricityAvailable",
-        "label": "26. Electricity available?",
+        "label": "13. Electricity available?",
         "type": "radio",
         "required": true,
         "options": [
@@ -238,7 +135,7 @@ class HealthJson {
       },
       {
         "name": "waterAvailable",
-        "label": "27. Water available?",
+        "label": "14. Water available?",
         "type": "radio",
         "required": true,
         "options": [
@@ -249,7 +146,7 @@ class HealthJson {
       },
       {
         "name": "equipmentFunctional",
-        "label": "28. Equipment functional?",
+        "label": "15. Equipment functional?",
         "type": "radio",
         "required": true,
         "options": [
@@ -257,6 +154,15 @@ class HealthJson {
           {"label": "No", "value": false},
         ],
         "validationMsg": "Please select whether the equipment is functional.",
+      },
+
+      {
+        "name": "inspectionRemarks",
+        "label": "16. Inspection Remarks",
+        "type": "textarea",
+        "required": true,
+        "maxLength": 500,
+        "validationMsg": "Please enter remarks.",
       },
     ],
   };

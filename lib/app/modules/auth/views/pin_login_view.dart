@@ -51,6 +51,7 @@ class PinLoginView extends StatelessWidget {
                     ),
                     const SizedBox(height: AppDimensions.lg),
                     OtpSection(
+                      otpKey: controller.otpKey,
                       length: 4,
                       boxWidth: 62,
                       boxHeight: 58,

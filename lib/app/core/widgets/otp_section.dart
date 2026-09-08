@@ -13,6 +13,7 @@ class OtpSection extends StatelessWidget {
   final Duration maskDuration;
   final ValueChanged<String>? onCompleted;
   final ValueChanged<String>? onChanged;
+  final GlobalKey<MaskedOtpInternalState>? otpKey;
 
   const OtpSection({
     super.key,
@@ -25,11 +26,13 @@ class OtpSection extends StatelessWidget {
     this.maskDuration = const Duration(seconds: 1),
     this.onCompleted,
     this.onChanged,
+    this.otpKey,
   });
 
   @override
   Widget build(BuildContext context) {
-    return _MaskedOtpInternal(
+    return MaskedOtpInternal(
+      key: otpKey,
       length: length,
       boxWidth: boxWidth,
       boxHeight: boxHeight,
@@ -43,7 +46,7 @@ class OtpSection extends StatelessWidget {
   }
 }
 
-class _MaskedOtpInternal extends StatefulWidget {
+class MaskedOtpInternal extends StatefulWidget {
   final int length;
   final double boxWidth;
   final double boxHeight;
@@ -54,7 +57,8 @@ class _MaskedOtpInternal extends StatefulWidget {
   final ValueChanged<String>? onCompleted;
   final ValueChanged<String>? onChanged;
 
-  const _MaskedOtpInternal({
+  const MaskedOtpInternal({
+    super.key,
     required this.length,
     required this.boxWidth,
     required this.boxHeight,
@@ -67,10 +71,10 @@ class _MaskedOtpInternal extends StatefulWidget {
   });
 
   @override
-  State<_MaskedOtpInternal> createState() => __MaskedOtpInternalState();
+  State<MaskedOtpInternal> createState() => MaskedOtpInternalState();
 }
 
-class __MaskedOtpInternalState extends State<_MaskedOtpInternal> {
+class MaskedOtpInternalState extends State<MaskedOtpInternal> {
   late List<TextEditingController> controllers;
   late List<FocusNode> focusNodes;
   late List<bool> obscureFlags;
@@ -158,6 +162,22 @@ class __MaskedOtpInternalState extends State<_MaskedOtpInternal> {
       f.dispose();
     }
     super.dispose();
+  }
+
+  void clear() {
+    for (final controller in controllers) {
+      controller.clear();
+    }
+
+    _maskTimer?.cancel();
+
+    setState(() {
+      obscureFlags = List.generate(widget.length, (_) => true);
+    });
+
+    focusNodes.first.requestFocus();
+
+    widget.onChanged?.call('');
   }
 
   @override
