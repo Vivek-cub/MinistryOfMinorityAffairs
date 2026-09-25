@@ -82,7 +82,7 @@ class MyFormsDropdown<T> extends StatelessWidget {
           menuMaxHeight: 400,
           menuWidth: menuWidth ?? MediaQuery.of(context).size.width * 0.90,
           style: Get.textTheme.bodySmall?.copyWith(
-            color: AppColors.lightGrey,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
           dropdownColor: AppColors.textWhite,
@@ -131,7 +131,6 @@ class MyFormsDropdown<T> extends StatelessWidget {
       width: 50,
       margin: EdgeInsets.all(1),
       decoration: BoxDecoration(
-        color: AppColors.background,
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(AppDimensions.sm),
           bottomRight: Radius.circular(AppDimensions.sm),
@@ -140,9 +139,7 @@ class MyFormsDropdown<T> extends StatelessWidget {
           left: BorderSide(color: AppColors.primaryLight, width: 1),
         ),
       ),
-      // child: Center(
-      //   child: SvgPicture.asset(IconAssets.dr),
-      // ),
+      child: Center(child: Icon(Icons.arrow_drop_down, size: 24)),
     );
   }
 }

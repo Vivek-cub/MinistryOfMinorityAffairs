@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/modules/calender/bindings/calendar_project_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/calender/views/calendar_project.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/binding/functional_binding.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/view/functional_screen.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/binding/project_functional_binding.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/view/project_functional_view.dart';
 import 'package:ministry_of_minority_affairs/app/modules/pin/bindings/check_old_pin_binding.dart';
@@ -151,6 +153,13 @@ class AppPages {
       name: AppRoutes.officerList,
       page: () => OfficerListView(),
       binding: OfficerListViewBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.functional,
+      page: () => FunctionalScreen(),
+      binding: FunctionalBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

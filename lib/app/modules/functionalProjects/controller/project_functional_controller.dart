@@ -31,6 +31,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/co
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/geofence_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/location_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
@@ -270,6 +271,8 @@ class ProjectFunctionalController extends GetxController
   }
 
   Future<void> onCaptureVideo() async {
+    final position = await LocationService.getAccurateLocation();
+
     // if (data.value.unitProject?.blockTownName == "" ||
     //     data.value.unitProject?.blockTownName == null) {
     //   PopupMixin().showErrorDialog(
@@ -284,9 +287,10 @@ class ProjectFunctionalController extends GetxController
       title: "Fetching Location...",
     );
     final insideGeofence = await checkGeoFence(
-      data.value.lat ?? 0.0,
-      data.value.lng ?? 0.0,
-      data.value.unitProject?.blockTownName ?? "",
+      lat: data.value.lat ?? 0.0,
+      lng: data.value.lng ?? 0.0,
+      blockName: data.value.unitProject?.stateName ?? "",
+      position: position,
     );
     Get.back();
 
@@ -302,11 +306,19 @@ class ProjectFunctionalController extends GetxController
     try {
       final compressedFile = await captureProjectVideo(
         maxDuration: const Duration(minutes: 2),
+        // onCompressionStarted: () {
+        //   SnackBarMixin().showAlertCustom(
+        //     backBtnDisable: true,
+        //     title: "Compressing video...",
+        //   );
+        // },
       );
+      // Get.back();
 
       if (compressedFile == null) return;
       videoPath.value = compressedFile.path;
     } catch (e) {
+      Get.back();
       showErrorDialog(
         Get.context!,
         message: 'Unable to capture video. Please try again.',

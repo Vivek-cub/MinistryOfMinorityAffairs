@@ -37,7 +37,7 @@ class DwfJson {
         "required": true,
         "validationMsg": "Please Enter reason of non-operational.",
         "visibleWhen": [
-          {"key": "assetOptional", "value": false},
+          {"key": "assetOptional", "value": true},
         ],
       },
 

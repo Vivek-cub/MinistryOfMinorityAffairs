@@ -23,6 +23,7 @@ abstract class AppRoutes {
   static const seeImageList = '/see-image-list';
   static const stateDashboard = '/state-dashboard';
   static const officerList = '/officer-list';
+  static const functional = '/functional';
 
   // Add more routes as needed
 }

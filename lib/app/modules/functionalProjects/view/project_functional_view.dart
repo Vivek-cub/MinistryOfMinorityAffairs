@@ -6,13 +6,14 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/work_progress_header.dart';
 import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/controller/functional_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/controller/project_functional_controller.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/widget/switch_form_field_widgets.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/capture_video_previews.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/function_toggle.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
-class ProjectFunctionalView extends GetView<ProjectFunctionalController> {
+class ProjectFunctionalView extends GetView<FunctionalController> {
   const ProjectFunctionalView({super.key});
 
   @override
@@ -74,22 +75,24 @@ class ProjectFunctionalView extends GetView<ProjectFunctionalController> {
                           else
                             FormBuilder(
                               key: controller.formKey,
+
                               initialValue: Map<String, dynamic>.from(
                                 controller.initialValue,
                               ),
+
                               onChanged: controller.onDynamicFormChanged,
+
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children:
-                                    controller.dynamicFormConfig.value?.fields
+                                    controller.dynamicFormConfig
                                         .map(
-                                          (field) => SwitchFormFieldWidgets(
-                                            field: field,
+                                          (question) => SwitchFormFieldWidgets(
+                                            question: question,
                                             controller: controller,
                                           ),
                                         )
-                                        .toList() ??
-                                    const [],
+                                        .toList(),
                               ),
                             ),
 

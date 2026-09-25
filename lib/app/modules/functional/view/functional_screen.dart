@@ -1,0 +1,146 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get_state_manager/src/simple/get_view.dart';
+import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
+import 'package:ministry_of_minority_affairs/app/core/widgets/work_progress_header.dart';
+import 'package:ministry_of_minority_affairs/app/modules/auth/views/widgets/auth_submit_button.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/controller/functional_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/widget/switch_form_field_widgets.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/capture_video_previews.dart';
+import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/function_toggle.dart';
+import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
+
+class FunctionalScreen extends GetView<FunctionalController> {
+  const FunctionalScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          top: false,
+          bottom: true,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                WorkProgressHeader(
+                  //title: controller.screenTitle,
+                  title: "Project Details",
+                  subtitle: 'Track Progress of works in real-time',
+                  avatarAssetPath: ImageAssets.emblemImage,
+                  backIcon: Icons.arrow_back,
+                ),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Obx(
+                    () => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const TitleText(
+                          text: 'Is this Project Functional?',
+                          fontWeight: FontWeight.w600,
+                        ),
+                        const SizedBox(height: AppDimensions.sm),
+                        FunctionalYesNoSelector(
+                          value:
+                              controller.isFunctional.value == false
+                                  ? controller.isFunctionalProject.value
+                                  : true,
+                          onChanged: controller.selectFunctionalProject,
+                          isFunctional: controller.isFunctional.value,
+                        ),
+
+                        // if (controller.isFunctionalProject.value == true) ...[
+                        //   const SizedBox(height: AppDimensions.lg),
+
+                        //   if (controller.isFormLoading.value)
+                        //     const Center(
+                        //       child: Padding(
+                        //         padding: EdgeInsets.all(24),
+                        //         child: CircularProgressIndicator(),
+                        //       ),
+                        //     )
+                        //   else
+                        //     FormBuilder(
+                        //       key: controller.formKey,
+                        //       initialValue: Map<String, dynamic>.from(
+                        //         controller.initialValue,
+                        //       ),
+                        //       child: Obx(
+                        //         () => Column(
+                        //           crossAxisAlignment: CrossAxisAlignment.start,
+                        //           children:
+                        //               controller.dynamicFormConfig
+                        //                   .map(
+                        //                     (question) =>
+                        //                         SwitchFormFieldWidgets(
+                        //                           key: ValueKey(
+                        //                             question.questionId,
+                        //                           ),
+                        //                           question: question,
+                        //                           controller: controller,
+                        //                         ),
+                        //                   )
+                        //                   .toList(),
+                        //         ),
+                        //       ),
+                        //     ),
+                        const SizedBox(height: AppDimensions.lg),
+                        CapturedVideoPreview(
+                          videoPath: controller.displayedVideoPath,
+                          onCaptureTap: controller.onCaptureVideo,
+                          onRemoveTap: controller.clearVideoSelection,
+                        ),
+                        // ],
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: SafeArea(
+            child: Obx(
+              () => AuthSubmitButton(
+                height: 44,
+                title:
+                    controller.isSubmitting.value ? 'Submitting...' : 'Submit',
+                isEnabled: !controller.isSubmitting.value,
+                onPressed:
+                    controller.isSubmitting.value
+                        ? null
+                        : controller.submitData,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

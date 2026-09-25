@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_minimal/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 import 'package:path/path.dart' as p;

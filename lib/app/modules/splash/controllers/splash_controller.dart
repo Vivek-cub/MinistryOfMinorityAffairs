@@ -47,6 +47,8 @@ class SplashController extends GetxController {
       final hasPin = await authService.checkPinFromStorage();
 
       if (hasPin) {
+        final token = Get.find<AuthService>().getToken;
+        debugPrint("Session token $token");
         final route = await authService.dashboardRoute();
         Get.offAllNamed(
           authService.isPinVerifiedForSession ? route : AppRoutes.pinLogin,

@@ -147,7 +147,7 @@ class HomeController extends GetxController
         isFunctional = true;
       }
       Get.toNamed(
-        AppRoutes.projectFunctional,
+        AppRoutes.functional,
         arguments: {
           "project": project,
           "status": status,

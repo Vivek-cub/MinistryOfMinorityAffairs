@@ -5,6 +5,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/
 
 class UnitDetails {
   final String? id;
+  final String? projectId;
   final String? projectUniqueId;
   final String? districtId;
   final String? sectorId;
@@ -35,6 +36,7 @@ class UnitDetails {
 
   UnitDetails({
     this.id,
+    this.projectId,
     this.projectUniqueId,
     this.districtId,
     this.sectorId,
@@ -71,6 +73,7 @@ class UnitDetails {
 
     return UnitDetails(
       id: _stringValue(json['Id']),
+      projectId: _stringValue(json['projectId']),
       projectUniqueId: _stringValue(
         project?['projectUniqueId'] ??
             json['projectUniqueId'] ??

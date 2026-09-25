@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ffmpeg_kit_flutter_minimal/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/services/video_compressor.dart';
 import 'package:path/path.dart' as p;
@@ -17,10 +17,11 @@ class FfmpegVideoCompressor implements VideoCompressor {
     final originalSize = await file.length();
 
     debugPrint(
-      "Original video size: "
-      "${(originalSize / (1024 * 1024)).toStringAsFixed(2)} MB",
+      'Original video size: '
+      '${(originalSize / (1024 * 1024)).toStringAsFixed(2)} MB',
     );
 
+    // No compression required
     if (originalSize <= maxSizeBytes) {
       return file;
     }
@@ -31,38 +32,39 @@ class FfmpegVideoCompressor implements VideoCompressor {
 
     final compressionLevels = [
       const VideoCompressionLevel(
-        width: 960,
+        width: 640,
         bitrate: '700k',
         audioBitrate: '64k',
         fps: 24,
       ),
       const VideoCompressionLevel(
-        width: 720,
+        width: 640,
         bitrate: '500k',
         audioBitrate: '48k',
         fps: 24,
       ),
       const VideoCompressionLevel(
-        width: 640,
+        width: 480,
         bitrate: '350k',
         audioBitrate: '32k',
         fps: 22,
       ),
       const VideoCompressionLevel(
-        width: 480,
+        width: 360,
         bitrate: '250k',
         audioBitrate: '24k',
         fps: 20,
       ),
     ];
 
-    File? compressedFile;
+    File? lastCompressedFile;
 
     for (int i = 0; i < compressionLevels.length; i++) {
       final level = compressionLevels[i];
+
       final outputPath = p.join(
         tempDir.path,
-        'compressed_${i}_${DateTime.now().millisecondsSinceEpoch}.mp4',
+        'compressed_${DateTime.now().millisecondsSinceEpoch}_$i.mp4',
       );
 
       final command = level.toFfmpegCommand(
@@ -71,43 +73,82 @@ class FfmpegVideoCompressor implements VideoCompressor {
       );
 
       debugPrint(
-        "Original Compressing video "
-        "Level ${i + 1} "
-        "Bitrate ${level.bitrate}",
+        'Compressing video - '
+        'Level ${i + 1}, '
+        'Bitrate ${level.bitrate}',
       );
 
-      await FFmpegKit.execute(command);
+      debugPrint('FFmpeg command: $command');
 
-      final tempFile = File(outputPath);
+      try {
+        debugPrint('BEFORE FFmpegKit.execute');
 
-      if (!tempFile.existsSync()) {
-        continue;
-      }
+        final session = await FFmpegKit.execute(command);
 
-      final size = await tempFile.length();
+        debugPrint('AFTER FFmpegKit.execute');
 
-      debugPrint(
-        "Original Compressed size: "
-        "${(size / (1024 * 1024)).toStringAsFixed(2)} MB",
-      );
+        final returnCode = await session.getReturnCode();
 
-      compressedFile = tempFile;
+        debugPrint('FFmpeg return code: $returnCode');
 
-      if (size <= maxSizeBytes) {
-        debugPrint("Original Compression successful below 5 MB");
-        return compressedFile;
+        final logs = await session.getAllLogs();
+
+        for (final log in logs) {
+          debugPrint('FFmpeg: ${log.getMessage()}');
+        }
+
+        if (returnCode == null || !returnCode.isValueSuccess()) {
+          debugPrint('FFmpeg failed at compression level ${i + 1}');
+
+          final logs = await session.getAllLogs();
+
+          for (final log in logs) {
+            debugPrint(log.getMessage());
+          }
+
+          continue;
+        }
+
+        final tempFile = File(outputPath);
+
+        if (!await tempFile.exists()) {
+          debugPrint('Compressed file does not exist');
+          continue;
+        }
+
+        final size = await tempFile.length();
+
+        debugPrint(
+          'Compressed size: '
+          '${(size / (1024 * 1024)).toStringAsFixed(2)} MB',
+        );
+
+        lastCompressedFile = tempFile;
+
+        if (size <= maxSizeBytes) {
+          debugPrint('Compression successful below 20 MB');
+          return tempFile;
+        }
+      } catch (e, stackTrace) {
+        debugPrint('Compression error at level ${i + 1}: $e');
+        debugPrintStack(stackTrace: stackTrace);
       }
     }
 
-    return compressedFile ?? file;
+    // If no compression level could bring the video below 20 MB,
+    // return the smallest compressed file generated.
+    return lastCompressedFile ?? file;
   }
 
   Future<Directory> _offlineMediaDir() async {
     final dir = await getApplicationDocumentsDirectory();
+
     final mediaDir = Directory('${dir.path}/offline_media');
+
     if (!await mediaDir.exists()) {
       await mediaDir.create(recursive: true);
     }
+
     return mediaDir;
   }
 }
@@ -129,18 +170,17 @@ class VideoCompressionLevel {
     required String inputPath,
     required String outputPath,
   }) {
-    return '''
--y -i "$inputPath"
--vf scale='min($width,iw)':-2,fps=$fps
--c:v libx264
--preset veryfast
--b:v $bitrate
--maxrate $bitrate
--bufsize 1000k
--c:a aac
--b:a $audioBitrate
--movflags +faststart
-"$outputPath"
-''';
+    return '-y '
+        '-i "$inputPath" '
+        '-vf "scale=$width:-2,fps=$fps" '
+        '-c:v libx264 '
+        '-preset veryfast '
+        '-b:v $bitrate '
+        '-maxrate $bitrate '
+        '-bufsize 1000k '
+        '-c:a aac '
+        '-b:a $audioBitrate '
+        '-movflags +faststart '
+        '"$outputPath"';
   }
 }

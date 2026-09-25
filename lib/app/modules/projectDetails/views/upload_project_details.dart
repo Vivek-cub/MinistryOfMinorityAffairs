@@ -24,6 +24,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/p
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/selectable_milestone_card.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/selectable_progress_card.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/user_project.dart';
+import 'package:ministry_of_minority_affairs/app/services/location_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 
 class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
@@ -98,51 +99,9 @@ class UploadProjectDetails extends GetView<UploadProjectDetailsController> {
                                     controller.photos.refresh();
                                   },
                                   onTap: () async {
-                                    // if (controller
-                                    //             .data
-                                    //             .value
-                                    //             .unitProject
-                                    //             ?.blockTownName ==
-                                    //         "" ||
-                                    //     controller
-                                    //             .data
-                                    //             .value
-                                    //             .unitProject
-                                    //             ?.blockTownName ==
-                                    //         null) {
-                                    //   PopupMixin().showErrorDialog(
-                                    //     context,
-                                    //     message:
-                                    //         "You are not allowed to capture as there is no blockname available",
-                                    //   );
-                                    //   return;
-                                    // }
-                                    SnackBarMixin().showAlertCustom(
-                                      backBtnDisable: true,
-                                      title: "Fetching Location...",
+                                    await controller.validationToCaptureImage(
+                                      index,
                                     );
-                                    final insideGeofence = await controller
-                                        .checkGeoFence(
-                                          controller.data.value.lat ?? 0.0,
-                                          controller.data.value.lng ?? 0.0,
-                                          controller
-                                                  .data
-                                                  .value
-                                                  .unitProject
-                                                  ?.blockTownName ??
-                                              "",
-                                        );
-                                    Get.back();
-                                    debugPrint("1. After Geofence");
-                                    if (insideGeofence) {
-                                      //controller.showPhotoSourceDialog(index);
-                                      await controller.takePhoto(index);
-                                    } else {
-                                      PopupMixin().showErrorDialog(
-                                        Get.context!,
-                                        message: "You are outside the location",
-                                      );
-                                    }
                                   },
                                   label: 'Tap to take a photo',
                                 ),

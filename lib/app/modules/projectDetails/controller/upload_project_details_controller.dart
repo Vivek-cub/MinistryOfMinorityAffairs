@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
@@ -101,32 +102,69 @@ class UploadProjectDetailsController extends GetxController
     await dbRepo.saveProject(data.value, userId);
   }
 
-  Future<void> takePhoto(int index) async {
+  Future<void> takePhoto(int index, {required Position position}) async {
     bool dialogShown = false;
+
     try {
       debugPrint("1. Before capture");
+
       final File? image = await captureImage();
-      if (image == null) return;
 
-      debugPrint("2. After capture");
-      showAlertCustom(backBtnDisable: true, title: "Setting Image");
-      dialogShown = true;
-
-      final exifAdded = await _addExifToImage(image.path);
-      if (!exifAdded) {
-        Helpers.showError("Could not tag photo location. Please retake photo.");
+      if (image == null) {
         return;
       }
 
+      debugPrint("2. After capture");
+
+      // ============================================================
+      // SHOW EXIF LOADING
+      // ============================================================
+      showAlertCustom(backBtnDisable: true, title: "Setting Image");
+
+      dialogShown = true;
+
+      // ============================================================
+      // ADD EXIF USING SAME VALIDATED POSITION
+      // ============================================================
+      debugPrint("Adding EXIF...");
+
+      final exifAdded = await _addExifToImage(image.path, position: position);
+
+      if (!exifAdded) {
+        Helpers.showError("Could not tag photo location. Please retake photo.");
+
+        return;
+      }
+
+      debugPrint("EXIF successfully added");
+
+      // ============================================================
+      // SAVE IMAGE
+      // ============================================================
       photos[index] = image.path;
       photos.refresh();
 
       final sizeKb = await image.length() / 1024;
-      debugPrint('Final image size: ${sizeKb.toStringAsFixed(2)} KB');
-    } catch (e) {
-      throw Exception(e);
+
+      debugPrint(
+        'Image $index saved: '
+        '${sizeKb.toStringAsFixed(2)} KB',
+      );
+
+      debugPrint(
+        'Image $index GPS: '
+        '${position.latitude}, ${position.longitude}',
+      );
+    } catch (e, stackTrace) {
+      debugPrint("takePhoto error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+
+      Helpers.showError("Unable to process image. Please try again.");
     } finally {
-      if (dialogShown == true) {
+      // ============================================================
+      // CLOSE "SETTING IMAGE" LOADER
+      // ============================================================
+      if (dialogShown) {
         Get.back();
       }
     }
@@ -320,27 +358,24 @@ class UploadProjectDetailsController extends GetxController
     }
   }
 
-  Future<bool> _addExifToImage(String path) async {
+  Future<bool> _addExifToImage(
+    String path, {
+    required Position position,
+  }) async {
     try {
       debugPrint("3. Before EXIF");
-      // var lat = userLat.value;
-      // var lng = userLng.value;
 
-      // if (lat == 0.0 && lng == 0.0) {
-      debugPrint("4. Before fallback location");
-      final position = await LocationService.getAccurateLocation();
-      var poslat = position.latitude;
-      var poslong = position.longitude;
-      var accuracy = position.accuracy;
-      var altitude = position.altitude;
-      var speed = position.speed;
-      var heading = position.heading;
-      // userLat(lat);
-      // userLng(lng);
+      final poslat = position.latitude;
+      final poslong = position.longitude;
+      final accuracy = position.accuracy;
+      final altitude = position.altitude;
+      final speed = position.speed;
+      final heading = position.heading;
+
       debugPrint(
-        "5. After fallback location  ${poslat.toString()}  ${poslong.toString()}",
+        "EXIF Location: "
+        "$poslat, $poslong | Accuracy: $accuracy",
       );
-      //  }
 
       await Helpers().addExifData(
         path,
@@ -352,20 +387,15 @@ class UploadProjectDetailsController extends GetxController
         heading: heading,
         time: DateTime.now().toString(),
       );
+
       debugPrint("6. EXIF completed");
+
       return true;
     } catch (e) {
       debugPrint('Failed to add image EXIF data: $e');
+
       return false;
     }
-  }
-
-  Future<bool> _ensureExifOnSelectedImages() async {
-    for (final path in selectedImages) {
-      final exifAdded = await _addExifToImage(path);
-      if (!exifAdded) return false;
-    }
-    return true;
   }
 
   void selectProgress(String value) {
@@ -448,106 +478,166 @@ class UploadProjectDetailsController extends GetxController
     );
   }
 
-  String? get existingApiVideoPath {
-    final apiVideo = data.value.videoAtt;
-    if (apiVideo == null || apiVideo.isEmpty) {
-      return null;
-    }
-    if (apiVideo.startsWith('http://') || apiVideo.startsWith('https://')) {
-      final normalized = _normalizeVideoUrl(apiVideo);
-      debugPrint('Resolved API video URL: $normalized');
-      return normalized;
-    }
-
-    final rawBaseUrl =
-        NetworkConstants.baseUrl.replaceFirst('baseUrl=', '').trim();
-    final baseUri = Uri.parse(rawBaseUrl);
-    final cleanedPath = apiVideo.replaceAll('\\', '/').trim();
-    final resolved = baseUri.resolve(cleanedPath);
-    final normalized = _normalizeVideoUrl(resolved.toString());
-    debugPrint('Resolved API video URL: $normalized');
-    return normalized;
-  }
-
-  String _normalizeVideoUrl(String value) {
-    final cleaned = value.replaceAll('\\', '/').trim();
-    final parsed = Uri.parse(cleaned);
-
-    final encodedPathSegments =
-        parsed.pathSegments.map(Uri.encodeComponent).toList();
-
-    return parsed.replace(pathSegments: encodedPathSegments).toString();
-  }
-
-  String? get displayedVideoPath {
-    if (videoPath.value.isNotEmpty) {
-      return videoPath.value;
-    }
-    return existingApiVideoPath;
-  }
-
-  bool get isShowingApiVideoOnly =>
-      videoPath.value.isEmpty && (existingApiVideoPath?.isNotEmpty ?? false);
-
-  bool get canSubmitCompletedVideo => finalVideoPath?.isNotEmpty == true;
-
-  Future<void> onCaptureVideo() async {
-    // final insideGeofence = await checkGeoFence(
-    //   data.value.lat ?? 0.0,
-    //   data.value.lng ?? 0.0,
-    // );
-
-    final insideGeofence = await checkGeoFence(
-      data.value.lat ?? 0.0,
-      data.value.lng ?? 0.0,
-      data.value.unitProject?.blockTownName ?? "",
-    );
-
-    if (insideGeofence == false) {
-      //controller.showPhotoSourceDialog(index);
-      PopupMixin().showErrorDialog(
-        Get.context!,
-        message: "You are outside the location",
-      );
-      return;
-    }
-
-    var showedLoading = false;
-
-    try {
-      final compressedFile = await captureProjectVideo(
-        maxDuration: const Duration(minutes: 2),
-        onCompressionStarted: () {
-          showedLoading = true;
-          // showAlertCustom(backBtnDisable: true, title: "Loading...");
-        },
-      );
-
-      if (compressedFile == null) return;
-
-      videoPath.value = compressedFile.path;
-      finalVideoPath = compressedFile.path;
-    } catch (e) {
-      throw Exception(e);
-    }
-    // finally {
-    //   // if (showedLoading && (Get.isDialogOpen ?? false)) {
-    //   //   Get.back();
-    //   // }
-    // }
-  }
-
-  void clearVideoSelection() {
-    videoPath.value = "";
-    finalVideoPath = "";
-  }
-
   Future<void> _navigateToDashboard() async {
     Get.offAllNamed(await authService.dashboardRoute());
+  }
+
+  Future<void> validationToCaptureImage(int index) async {
+    bool loaderShown = false;
+
+    try {
+      // ============================================================
+      // 1. FETCH LOCATION
+      // ============================================================
+      showAlertCustom(backBtnDisable: true, title: "Fetching Location...");
+
+      loaderShown = true;
+
+      final position = await LocationService.getAccurateLocation();
+
+      final accuracy = position.accuracy;
+
+      debugPrint("================================");
+      debugPrint("IMAGE INDEX : $index");
+      debugPrint("LATITUDE    : ${position.latitude}");
+      debugPrint("LONGITUDE   : ${position.longitude}");
+      debugPrint("ACCURACY    : $accuracy m");
+      debugPrint("================================");
+
+      // ============================================================
+      // 2. ACCURACY VALIDATION
+      // Accuracy must be <= 15 meters
+      // ============================================================
+      if (accuracy > 15) {
+        if (loaderShown) {
+          Get.back();
+          loaderShown = false;
+        }
+
+        showErrorDialog(
+          Get.context!,
+          message:
+              "Location accuracy is ${accuracy.toStringAsFixed(1)} meters.\n"
+              "Please move to an open area and try again.",
+        );
+
+        return;
+      }
+
+      // Save validated location
+      userLat.value = position.latitude;
+      userLng.value = position.longitude;
+
+      // ============================================================
+      // 3. GET PROJECT LOCATION / BLOCK
+      // ============================================================
+      final projectLat = data.value.lat;
+      final projectLng = data.value.lng;
+
+      final blockName = data.value.unitProject?.blockTownName?.trim();
+
+      final hasLatLng =
+          projectLat != null &&
+          projectLng != null &&
+          projectLat != 0.0 &&
+          projectLng != 0.0;
+
+      final hasBlock = blockName != null && blockName.isNotEmpty;
+
+      debugPrint("Has Project Lat/Lng : $hasLatLng");
+      debugPrint("Project Lat         : $projectLat");
+      debugPrint("Project Lng         : $projectLng");
+      debugPrint("Has Block           : $hasBlock");
+      debugPrint("Project Block       : $blockName");
+
+      // ============================================================
+      // 4. NOTHING AVAILABLE FOR GEO-FENCING
+      // ============================================================
+      if (!hasLatLng && !hasBlock) {
+        if (loaderShown) {
+          Get.back();
+          loaderShown = false;
+        }
+
+        isInsideFence.value = false;
+
+        showErrorDialog(
+          Get.context!,
+          message:
+              "Project location information is unavailable.\n"
+              "Latitude/Longitude and Block are not available.",
+        );
+
+        return;
+      }
+
+      // ============================================================
+      // 5. GEO-FENCING
+      //
+      // Priority:
+      //   A. Lat/Lng -> 200 meter radius
+      //   B. No Lat/Lng -> Block validation
+      // ============================================================
+
+      final insideGeofence = await checkGeoFence(
+        lat: hasLatLng ? projectLat : null,
+        lng: hasLatLng ? projectLng : null,
+        blockName: hasBlock ? blockName : null,
+        position: position,
+      );
+
+      // Close location loader
+      if (loaderShown) {
+        Get.back();
+        loaderShown = false;
+      }
+
+      // ============================================================
+      // 6. GEO-FENCE VALIDATION
+      // ============================================================
+      if (!insideGeofence) {
+        showErrorDialog(
+          Get.context!,
+          message:
+              hasLatLng
+                  ? "You are outside the location."
+                  : "You are outside the assigned project block.",
+        );
+
+        return;
+      }
+
+      // ============================================================
+      // 7. CAPTURE PHOTO
+      // ============================================================
+      await takePhoto(index, position: position);
+    } catch (e, stackTrace) {
+      debugPrint("Capture validation error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (loaderShown) {
+        Get.back();
+      }
+
+      showErrorDialog(
+        Get.context!,
+        message: "Unable to fetch location. Please try again.",
+      );
+    }
   }
 }
 
 /*
+
+
+Future<bool> _ensureExifOnSelectedImages() async {
+    for (final path in selectedImages) {
+      final exifAdded = await _addExifToImage(path);
+      if (!exifAdded) return false;
+    }
+    return true;
+  }
+
 
 // Future<void> addExifData(String path) async {
   //   final position = await LocationService.getAccurateLocation();
@@ -711,5 +801,106 @@ Future<bool> checkGeoFence(double lat, double lng) async {
       return false;
     }
   }
+
+
+
+  String? get existingApiVideoPath {
+    final apiVideo = data.value.videoAtt;
+    if (apiVideo == null || apiVideo.isEmpty) {
+      return null;
+    }
+    if (apiVideo.startsWith('http://') || apiVideo.startsWith('https://')) {
+      final normalized = _normalizeVideoUrl(apiVideo);
+      debugPrint('Resolved API video URL: $normalized');
+      return normalized;
+    }
+
+    final rawBaseUrl =
+        NetworkConstants.baseUrl.replaceFirst('baseUrl=', '').trim();
+    final baseUri = Uri.parse(rawBaseUrl);
+    final cleanedPath = apiVideo.replaceAll('\\', '/').trim();
+    final resolved = baseUri.resolve(cleanedPath);
+    final normalized = _normalizeVideoUrl(resolved.toString());
+    debugPrint('Resolved API video URL: $normalized');
+    return normalized;
+  }
+
+  String _normalizeVideoUrl(String value) {
+    final cleaned = value.replaceAll('\\', '/').trim();
+    final parsed = Uri.parse(cleaned);
+
+    final encodedPathSegments =
+        parsed.pathSegments.map(Uri.encodeComponent).toList();
+
+    return parsed.replace(pathSegments: encodedPathSegments).toString();
+  }
+
+  String? get displayedVideoPath {
+    if (videoPath.value.isNotEmpty) {
+      return videoPath.value;
+    }
+    return existingApiVideoPath;
+  }
+
+  bool get isShowingApiVideoOnly =>
+      videoPath.value.isEmpty && (existingApiVideoPath?.isNotEmpty ?? false);
+
+  bool get canSubmitCompletedVideo => finalVideoPath?.isNotEmpty == true;
+
+  Future<void> onCaptureVideo() async {
+    // final insideGeofence = await checkGeoFence(
+    //   data.value.lat ?? 0.0,
+    //   data.value.lng ?? 0.0,
+    // );
+
+    final insideGeofence = await checkGeoFence(
+      data.value.lat ?? 0.0,
+      data.value.lng ?? 0.0,
+      data.value.unitProject?.blockTownName ?? "",
+    );
+
+    if (insideGeofence == false) {
+      //controller.showPhotoSourceDialog(index);
+      PopupMixin().showErrorDialog(
+        Get.context!,
+        message: "You are outside the location",
+      );
+      return;
+    }
+
+    var showedLoading = false;
+
+    try {
+      final compressedFile = await captureProjectVideo(
+        maxDuration: const Duration(minutes: 2),
+        onCompressionStarted: () {
+          showedLoading = true;
+          // showAlertCustom(backBtnDisable: true, title: "Loading...");
+        },
+      );
+
+      if (compressedFile == null) return;
+
+      videoPath.value = compressedFile.path;
+      finalVideoPath = compressedFile.path;
+    } catch (e) {
+      throw Exception(e);
+    }
+    // finally {
+    //   // if (showedLoading && (Get.isDialogOpen ?? false)) {
+    //   //   Get.back();
+    //   // }
+    // }
+  }
+
+  void clearVideoSelection() {
+    videoPath.value = "";
+    finalVideoPath = "";
+  }
+
+
+
+
+
 
   */

@@ -175,8 +175,6 @@ class HomeView extends GetView<HomeController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Obx(() {
-            final data = controller.data.value;
-
             return IntrinsicHeight(
               child: Column(
                 children: [

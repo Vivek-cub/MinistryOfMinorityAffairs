@@ -50,7 +50,13 @@ class GeoFenceService {
     required String detectedBlock,
     required String blockName,
   }) {
-    return detectedBlock.trim().toLowerCase() == blockName.trim().toLowerCase();
+    final detected = normalizeBlockName(detectedBlock);
+    final expected = normalizeBlockName(blockName);
+
+    debugPrint("Detected Block: $detected");
+    debugPrint("Expected Block: $expected");
+
+    return detected == expected || detected.startsWith('$expected ');
   }
 
   static Future<String?> getBlockFromPosition(Position user) async {
@@ -71,5 +77,9 @@ class GeoFenceService {
       debugPrint('Failed to get block: $e');
       return null;
     }
+  }
+
+  static String normalizeBlockName(String value) {
+    return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
   }
 }
