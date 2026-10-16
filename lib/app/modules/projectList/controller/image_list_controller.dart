@@ -35,6 +35,7 @@ class ImageListController extends GetxController
 
     for (final item in attachments) {
       if (item.date == null) continue;
+      if (!_isSupportedAttachment(item)) continue;
 
       final dateKey = DateFormat('dd MMM yyyy').format(item.date!);
       final progressKey = _cleanText(item.progress);
@@ -78,6 +79,11 @@ class ImageListController extends GetxController
     final text = value?.trim();
     if (text == null || text.isEmpty) return null;
     return text;
+  }
+
+  bool _isSupportedAttachment(ImageAttachment attachment) {
+    final attachmentType = attachment.attachmentType?.trim().toLowerCase();
+    return attachmentType == 'image' || attachmentType == 'video';
   }
 }
 

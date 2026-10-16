@@ -27,7 +27,7 @@ class UnitDetails {
   // final List<ProjectMilestone>? milestones;
   final UnitProject? unitProject;
   final List<ImageAttachment>? imageAtt;
-  final String? videoAtt;
+  // final String? videoAtt;
   final String? districtName;
   final String? stateName;
   final String? blockName;
@@ -58,7 +58,7 @@ class UnitDetails {
     this.imageAtt,
     this.unitProject,
     //this.milestones = const [],
-    this.videoAtt,
+    // this.videoAtt,
     this.districtName,
     this.blockName,
     this.stateName,
@@ -124,7 +124,7 @@ class UnitDetails {
           (json['attachments'] as List?)
               ?.map((e) => ImageAttachment.fromJson(e))
               .toList(),
-      videoAtt: _stringValue(json['videoAtt']),
+      // videoAtt: _stringValue(json['videoAtt']),
       unitProject:
           responseData is Map<String, dynamic>
               ? UnitProject.fromJson(responseData)

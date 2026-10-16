@@ -11,6 +11,7 @@ mixin GeofenceMixin on GetxController {
     required double? lat,
     required double? lng,
     required String? blockName,
+    required String? stateName,
     required Position position,
   }) async {
     userLat.value = position.latitude;
@@ -29,8 +30,8 @@ mixin GeofenceMixin on GetxController {
 
       isInsideFence.value = GeoFenceService.isInside(
         user: position,
-        targetLat: lat!,
-        targetLng: lng!,
+        targetLat: lat,
+        targetLng: lng,
         radius: 200,
       );
 
@@ -44,30 +45,55 @@ mixin GeofenceMixin on GetxController {
     // Check block
     // ============================================================
     if (hasBlock) {
-      debugPrint("GeoFence: Lat/Lng unavailable -> checking block");
+      debugPrint('GeoFence: Checking state and block');
 
-      final detectedBlock = await GeoFenceService.getBlockFromPosition(
+      final placemark = await GeoFenceService.getPlacemarkFromPosition(
         position,
       );
 
-      debugPrint("Detected Block : $detectedBlock");
-      debugPrint("Expected Block : $blockName");
-
-      if (detectedBlock == null || detectedBlock.trim().isEmpty) {
-        debugPrint("GeoFence: Could not detect current block");
-
+      if (placemark == null) {
+        debugPrint('GeoFence: Could not detect location details');
         isInsideFence.value = false;
         return false;
       }
 
-      isInsideFence.value = GeoFenceService.isInsideBlock(
-        detectedBlock: detectedBlock,
-        blockName: blockName!,
-      );
+      final detectedState = placemark.administrativeArea;
+      final detectedBlock = placemark.subAdministrativeArea;
 
-      debugPrint("Block geofence result: ${isInsideFence.value}");
+      debugPrint('Detected State: $detectedState');
+      debugPrint('Expected State: $stateName');
+      debugPrint('Detected Block: $detectedBlock');
+      debugPrint('Expected Block: $blockName');
 
-      return isInsideFence.value;
+      // Validate state first.
+      if (stateName == null ||
+          stateName.trim().isEmpty ||
+          detectedState == null ||
+          !GeoFenceService.isInsideState(
+            detectedState: detectedState,
+            stateName: stateName,
+          )) {
+        debugPrint('GeoFence: State validation failed');
+        isInsideFence.value = false;
+        return false;
+      }
+
+      // Validate block only after state matches.
+      if (detectedBlock == null ||
+          detectedBlock.trim().isEmpty ||
+          !GeoFenceService.isInsideBlock(
+            detectedBlock: detectedBlock,
+            blockName: blockName!,
+          )) {
+        debugPrint('GeoFence: Block validation failed');
+        isInsideFence.value = false;
+        return false;
+      }
+
+      isInsideFence.value = true;
+      debugPrint('GeoFence: State and block validation passed');
+
+      return true;
     }
 
     // ============================================================

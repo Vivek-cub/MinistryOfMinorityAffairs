@@ -161,7 +161,8 @@ class WorkDetailController extends GetxController
       projectStatus.value == "Completed" || data.value.status == "Completed";
 
   String? get existingApiVideoPath {
-    final apiVideo = data.value.videoAtt;
+    //final apiVideo = data.value.videoAtt;
+    final apiVideo = "";
     if (apiVideo == null || apiVideo.isEmpty) {
       return null;
     }

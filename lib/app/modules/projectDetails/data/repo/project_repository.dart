@@ -26,7 +26,7 @@ class ProjectRepository {
       createdAt: local.project.createdAt,
       districtId: local.project.districtId,
       projectUniqueId: local.project.projectUniqueId,
-      videoAtt: local.video,
+      // videoAtt: local.video,
       // milestones:
       //     local.milestones.map((m) {
       //       return ProjectMilestone(

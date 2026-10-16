@@ -534,6 +534,7 @@ class UploadProjectDetailsController extends GetxController
       final projectLat = data.value.lat;
       final projectLng = data.value.lng;
 
+      final stateName = data.value.unitProject?.stateName?.trim();
       final blockName = data.value.unitProject?.blockTownName?.trim();
 
       final hasLatLng =
@@ -542,6 +543,7 @@ class UploadProjectDetailsController extends GetxController
           projectLat != 0.0 &&
           projectLng != 0.0;
 
+      final hasState = stateName != null && stateName.isNotEmpty;
       final hasBlock = blockName != null && blockName.isNotEmpty;
 
       debugPrint("Has Project Lat/Lng : $hasLatLng");
@@ -553,7 +555,7 @@ class UploadProjectDetailsController extends GetxController
       // ============================================================
       // 4. NOTHING AVAILABLE FOR GEO-FENCING
       // ============================================================
-      if (!hasLatLng && !hasBlock) {
+      if (!hasLatLng && !(hasState && hasBlock)) {
         if (loaderShown) {
           Get.back();
           loaderShown = false;
@@ -565,7 +567,7 @@ class UploadProjectDetailsController extends GetxController
           Get.context!,
           message:
               "Project location information is unavailable.\n"
-              "Latitude/Longitude and Block are not available.",
+              "Valid coordinates or both state and block are required.",
         );
 
         return;
@@ -583,6 +585,7 @@ class UploadProjectDetailsController extends GetxController
         lat: hasLatLng ? projectLat : null,
         lng: hasLatLng ? projectLng : null,
         blockName: hasBlock ? blockName : null,
+        stateName: hasState ? stateName : null,
         position: position,
       );
 

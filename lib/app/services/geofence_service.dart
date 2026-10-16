@@ -19,67 +19,60 @@ class GeoFenceService {
     return distance <= radius;
   }
 
-  static bool isInsideState({
-    required String detectedState,
-    required String stateName,
-  }) {
-    return detectedState.trim().toLowerCase() == stateName.trim().toLowerCase();
-  }
-
-  static Future<String?> getStateFromPosition(Position user) async {
+  static Future<Placemark?> getPlacemarkFromPosition(Position user) async {
     try {
       final geocoding = Geocoding();
-
       final placemarks = await geocoding.placemarkFromCoordinates(
         user.latitude,
         user.longitude,
       );
 
-      if (placemarks.isEmpty) {
-        return null;
-      }
+      if (placemarks.isEmpty) return null;
 
-      return placemarks.first.administrativeArea;
+      return placemarks.first;
     } catch (e) {
-      debugPrint('Failed to get state: $e');
+      debugPrint('Failed to reverse geocode position: $e');
       return null;
     }
+  }
+
+  static Future<String?> getStateFromPosition(Position user) async {
+    final placemark = await getPlacemarkFromPosition(user);
+    return placemark?.administrativeArea;
+  }
+
+  static Future<String?> getBlockFromPosition(Position user) async {
+    final placemark = await getPlacemarkFromPosition(user);
+    return placemark?.subAdministrativeArea;
+  }
+
+  static bool isInsideState({
+    required String detectedState,
+    required String stateName,
+  }) {
+    return normalizeName(detectedState) == normalizeName(stateName);
   }
 
   static bool isInsideBlock({
     required String detectedBlock,
     required String blockName,
   }) {
-    final detected = normalizeBlockName(detectedBlock);
-    final expected = normalizeBlockName(blockName);
+    final detected = normalizeName(detectedBlock);
+    final expected = normalizeName(blockName);
 
-    debugPrint("Detected Block: $detected");
-    debugPrint("Expected Block: $expected");
+    debugPrint('Detected Block: $detected');
+    debugPrint('Expected Block: $expected');
 
-    return detected == expected || detected.startsWith('$expected ');
-  }
-
-  static Future<String?> getBlockFromPosition(Position user) async {
-    try {
-      final geocoding = Geocoding();
-
-      final placemarks = await geocoding.placemarkFromCoordinates(
-        user.latitude,
-        user.longitude,
-      );
-
-      if (placemarks.isEmpty) {
-        return null;
-      }
-
-      return placemarks.first.subAdministrativeArea;
-    } catch (e) {
-      debugPrint('Failed to get block: $e');
-      return null;
+    if (detected.isEmpty || expected.isEmpty) {
+      return false;
     }
+
+    return detected == expected ||
+        detected.startsWith('$expected ') ||
+        expected.startsWith('$detected ');
   }
 
-  static String normalizeBlockName(String value) {
+  static String normalizeName(String value) {
     return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
   }
 }

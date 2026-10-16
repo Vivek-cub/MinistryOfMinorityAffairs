@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart';
 import 'package:ministry_of_minority_affairs/app/core/theme/typography.dart';
-import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/controller/project_functional_controller.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/controller/functional_controller.dart';
 
 class MyDatePickerFormField extends StatelessWidget {
   const MyDatePickerFormField({
@@ -94,8 +94,7 @@ class MyDatePickerFormField extends StatelessWidget {
                     ? (value) {
                       if (value == null) return;
 
-                      final controller =
-                          Get.find<ProjectFunctionalController>();
+                      final controller = Get.find<FunctionalController>();
 
                       final rawInitialValue = controller.initialValue[name];
 

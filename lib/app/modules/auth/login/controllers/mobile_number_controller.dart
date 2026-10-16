@@ -56,10 +56,22 @@ class MobileNumberController extends GetxController
 
       if (modelData?.statusCode == "200") {
         Get.back();
-        Get.toNamed(
-          AppRoutes.otpVerification,
-          arguments: {'phoneNumber': phoneNumber},
-        );
+        if (modelData?.data?.isPin == "yes") {
+          Get.toNamed(
+            AppRoutes.pinLogin,
+            arguments: {'phoneNumber': phoneNumber},
+          );
+        } else {
+          Get.toNamed(
+            AppRoutes.setPin,
+            arguments: {'phoneNumber': phoneNumber},
+          );
+        }
+
+        // Get.toNamed(
+        //   AppRoutes.otpVerification,
+        //   arguments: {'phoneNumber': phoneNumber},
+        // );
       }
     } catch (e) {
       Get.back();

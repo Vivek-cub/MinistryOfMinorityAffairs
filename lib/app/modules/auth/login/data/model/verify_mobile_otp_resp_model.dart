@@ -1,13 +1,21 @@
 class VerifyMobileOtpRespModel {
   String? statusCode;
   String? statusMessage;
+  String? error;
   LoginData? data;
 
-  VerifyMobileOtpRespModel({this.statusCode, this.statusMessage, this.data});
+  VerifyMobileOtpRespModel({
+    this.statusCode,
+    this.statusMessage,
+    this.data,
+    this.error,
+  });
 
   VerifyMobileOtpRespModel.fromJson(Map<String, dynamic> json) {
     statusCode = json['statusCode'];
     statusMessage = json['statusMessage'];
+    statusMessage = json['statusMessage'];
+    error = json['error'];
     data = json['data'] != null ? LoginData.fromJson(json['data']) : null;
   }
 }

@@ -63,48 +63,48 @@ class FunctionalScreen extends GetView<FunctionalController> {
                           isFunctional: controller.isFunctional.value,
                         ),
 
-                        // if (controller.isFunctionalProject.value == true) ...[
-                        //   const SizedBox(height: AppDimensions.lg),
+                        if (controller.isFunctionalProject.value == true) ...[
+                          const SizedBox(height: AppDimensions.lg),
 
-                        //   if (controller.isFormLoading.value)
-                        //     const Center(
-                        //       child: Padding(
-                        //         padding: EdgeInsets.all(24),
-                        //         child: CircularProgressIndicator(),
-                        //       ),
-                        //     )
-                        //   else
-                        //     FormBuilder(
-                        //       key: controller.formKey,
-                        //       initialValue: Map<String, dynamic>.from(
-                        //         controller.initialValue,
-                        //       ),
-                        //       child: Obx(
-                        //         () => Column(
-                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                        //           children:
-                        //               controller.dynamicFormConfig
-                        //                   .map(
-                        //                     (question) =>
-                        //                         SwitchFormFieldWidgets(
-                        //                           key: ValueKey(
-                        //                             question.questionId,
-                        //                           ),
-                        //                           question: question,
-                        //                           controller: controller,
-                        //                         ),
-                        //                   )
-                        //                   .toList(),
-                        //         ),
-                        //       ),
-                        //     ),
-                        const SizedBox(height: AppDimensions.lg),
-                        CapturedVideoPreview(
-                          videoPath: controller.displayedVideoPath,
-                          onCaptureTap: controller.onCaptureVideo,
-                          onRemoveTap: controller.clearVideoSelection,
-                        ),
-                        // ],
+                          if (controller.isFormLoading.value)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          else
+                            FormBuilder(
+                              key: controller.formKey,
+                              initialValue: Map<String, dynamic>.from(
+                                controller.initialValue,
+                              ),
+                              child: Obx(
+                                () => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children:
+                                      controller.dynamicFormConfig
+                                          .map(
+                                            (question) =>
+                                                SwitchFormFieldWidgets(
+                                                  key: ValueKey(
+                                                    question.questionId,
+                                                  ),
+                                                  question: question,
+                                                  controller: controller,
+                                                ),
+                                          )
+                                          .toList(),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: AppDimensions.lg),
+                          CapturedVideoPreview(
+                            videoPath: controller.displayedVideoPath,
+                            onCaptureTap: controller.onCaptureVideo,
+                            onRemoveTap: controller.clearVideoSelection,
+                          ),
+                        ],
                         const SizedBox(height: 100),
                       ],
                     ),

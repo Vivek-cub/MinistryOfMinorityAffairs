@@ -70,8 +70,14 @@ class SyncService extends GetxService {
         if (response.statusCode == '200') {
           await _cleanupUploadedSubmission(item, userId);
         }
-      } catch (e) {
-        throw Exception(e);
+      } catch (e, stackTrace) {
+        debugPrint(
+          'Pending sync failed for project '
+          '${item.submission.projectId} '
+          '(${item.submission.progress}): $e',
+        );
+        debugPrintStack(stackTrace: stackTrace);
+        continue;
       }
     }
   }

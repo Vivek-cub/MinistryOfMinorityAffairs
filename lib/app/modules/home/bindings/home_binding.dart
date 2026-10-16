@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:ministry_of_minority_affairs/app/core/database/app_database.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/dao/submission_dao.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/data/repo/functional_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/data/repo/project_functional_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/data/repo/home_repo_impl.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
@@ -34,6 +35,7 @@ class HomeBinding extends Bindings {
         ProjectDetailRepoImpl(Get.find<ApiService>()),
         ProjectListRepoImpl(Get.find<ApiService>()),
         ProjectFunctionalRepoImpl(Get.find<ApiService>()),
+        FunctionalRepoImpl(Get.find<ApiService>()),
         //  Get.find<ProjectDao>(),
       ),
     );

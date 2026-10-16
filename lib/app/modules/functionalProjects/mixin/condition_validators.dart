@@ -41,8 +41,8 @@ mixin ConditionValidators {
       debugPrint('Expected      : $expectedValue');
       debugPrint('Actual Type   : ${actualValue.runtimeType}');
       debugPrint('Expected Type : ${expectedValue.runtimeType}');
-      debugPrint('Normalized    : ${_normalize(actualValue)}');
-      debugPrint('Expected Norm : ${_normalize(expectedValue)}');
+      debugPrint('Normalized    : ${normalize(actualValue)}');
+      debugPrint('Expected Norm : ${normalize(expectedValue)}');
       debugPrint('Result        : $isMatch');
       debugPrint('==========================================');
 
@@ -59,8 +59,8 @@ mixin ConditionValidators {
   // ===========================================================================
 
   bool _valuesEqual(dynamic actual, dynamic expected) {
-    final normalizedActual = _normalize(actual);
-    final normalizedExpected = _normalize(expected);
+    final normalizedActual = normalize(actual);
+    final normalizedExpected = normalize(expected);
 
     return normalizedActual == normalizedExpected;
   }
@@ -69,36 +69,15 @@ mixin ConditionValidators {
   // NORMALIZE
   // ===========================================================================
 
-  dynamic _normalize(dynamic value) {
-    if (value == null) {
-      return null;
-    }
-
-    if (value is bool) {
-      return value;
-    }
-
+  static dynamic normalize(dynamic value) {
+    if (value == null) return null;
+    if (value is bool || value is num) return value;
     if (value is String) {
-      final normalized = value.trim().toLowerCase();
-
-      switch (normalized) {
-        case 'true':
-        case 'yes':
-          return true;
-
-        case 'false':
-        case 'no':
-          return false;
-
-        default:
-          return normalized;
-      }
+      final v = value.trim().toLowerCase();
+      if (v == 'true' || v == 'yes') return true;
+      if (v == 'false' || v == 'no') return false;
+      return v;
     }
-
-    if (value is num) {
-      return value;
-    }
-
     return value;
   }
 

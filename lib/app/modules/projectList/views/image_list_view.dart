@@ -9,6 +9,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/widget/m
 import 'package:ministry_of_minority_affairs/app/modules/projectList/controller/image_list_controller.dart';
 import 'package:ministry_of_minority_affairs/app/utils/assets.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
+import 'package:video_player/video_player.dart';
 
 class ImageListView extends GetView<ImageListController> {
   const ImageListView({super.key});
@@ -107,7 +108,16 @@ class ImageListView extends GetView<ImageListController> {
 
                               ...group.roleGroups.entries.map((roleEntry) {
                                 final role = roleEntry.key;
-                                final images = roleEntry.value;
+                                final attachments = roleEntry.value;
+                                final imageUrls = attachments
+                                    .where(_isImageAttachment)
+                                    .map(
+                                      (attachment) => Helpers()
+                                          .resolveImageUrl(
+                                            attachment.images ?? '',
+                                          ),
+                                    )
+                                    .toList();
 
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +129,7 @@ class ImageListView extends GetView<ImageListController> {
                                       shrinkWrap: true,
                                       physics:
                                           const NeverScrollableScrollPhysics(),
-                                      itemCount: images.length,
+                                      itemCount: attachments.length,
                                       padding: EdgeInsets.zero,
                                       gridDelegate:
                                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -128,26 +138,32 @@ class ImageListView extends GetView<ImageListController> {
                                             mainAxisSpacing: 8,
                                           ),
                                       itemBuilder: (context, imageIndex) {
-                                        final attachment = images[imageIndex];
-                                        final imageUrl = Helpers()
+                                        final attachment =
+                                            attachments[imageIndex];
+                                        final attachmentUrl = Helpers()
                                             .resolveImageUrl(
-                                              attachment.images ?? "",
+                                              attachment.images ?? '',
                                             );
 
+                                        if (_isVideoAttachment(attachment)) {
+                                          return _VideoTile(
+                                            videoUrl: attachmentUrl,
+                                          );
+                                        }
+
+                                        final imageIndexInViewer =
+                                            attachments
+                                                .take(imageIndex + 1)
+                                                .where(_isImageAttachment)
+                                                .length -
+                                            1;
                                         return _ImageTile(
-                                          imageUrl: imageUrl,
+                                          imageUrl: attachmentUrl,
                                           onTap:
                                               () => controller.openImageViewer(
                                                 context,
-                                                images
-                                                    .map(
-                                                      (e) => Helpers()
-                                                          .resolveImageUrl(
-                                                            e.images ?? '',
-                                                          ),
-                                                    )
-                                                    .toList(),
-                                                imageIndex,
+                                                imageUrls,
+                                                imageIndexInViewer,
                                               ),
                                         );
                                       },
@@ -202,6 +218,176 @@ class _ImageTile extends StatelessWidget {
                   size: 24,
                 ),
               ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VideoTile extends StatefulWidget {
+  final String videoUrl;
+
+  const _VideoTile({
+    required this.videoUrl,
+  });
+
+  @override
+  State<_VideoTile> createState() => _VideoTileState();
+}
+
+class _VideoTileState extends State<_VideoTile> {
+  VideoPlayerController? _controller;
+  bool _isInitializing = true;
+  bool _hasError = false;
+  int _loadId = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  @override
+  void didUpdateWidget(covariant _VideoTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoUrl != widget.videoUrl) {
+      _controller?.dispose();
+      _initializeVideo();
+    }
+  }
+
+  @override
+  void dispose() {
+    _loadId++;
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeVideo() async {
+    final loadId = ++_loadId;
+
+    setState(() {
+      _isInitializing = true;
+      _hasError = false;
+      _controller = null;
+    });
+
+    VideoPlayerController? controller;
+    try {
+      controller = VideoPlayerController.networkUrl(
+        Uri.parse(widget.videoUrl),
+      );
+      await controller.initialize();
+      await controller.setLooping(true);
+
+      if (!mounted || loadId != _loadId) {
+        await controller.dispose();
+        return;
+      }
+
+      setState(() {
+        _controller = controller;
+        _isInitializing = false;
+      });
+    } catch (_) {
+      await controller?.dispose();
+      if (!mounted || loadId != _loadId) return;
+      setState(() {
+        _isInitializing = false;
+        _hasError = true;
+      });
+    }
+  }
+
+  void _togglePlayback() {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+
+    setState(() {
+      controller.value.isPlaying ? controller.pause() : controller.play();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (controller != null && controller.value.isInitialized)
+              SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: controller.value.size.width,
+                    height: controller.value.size.height,
+                    child: VideoPlayer(controller),
+                  ),
+                ),
+              )
+            else
+              Center(
+                child: _isInitializing
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        _hasError
+                            ? Icons.videocam_off_outlined
+                            : Icons.video_library_outlined,
+                        color: AppColors.textWhite,
+                        size: 28,
+                      ),
+              ),
+            if (controller != null && controller.value.isInitialized)
+              Positioned.fill(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _togglePlayback,
+                    child: Center(
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          controller.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: AppColors.textWhite,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (controller != null && controller.value.isInitialized)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: VideoProgressIndicator(
+                  controller,
+                  allowScrubbing: true,
+                  colors: const VideoProgressColors(
+                    playedColor: AppColors.primary,
+                    bufferedColor: AppColors.lightGrey,
+                    backgroundColor: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -281,4 +467,16 @@ Color _statusColor(String status) {
     default:
       return AppColors.textSecondary;
   }
+}
+
+bool _isImageAttachment(dynamic attachment) {
+  return _attachmentType(attachment) == 'image';
+}
+
+bool _isVideoAttachment(dynamic attachment) {
+  return _attachmentType(attachment) == 'video';
+}
+
+String? _attachmentType(dynamic attachment) {
+  return attachment.attachmentType?.trim().toLowerCase();
 }

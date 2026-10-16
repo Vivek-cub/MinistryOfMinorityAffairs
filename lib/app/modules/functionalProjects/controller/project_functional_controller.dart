@@ -289,7 +289,8 @@ class ProjectFunctionalController extends GetxController
     final insideGeofence = await checkGeoFence(
       lat: data.value.lat ?? 0.0,
       lng: data.value.lng ?? 0.0,
-      blockName: data.value.unitProject?.stateName ?? "",
+      blockName: data.value.unitProject?.blockTownName ?? "",
+      stateName: data.value.unitProject?.stateName ?? "",
       position: position,
     );
     Get.back();

@@ -54,16 +54,16 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         (a) => a.userId.equals(userId) & a.projectId.equals(project.id ?? ""),
       )).go();
 
-      if (project.videoAtt?.isNotEmpty == true) {
-        await into(localMilestoneAttachments).insertOnConflictUpdate(
-          LocalMilestoneAttachmentsCompanion(
-            userId: Value(userId),
-            projectId: Value(project.id ?? ""),
-            type: const Value('video'),
-            filePath: Value(project.videoAtt!),
-          ),
-        );
-      }
+      // if (project.videoAtt?.isNotEmpty == true) {
+      //   await into(localMilestoneAttachments).insertOnConflictUpdate(
+      //     LocalMilestoneAttachmentsCompanion(
+      //       userId: Value(userId),
+      //       projectId: Value(project.id ?? ""),
+      //       type: const Value('video'),
+      //       filePath: Value(project.videoAtt!),
+      //     ),
+      //   );
+      // }
 
       // for (final m in project.milestones ?? []) {
       //   await into(localMilestones).insert(

@@ -10,6 +10,7 @@ import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart'
 
 import 'package:ministry_of_minority_affairs/app/core/model/common_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functional/data/model/functional_response_model.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/data/model/submit_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functional/domain/functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/services/api_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/network_constants.dart';
@@ -47,8 +48,12 @@ class FunctionalRepoImpl extends FunctionalRepo with PopupMixin, SnackBarMixin {
     }
   }
 
+  // Replace submitQuestionnaire in your repository implementation.
+  // Sends JSON when there are no files (matches the required body),
+  // and multipart only when media exists.
+
   @override
-  Future<CommonResponseModel> submitQuestionnaire({
+  Future<SubmitResponseModel> submitQuestionnaire({
     required String unitId,
     required Map<String, dynamic> formValues,
     required List<Map<String, dynamic>> media,
@@ -56,145 +61,118 @@ class FunctionalRepoImpl extends FunctionalRepo with PopupMixin, SnackBarMixin {
     try {
       final url = "${NetworkConstants.postQuestionnaire}$unitId/submit";
 
-      final formData = FormData();
+      final assessmentDate = formValues['assessmentDate']?.toString() ?? '';
 
-      // ============================================================
-      // 1. PROJECT ID
-      // ============================================================
-
-      formData.fields.add(
-        MapEntry('projectId', formValues['projectId']?.toString() ?? ''),
+      final answers = List<Map<String, dynamic>>.from(
+        (formValues['answers'] as List? ?? []).map(
+          (item) => Map<String, dynamic>.from(item as Map),
+        ),
       );
 
-      // ============================================================
-      // 2. ASSESSMENT
-      // ============================================================
+      final mediaByQuestionId = <String, String>{
+        for (final item in media)
+          if (item['questionId'] != null && item['path'] != null)
+            item['questionId'].toString(): item['path'].toString(),
+      };
 
-      final assessment = formValues['assessment'] ?? [];
+      final hasNewFiles = answers.any(
+        (answer) => answer['answer'] == '__FILE__',
+      );
 
-      formData.fields.add(MapEntry('assessment', jsonEncode(assessment)));
+      final hasImageUrls = answers.any((answer) {
+        final value = answer['answer'];
+        return value is String &&
+            (value.startsWith('http://') || value.startsWith('https://'));
+      });
 
-      // ============================================================
-      // 3. IMAGE / VIDEO FILES
-      // ============================================================
+      final useMultipart = hasNewFiles || hasImageUrls;
 
-      for (final item in media) {
-        final questionId = item['questionId']?.toString();
-        final questionType = item['questionType']?.toString().toUpperCase();
-        final path = item['path']?.toString();
+      dynamic data;
+      Options options;
 
-        if (questionId == null ||
-            questionId.isEmpty ||
-            path == null ||
-            path.isEmpty) {
-          continue;
-        }
+      if (!useMultipart) {
+        data = {'assessmentDate': assessmentDate, 'answers': answers};
 
-        final file = File(path);
+        options = Options(contentType: Headers.jsonContentType);
+      } else {
+        final formData = FormData();
 
-        if (!await file.exists()) {
-          debugPrint('Media file does not exist: $path');
-          continue;
-        }
+        formData.fields.add(MapEntry('assessmentDate', assessmentDate));
 
-        final filename = path.split('/').last;
+        formData.fields.add(MapEntry('answers', jsonEncode(answers)));
 
-        // ------------------------------------------------------------
-        // IMAGE
-        // ------------------------------------------------------------
+        for (final answer in answers) {
+          if (answer['answer'] != '__FILE__') continue;
 
-        if (questionType == 'IMAGE' || questionType == 'IMAGES') {
+          final questionId = answer['questionId']?.toString();
+          final path = mediaByQuestionId[questionId];
+
+          if (path == null || path.isEmpty) {
+            throw Exception('No media found for questionId: $questionId');
+          }
+
+          // Existing URL: preserve it; do not upload it as a file.
+          if (path.startsWith('http://') || path.startsWith('https://')) {
+            answer['answer'] = path;
+            continue;
+          }
+
+          // Local file: upload it.
+          final file = File(path);
+
+          if (!await file.exists()) {
+            throw Exception('Media file does not exist: $path');
+          }
+
           formData.files.add(
             MapEntry(
-              'image_$questionId',
-              await MultipartFile.fromFile(path, filename: filename),
+              'answer',
+              await MultipartFile.fromFile(
+                path,
+                filename: path.split('/').last,
+              ),
             ),
           );
-
-          debugPrint('Image added: image_$questionId -> $path');
         }
-        // ------------------------------------------------------------
-        // VIDEO
-        // ------------------------------------------------------------
-        else if (questionType == 'VIDEO') {
-          formData.files.add(
-            MapEntry(
-              'video_$questionId',
-              await MultipartFile.fromFile(path, filename: filename),
-            ),
-          );
 
-          debugPrint('Video added: video_$questionId -> $path');
-        }
+        // Re-encode answers because existing URLs may have replaced
+        // __FILE__ placeholders above.
+        formData.fields.removeWhere((field) => field.key == 'answers');
+
+        formData.fields.add(MapEntry('answers', jsonEncode(answers)));
+
+        data = formData;
+        options = Options(contentType: Headers.multipartFormDataContentType);
       }
 
-      // ============================================================
-      // DEBUG
-      // ============================================================
-
-      debugPrint('========== SUBMIT QUESTIONNAIRE ==========');
-
-      debugPrint('URL: $url');
-
-      debugPrint('Project ID: ${formValues['projectId']}');
-
-      debugPrint('Assessment: ${jsonEncode(assessment)}');
-
+      debugPrint('SUBMIT QUESTIONNAIRE URL: $url');
+      debugPrint('Assessment date: $assessmentDate');
+      debugPrint('Answers: ${jsonEncode(answers)}');
       debugPrint('Media count: ${media.length}');
+      debugPrint('Has new files: $hasNewFiles');
+      debugPrint('Using multipart: $useMultipart');
 
-      for (final item in media) {
-        debugPrint(
-          'Media => '
-          'questionId: ${item['questionId']}, '
-          'questionType: ${item['questionType']}, '
-          'path: ${item['path']}',
-        );
-      }
-
-      debugPrint('==========================================');
-
-      // ============================================================
-      // 4. API CALL
-      // ============================================================
-
-      final response = await apiService.post(
-        url,
-        data: formData,
-        options: Options(contentType: 'multipart/form-data'),
-      );
+      final response = await apiService.post(url, data: data, options: options);
 
       debugPrint('Status: ${response.statusCode}');
-
       debugPrint('Response: ${response.data}');
 
-      // ============================================================
-      // 5. ONLY 200 = SUCCESS
-      // ============================================================
-
       if (response.statusCode == HttpStatus.ok) {
-        return CommonResponseModel.fromJson(response.data);
+        return SubmitResponseModel.fromJson(response.data);
       }
 
-      return CommonResponseModel(
-        statusCode: response.statusCode?.toString(),
+      return SubmitResponseModel(
+        success: false,
         error:
             response.data?['message']?.toString() ??
             response.data?['error']?.toString() ??
             'Unable to submit questionnaire.',
       );
     } on DioException catch (e) {
-      debugPrint('========== SUBMIT QUESTIONNAIRE ERROR ==========');
+      debugPrint('SUBMIT QUESTIONNAIRE ERROR: ${e.response?.data}');
 
-      debugPrint('Status: ${e.response?.statusCode}');
-
-      debugPrint('Response: ${e.response?.data}');
-
-      debugPrint('Request: ${e.requestOptions.data}');
-
-      debugPrint('===============================================');
-
-      return CommonResponseModel(
-        statusCode: e.response?.statusCode?.toString(),
+      return SubmitResponseModel(
+        success: false,
         error:
             e.response?.data?['message']?.toString() ??
             e.response?.data?['error']?.toString() ??
@@ -204,7 +182,7 @@ class FunctionalRepoImpl extends FunctionalRepo with PopupMixin, SnackBarMixin {
     } catch (e) {
       debugPrint('submitQuestionnaire error: $e');
 
-      return CommonResponseModel(statusCode: '500', error: e.toString());
+      return SubmitResponseModel(success: false, error: e.toString());
     }
   }
 

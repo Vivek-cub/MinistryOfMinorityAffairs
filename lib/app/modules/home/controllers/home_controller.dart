@@ -11,6 +11,7 @@ import 'package:ministry_of_minority_affairs/app/core/database/pending_submissio
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functional/domain/functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/domain/repo/project_functional_repo.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/entity/home_data.dart';
 import 'package:ministry_of_minority_affairs/app/modules/home/domain/repo/home_repo.dart';
@@ -39,6 +40,7 @@ class HomeController extends GetxController
   final SubmissionRepository submissionRepo;
   final ProjectDetailRepo projectRepo;
   final ProjectFunctionalRepo functionalRepo;
+  final FunctionalRepo functionalQuestionnaireRepo;
 
   HomeController(
     this.repo,
@@ -47,6 +49,7 @@ class HomeController extends GetxController
     this.projectRepo,
     this.projectListRepo,
     this.functionalRepo,
+    this.functionalQuestionnaireRepo,
   );
   final userName = ''.obs;
   final assignedState = ''.obs;
@@ -250,8 +253,14 @@ class HomeController extends GetxController
         if (response.statusCode == '200') {
           await _cleanupUploadedSubmission(item, userId);
         }
-      } catch (e) {
-        throw Exception(e);
+      } catch (e, stackTrace) {
+        debugPrint(
+          'Pending sync failed for project '
+          '${item.submission.projectId} '
+          '(${item.submission.progress}): $e',
+        );
+        debugPrintStack(stackTrace: stackTrace);
+        continue;
       }
     }
   }
@@ -264,12 +273,44 @@ class HomeController extends GetxController
     );
     if (formValues.isEmpty) return true;
 
+    if (formValues.containsKey('formValues')) {
+      final functionalFormValues = _asStringDynamicMap(
+        formValues['formValues'],
+      );
+      final media = _decodeFunctionalQuestionnaireMedia(formValues['media']);
+
+      final response = await functionalQuestionnaireRepo.submitQuestionnaire(
+        unitId: item.submission.projectId,
+        formValues: functionalFormValues,
+        media: media,
+      );
+
+      return response.success == true;
+    }
+
     final response = await functionalRepo.submitQuestionnaire(
       unitId: item.submission.projectId,
       formValues: formValues,
     );
 
     return response.statusCode == '200';
+  }
+
+  Map<String, dynamic> _asStringDynamicMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return <String, dynamic>{};
+  }
+
+  List<Map<String, dynamic>> _decodeFunctionalQuestionnaireMedia(
+    dynamic value,
+  ) {
+    if (value is! List) return <Map<String, dynamic>>[];
+
+    return value
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
   }
 
   Map<String, dynamic> _decodeQuestionnairePayload(String? payload) {

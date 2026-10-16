@@ -1,10 +1,13 @@
 class SendMobileOtpData {
-  String token;
-  SendMobileOtpData({
-    required this.token,
-  });
+  final String message;
+  final String isPin;
 
-  factory SendMobileOtpData.fromJson(Map<String, dynamic> json) => SendMobileOtpData(
-        token: json['token'],
-      );
+  SendMobileOtpData({required this.message, required this.isPin});
+
+  factory SendMobileOtpData.fromJson(Map<String, dynamic> json) {
+    return SendMobileOtpData(
+      message: json['message'] ?? '',
+      isPin: json['isPin'] ?? '',
+    );
+  }
 }

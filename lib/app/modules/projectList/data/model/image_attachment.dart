@@ -4,6 +4,7 @@ class ImageAttachment {
   final String? uploadedBy;
   final String? progress;
   final String? status;
+  final String? attachmentType;
 
   ImageAttachment({
     this.date,
@@ -11,6 +12,7 @@ class ImageAttachment {
     this.uploadedBy,
     this.progress,
     this.status,
+    this.attachmentType,
     // this.userRole
   });
 
@@ -21,6 +23,7 @@ class ImageAttachment {
       uploadedBy: _stringValue(json['uploadedBy']),
       progress: _stringValue(json['progress']),
       status: _stringValue(json['status']),
+      attachmentType: _stringValue(json['attachmentType']),
       // userRole: json['userRole'],
       // images: (json['path'] as List?)?.map((e) => e.toString()).toList(),
     );

@@ -1,12 +1,19 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/popup_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/core/mixin/snackbar_mixin.dart';
+import 'package:ministry_of_minority_affairs/app/data/local/offline_submission_type.dart';
 import 'package:ministry_of_minority_affairs/app/data/repository/submission_repository.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functional/data/model/functional_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functional/domain/functional_repo.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/mixin/condition_evaluator.dart';
+import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/mixin/condition_validators.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/domain/usecases/capture_project_video.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/capture_image_mixin.dart';
 import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/compress_mixin.dart';
@@ -14,6 +21,7 @@ import 'package:ministry_of_minority_affairs/app/modules/projectDetails/mixin/ge
 import 'package:ministry_of_minority_affairs/app/modules/projectList/data/model/unit_details.dart';
 import 'package:ministry_of_minority_affairs/app/services/auth_service.dart';
 import 'package:ministry_of_minority_affairs/app/services/location_service.dart';
+import 'package:ministry_of_minority_affairs/app/services/network_service.dart';
 import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
 class FunctionalController extends GetxController
@@ -22,7 +30,8 @@ class FunctionalController extends GetxController
         PopupMixin,
         CompressMixin,
         CaptureImageMixin,
-        GeofenceMixin {
+        GeofenceMixin,
+        ConditionValidators {
   FunctionalController(
     this.captureProjectVideo,
     this.repo,
@@ -43,6 +52,7 @@ class FunctionalController extends GetxController
   final RxBool isSubmitting = false.obs;
   final Rx<UnitDetails> data = UnitDetails().obs;
   final RxString projectId = ''.obs;
+  final RxString videoProjectId = ''.obs;
 
   RxMap<String, dynamic> initialValue = RxMap();
   final RxString dynamicFormHeading = ''.obs;
@@ -67,6 +77,7 @@ class FunctionalController extends GetxController
   /// Initial values from API.
 
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
+  final RxMap<String, dynamic> questionAnswers = <String, dynamic>{}.obs;
 
   @override
   void onInit() {
@@ -78,14 +89,15 @@ class FunctionalController extends GetxController
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
       data.value = args['project'] ?? UnitDetails();
-      projectId.value = data.value.id ?? '';
+      projectId.value = data.value.projectId ?? '';
+      videoProjectId.value = data.value.id ?? '';
       isFunctional.value = args['isFunctional'] ?? false;
       if (isFunctional.value == true) {
         selectFunctionalProject(isFunctional.value);
       }
       debugPrint("project Id: ${projectId.value}");
     }
-    // _loadQuestionnaire();
+    _loadQuestionnaire();
   }
 
   String? get displayedVideoPath {
@@ -113,7 +125,17 @@ class FunctionalController extends GetxController
       debugPrint("VIDEO LOCATION");
       debugPrint("Latitude  : ${position.latitude}");
       debugPrint("Longitude : ${position.longitude}");
+      debugPrint("Longitude : ${position.longitude}");
       debugPrint("Accuracy  : $accuracy m");
+      final geocoding = Geocoding();
+
+      final placemarks = await geocoding.placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      debugPrint("Accuracy  : ${placemarks.first.subAdministrativeArea} ");
+      debugPrint("Accuracy  : ${placemarks.first.administrativeArea} ");
       debugPrint("==========================================");
 
       // ============================================================
@@ -146,6 +168,7 @@ class FunctionalController extends GetxController
       final projectLng = data.value.lng;
 
       final blockName = data.value.unitProject?.blockTownName?.trim();
+      final stateName = data.value.unitProject?.stateName?.trim();
 
       final hasLatLng =
           projectLat != null &&
@@ -153,6 +176,7 @@ class FunctionalController extends GetxController
           projectLat != 0.0 &&
           projectLng != 0.0;
 
+      final hasState = stateName != null && stateName.isNotEmpty;
       final hasBlock = blockName != null && blockName.isNotEmpty;
 
       debugPrint("Project Lat : $projectLat");
@@ -164,7 +188,7 @@ class FunctionalController extends GetxController
       // ============================================================
       // 4. NO LAT/LNG + NO BLOCK = ERROR
       // ============================================================
-      if (!hasLatLng && !hasBlock) {
+      if (!hasLatLng && !(hasState && hasBlock)) {
         if (locationLoaderShown) {
           Get.back();
           locationLoaderShown = false;
@@ -173,8 +197,8 @@ class FunctionalController extends GetxController
         showErrorDialog(
           Get.context!,
           message:
-              "Project location is not configured.\n"
-              "Latitude/Longitude and Block are unavailable.",
+              "Project location is not configured. "
+              "Valid coordinates or both state and block are required.",
         );
 
         return;
@@ -195,6 +219,7 @@ class FunctionalController extends GetxController
         lat: hasLatLng ? projectLat : null,
         lng: hasLatLng ? projectLng : null,
         blockName: hasBlock ? blockName : null,
+        stateName: hasState ? stateName : null,
         position: position,
       );
 
@@ -303,10 +328,7 @@ class FunctionalController extends GetxController
         compressionLoaderShown = false;
       }
 
-      showErrorDialog(
-        Get.context!,
-        message: "Unable to capture or process video. Please try again.",
-      );
+      showErrorDialog(Get.context!, message: e.toString());
     }
   }
 
@@ -421,15 +443,15 @@ class FunctionalController extends GetxController
   // FORM CHANGED
   // ============================================================
 
-  void onDynamicFormChanged() {
-    final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
+  // void onDynamicFormChanged() {
+  //   final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
 
-    dynamicFormValue
-      ..clear()
-      ..addAll(values);
+  //   dynamicFormValue
+  //     ..clear()
+  //     ..addAll(values);
 
-    debugPrint('Form values: $dynamicFormValue');
-  }
+  //   debugPrint('Form values: $dynamicFormValue');
+  // }
 
   // ============================================================
   // PREPARE ASSESSMENT
@@ -437,72 +459,93 @@ class FunctionalController extends GetxController
 
   List<Map<String, dynamic>> prepareAssessment() {
     final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
-
     final List<Map<String, dynamic>> assessment = [];
 
     for (final question in dynamicFormConfig) {
       final questionId = question.questionId;
+      if (questionId == null) continue;
+      if (question.questionType == 'HEADING') continue;
 
-      if (questionId == null) {
-        continue;
-      }
+      // Don't submit answers for questions the user can't see.
+      if (!visibility(question, this)) continue;
 
-      // HEADING is not an answer.
-      if (question.questionType == 'HEADING') {
-        continue;
-      }
+      dynamic answer = values[_fieldName(questionId)];
 
-      final fieldName = _fieldName(questionId);
-
-      dynamic answer = values[fieldName];
-
-      // If user didn't change the value,
-      // use the value received from API.
+      // Untouched field -> fall back to the value from the API.
       if (answer == null && question.answer != null) {
         answer = question.answer;
       }
-
-      // Skip unanswered optional questions.
-      if (answer == null) {
-        continue;
-      }
-
-      if (answer is String && answer.trim().isEmpty) {
-        continue;
-      }
+      if (answer == null) continue;
+      if (answer is String && answer.trim().isEmpty) continue;
 
       // DATE
       if (answer is DateTime) {
         answer = _formatDate(answer, question.dateFormat);
       }
 
-      // INTEGER
-      if (question.questionType == 'INTEGER') {
-        if (answer is String) {
-          answer = int.tryParse(answer);
-        }
+      // INTEGER -> int (sample: "answer": 10)
+      if (question.questionType == 'INTEGER' && answer is String) {
+        answer = int.tryParse(answer.trim());
+        if (answer == null) continue;
       }
 
-      // IMAGE
+      // YES_NO -> "YES" / "NO" (sample: "answer": "NO")
+      if (question.questionType == 'YES_NO') {
+        final isYes =
+            answer is bool
+                ? answer
+                : ConditionEvaluator.normalize(answer) == true;
+        assessment.add({
+          'questionId': questionId,
+          'answer': isYes ? 'YES' : 'NO',
+        });
+        continue;
+      }
+
+      // IMAGE / VIDEO -> local path for now (see note about backend contract)
+      // IMAGE / VIDEO
       if (question.questionType == 'IMAGE' ||
-          question.questionType == 'IMAGES') {
-        assessment.add({'questionId': questionId, 'answer': answer.toString()});
+          question.questionType == 'IMAGES' ||
+          question.questionType == 'VIDEO') {
+        final value = answer.toString().trim();
+
+        // Preserve existing remote media URLs.
+        if (value.startsWith('http://') || value.startsWith('https://')) {
+          assessment.add({'questionId': questionId, 'answer': value});
+        } else {
+          // New local media file.
+          assessment.add({'questionId': questionId, 'answer': '__FILE__'});
+        }
 
         continue;
       }
 
-      // VIDEO
-      if (question.questionType == 'VIDEO') {
-        assessment.add({'questionId': questionId, 'answer': answer.toString()});
-
-        continue;
-      }
-
-      // NORMAL QUESTION
       assessment.add({'questionId': questionId, 'answer': answer});
     }
 
     return assessment;
+  }
+
+  // ---- media: skip hidden questions too --------------------------------------
+  List<Map<String, dynamic>> getAssessmentMedia() {
+    final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
+    final List<Map<String, dynamic>> media = [];
+
+    for (final question in dynamicFormConfig) {
+      final questionId = question.questionId;
+      final type = question.questionType?.toUpperCase();
+
+      if (questionId == null) continue;
+      if (type != 'IMAGE' && type != 'IMAGES' && type != 'VIDEO') continue;
+      if (!visibility(question, this)) continue;
+
+      final path = values[_fieldName(questionId)]?.toString();
+      if (path == null || path.trim().isEmpty) continue;
+
+      media.add({'questionId': questionId, 'questionType': type, 'path': path});
+    }
+
+    return media;
   }
 
   String _formatDate(DateTime date, String? dateFormat) {
@@ -534,62 +577,75 @@ class FunctionalController extends GetxController
         // debugPrint('PROJECT TYPE: FUNCTIONAL');
         // debugPrint('==========================================');
 
-        // final form = formKey.currentState;
+        final form = formKey.currentState;
 
-        // if (form == null) {
-        //   debugPrint('Form is null.');
+        if (form == null) {
+          debugPrint('Form is null.');
 
-        //   showErrorDialog(
-        //     Get.context!,
-        //     title: 'Validation Error',
-        //     message: 'Unable to validate questionnaire.',
-        //   );
+          showErrorDialog(
+            Get.context!,
+            title: 'Validation Error',
+            message: 'Unable to validate questionnaire.',
+          );
 
-        //   return;
-        // }
+          return;
+        }
 
-        // final isValid = form.saveAndValidate();
+        final isValid = form.saveAndValidate();
 
-        // if (!isValid) {
-        //   debugPrint('Questionnaire validation failed.');
+        if (!isValid) {
+          debugPrint('Questionnaire validation failed.');
 
-        //   showErrorDialog(
-        //     Get.context!,
-        //     title: 'Validation Error',
-        //     message: 'Please complete all required fields.',
-        //   );
+          showErrorDialog(
+            Get.context!,
+            title: 'Validation Error',
+            message: 'Please complete all required fields.',
+          );
 
-        //   return;
-        // }
+          return;
+        }
 
-        // // debugPrint('Questionnaire validation successful.');
+        debugPrint('Questionnaire validation successful.');
 
-        // // // Update dynamic form values after validation.
-        // // onDynamicFormChanged();
+        // Update dynamic form values after validation.
+        onDynamicFormChanged();
 
-        // if (videoPath.value.trim().isEmpty) {
-        //   debugPrint('Video is required for functional project.');
+        if (videoPath.value.trim().isEmpty) {
+          debugPrint('Video is required for functional project.');
 
-        //   showErrorDialog(
-        //     Get.context!,
-        //     title: 'Video Required',
-        //     message: 'Please upload a video before submitting.',
-        //   );
+          showErrorDialog(
+            Get.context!,
+            title: 'Video Required',
+            message: 'Please upload a video before submitting.',
+          );
 
-        //   return;
-        // }
+          return;
+        }
 
-        // debugPrint('Video validation successful.');
-        // debugPrint('Video path: ${videoPath.value}');
+        debugPrint('Video validation successful.');
+        debugPrint('Video path: ${videoPath.value}');
 
-        // final questionnaireSuccess = await submitQuestionaire();
+        final hasInternet = await NetworkService.hasInternet();
+        if (!hasInternet) {
+          showMessageDialog(
+            Get.context!,
+            title: 'NO Internet!',
+            message: 'Want to save this in Local Database?',
+            onPressed: () async {
+              await saveOffline();
+            },
+          );
+          return;
+        }
 
-        // if (!questionnaireSuccess) {
-        //   debugPrint('Questionnaire submission failed.');
-        //   return;
-        // }
+        final questionnaireSuccess = await submitQuestionaire();
 
-        // debugPrint('Questionnaire submission successful.');
+        if (!questionnaireSuccess) {
+          debugPrint('Questionnaire submission failed.');
+          return;
+        }
+
+        debugPrint('Questionnaire submission successful.');
 
         final functionalitySuccess = await updateFunctionality(
           uploadVideo: true,
@@ -615,6 +671,19 @@ class FunctionalController extends GetxController
         debugPrint('==========================================');
         debugPrint('PROJECT TYPE: NON-FUNCTIONAL');
         debugPrint('==========================================');
+
+        final hasInternet = await NetworkService.hasInternet();
+        if (!hasInternet) {
+          showMessageDialog(
+            Get.context!,
+            title: 'NO Internet!',
+            message: 'Want to save this in Local Database?',
+            onPressed: () async {
+              await saveOffline();
+            },
+          );
+          return;
+        }
 
         final functionalitySuccess = await updateFunctionality(
           uploadVideo: false,
@@ -655,26 +724,68 @@ class FunctionalController extends GetxController
     }
   }
 
+  String _offlineQuestionnairePayload() {
+    if (isFunctionalProject.value != true) return '';
+
+    return jsonEncode({
+      'formValues': {
+        'assessmentDate': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        'answers': prepareAssessment(),
+      },
+      'media': getAssessmentMedia(),
+    });
+  }
+
+  Future<void> saveOffline() async {
+    final userId = await authService.getUserToken();
+    if (userId == null || userId.isEmpty) {
+      showErrorDialog(Get.context!, message: 'Unable to identify current user');
+      return;
+    }
+
+    final questionnaireMedia =
+        isFunctionalProject.value == true ? getAssessmentMedia() : const [];
+
+    await repository.save(
+      userId: userId,
+      projectId: projectId.value,
+      images:
+          questionnaireMedia
+              .map((item) => item['path']?.toString() ?? '')
+              .where((path) => path.isNotEmpty)
+              .toList(),
+      videoPath:
+          isFunctionalProject.value == true && videoPath.value.isNotEmpty
+              ? videoPath.value
+              : null,
+      remarks: '',
+      questionnairePayload: _offlineQuestionnairePayload(),
+      isSynced: false,
+      userLat: userLat.value.toString(),
+      userLng: userLng.value.toString(),
+      progress: OfflineSubmissionType.functionalProject,
+      projectStatus: (isFunctionalProject.value ?? false).toString(),
+    );
+
+    Helpers().refreshHomeIfAvailable();
+    Get.snackbar(
+      'Saved Offline',
+      'No internet. Data will sync automatically',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    await _navigateToDashboard();
+  }
+
   Future<bool> submitQuestionaire() async {
     try {
-      final assessment = prepareAssessment();
-
+      final payload = <String, dynamic>{
+        'assessmentDate': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        'answers': prepareAssessment(),
+      };
       final media = getAssessmentMedia();
 
-      final Map<String, dynamic> payload = {
-        'projectId': _projectIdAsInt(),
-        'assessment': assessment,
-      };
-
-      debugPrint('==========================================');
-      debugPrint('QUESTIONNAIRE PAYLOAD');
-      debugPrint('==========================================');
-      debugPrint(payload.toString());
-
-      debugPrint('==========================================');
-      debugPrint('QUESTIONNAIRE MEDIA');
-      debugPrint('==========================================');
-      debugPrint(media.toString());
+      debugPrint('QUESTIONNAIRE PAYLOAD: $payload');
+      debugPrint('QUESTIONNAIRE MEDIA: $media');
 
       final response = await repo.submitQuestionnaire(
         unitId: projectId.value,
@@ -682,33 +793,23 @@ class FunctionalController extends GetxController
         media: media,
       );
 
-      debugPrint('==========================================');
-      debugPrint('QUESTIONNAIRE RESPONSE');
-      debugPrint('==========================================');
-      debugPrint('$response');
-      debugPrint('Status Code: ${response.statusCode}');
-      debugPrint('==========================================');
+      debugPrint('Success: ${response.success}');
+      debugPrint('Message: ${response.message}');
+      debugPrint('Error  : ${response.error}');
 
-      if (response.statusCode == '200') {
-        debugPrint('Questionnaire submitted successfully.');
-
-        return true;
-      }
+      if (response.success == true) return true;
 
       showErrorDialog(
         Get.context!,
         title: 'Questionnaire Failed',
-        message: response.error ?? 'Unable to submit questionnaire.',
+        message:
+            response.error ??
+            response.message ??
+            'Unable to submit questionnaire.',
       );
-
       return false;
     } on DioException catch (e) {
-      debugPrint('QUESTIONNAIRE API ERROR');
-
-      debugPrint('Status: ${e.response?.statusCode}');
-
-      debugPrint('Response: ${e.response?.data}');
-
+      debugPrint('QUESTIONNAIRE API ERROR: ${e.response?.data}');
       showErrorDialog(
         Get.context!,
         title: 'Questionnaire Failed',
@@ -717,17 +818,14 @@ class FunctionalController extends GetxController
             e.response?.data?['message']?.toString() ??
             'Unable to submit questionnaire.',
       );
-
       return false;
     } catch (e) {
       debugPrint('SUBMIT QUESTIONNAIRE ERROR: $e');
-
       showErrorDialog(
         Get.context!,
         title: 'Questionnaire Failed',
         message: 'Something went wrong while submitting questionnaire.',
       );
-
       return false;
     }
   }
@@ -742,7 +840,7 @@ class FunctionalController extends GetxController
       debugPrint('==========================================');
       debugPrint('UPDATE FUNCTIONALITY');
       debugPrint('==========================================');
-      debugPrint('Project ID      : ${projectId.value}');
+      debugPrint('Project ID      : ${videoProjectId.value}');
       debugPrint('Is Functional   : ${isFunctionalProject.value}');
       debugPrint('Upload Video    : $uploadVideo');
       debugPrint('Video Path      : ${videoPath.value}');
@@ -754,7 +852,7 @@ class FunctionalController extends GetxController
               : null;
 
       final response = await repo.updateFunctionality(
-        projectId: projectId.value,
+        projectId: videoProjectId.value,
 
         isFunctional: isFunctionalProject.value ?? false,
 
@@ -868,52 +966,48 @@ class FunctionalController extends GetxController
     }
   }
 
-  List<Map<String, dynamic>> getAssessmentMedia() {
-    final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
+  // List<Map<String, dynamic>> getAssessmentMedia() {
+  //   final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
 
-    final List<Map<String, dynamic>> media = [];
+  //   final List<Map<String, dynamic>> media = [];
 
-    for (final question in dynamicFormConfig) {
-      final questionId = question.questionId;
-      final questionType = question.questionType?.toUpperCase();
+  //   for (final question in dynamicFormConfig) {
+  //     final questionId = question.questionId;
+  //     final questionType = question.questionType?.toUpperCase();
 
-      if (questionId == null) continue;
+  //     if (questionId == null) continue;
 
-      if (questionType != 'IMAGE' && questionType != 'VIDEO') {
-        continue;
-      }
+  //     if (questionType != 'IMAGE' && questionType != 'VIDEO') {
+  //       continue;
+  //     }
 
-      final fieldName = _fieldName(questionId);
-      final path = values[fieldName]?.toString();
+  //     final fieldName = _fieldName(questionId);
+  //     final path = values[fieldName]?.toString();
 
-      if (path == null || path.trim().isEmpty) {
-        continue;
-      }
+  //     if (path == null || path.trim().isEmpty) {
+  //       continue;
+  //     }
 
-      media.add({
-        'questionId': questionId,
-        'questionType': questionType, // internal only
-        'path': path,
-      });
-    }
+  //     media.add({
+  //       'questionId': questionId,
+  //       'questionType': questionType, // internal only
+  //       'path': path,
+  //     });
+  //   }
 
-    return media;
-  }
-
-  void updateDynamicFormValue(String questionId, dynamic value) {
-    dynamicFormValue[questionId] = value;
-
-    debugPrint(
-      'FORM VALUE UPDATED => '
-      '$questionId = $value',
-    );
-  }
+  //   return media;
+  // }
 
   void onQuestionValueChanged(String questionId, dynamic value) {
+    questionAnswers[questionId] = value;
     dynamicFormValue[questionId] = value;
+  }
 
-    debugPrint('Question changed: $questionId -> $value');
-
-    update();
+  // Only needed if you still call it; keeps keys as plain questionIds
+  void onDynamicFormChanged() {
+    final values = formKey.currentState?.instantValue ?? <String, dynamic>{};
+    values.forEach((k, v) {
+      dynamicFormValue[k.replaceFirst('question_', '')] = v;
+    });
   }
 }

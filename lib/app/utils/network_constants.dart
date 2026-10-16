@@ -31,4 +31,6 @@ sealed class NetworkConstants {
   static final String getQuestionnaire = "api/v1/pms/tpqc/projects/";
   static final String postQuestionnaire = "api/v1/pms/tpqc/projects/";
   //"api/v1/pms/tpqc/projects/9f1917104bb3434/submit";
+  static final String createPin = "api/v1/pms/mobile/createPin";
+  static final String verifyPin = "api/v1/pms/mobile/verifyPin";
 }
