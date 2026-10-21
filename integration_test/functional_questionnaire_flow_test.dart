@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functional/data/model/functional_response_model.dart';
 import 'package:ministry_of_minority_affairs/app/modules/functionalProjects/widget/switch_form_field_widgets.dart';
 
 import '../test/helpers/functional_test_fakes.dart';
 
-void main() {
+void main(dynamic IntegrationTestWidgetsFlutterBinding) {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {

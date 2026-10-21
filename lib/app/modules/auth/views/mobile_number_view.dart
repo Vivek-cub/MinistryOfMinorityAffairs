@@ -42,14 +42,6 @@ class MobileNumberView extends GetView<MobileNumberController> {
                       color: AppColors.textWhite,
                     ),
 
-                    const SizedBox(height: 6),
-                    CustomText(
-                      text:
-                          "We'll send a verification code to your mobile number",
-                      color: AppColors.textWhite.withValues(alpha: 0.82),
-                      textAlign: TextAlign.center,
-                    ),
-
                     const SizedBox(height: AppDimensions.md),
 
                     // Phone Number Input

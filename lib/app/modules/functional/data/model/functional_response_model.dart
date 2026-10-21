@@ -37,7 +37,7 @@ class FunctionalQuestion {
   final String? questionText;
   final String? questionType;
   final bool? isMandatory;
-  final String? applicableRole;
+  final List<String>? applicableRole;
   final dynamic answer;
   final int? displayOrder;
   final int? maxLength;
@@ -68,7 +68,8 @@ class FunctionalQuestion {
       questionText: json['questionText'],
       questionType: json['questionType'],
       isMandatory: json['isMandatory'],
-      applicableRole: json['applicableRole'],
+      applicableRole:
+          (json['applicableRole'] as List?)?.map((e) => e.toString()).toList(),
       answer: json['answer'],
       displayOrder: json['displayOrder'],
       maxLength: json['maxLength'],

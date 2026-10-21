@@ -89,7 +89,8 @@ class FunctionalController extends GetxController
     final args = Get.arguments;
     if (args is Map<String, dynamic>) {
       data.value = args['project'] ?? UnitDetails();
-      projectId.value = data.value.projectId ?? '';
+      //projectId.value = data.value.projectId ?? '';
+      projectId.value = data.value.id ?? '';
       videoProjectId.value = data.value.id ?? '';
       isFunctional.value = args['isFunctional'] ?? false;
       if (isFunctional.value == true) {
@@ -385,11 +386,11 @@ class FunctionalController extends GetxController
 
       dynamicFormConfig.clear();
 
-      showErrorDialog(
-        Get.context!,
-        title: 'Error',
-        message: 'Unable to load questionnaire.',
-      );
+      // showErrorDialog(
+      //   Get.context!,
+      //   title: 'Error',
+      //   message: 'Unable to load questionnaire.',
+      // );
     } finally {
       isFormLoading.value = false;
     }

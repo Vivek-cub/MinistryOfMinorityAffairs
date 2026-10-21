@@ -1,8 +1,8 @@
 sealed class NetworkConstants {
-  static final String baseUrl = "http://49.249.23.234:80/";
+  //static final String baseUrl = "http://49.249.23.234:80/";
   //http://49.249.23.234
 
-  //static final String baseUrl = "https://msdp.minorityaffairs.gov.in/";
+  static final String baseUrl = "https://msdp.minorityaffairs.gov.in/";
   static final String login = "api/v1/pms/login/login";
   static final String verifyOtp = "api/v1/pms/login/verifyOtp";
   static final String dashboard = "api/v1/pms/mobile/dashboard";
@@ -28,8 +28,10 @@ sealed class NetworkConstants {
       "api/v1/pms/mobile/exportAssignedProjects";
   static final String updateFunctionality =
       "api/v1/pms/mobile/updateFunctionality";
-  static final String getQuestionnaire = "api/v1/pms/tpqc/projects/";
-  static final String postQuestionnaire = "api/v1/pms/tpqc/projects/";
+  //static final String getQuestionnaire = "api/v1/pms/tpqc/projects/";
+  static final String getQuestionnaire = "api/v1/pms/tpqc/units/";
+  static final String postQuestionnaire = "api/v1/pms/tpqc/units/";
+  // static final String postQuestionnaire = "api/v1/pms/tpqc/projects/";
   //"api/v1/pms/tpqc/projects/9f1917104bb3434/submit";
   static final String createPin = "api/v1/pms/mobile/createPin";
   static final String verifyPin = "api/v1/pms/mobile/verifyPin";

@@ -44,6 +44,8 @@ class SplashController extends GetxController {
     }
 
     if (authService.loggedIn) {
+      final token = Get.find<AuthService>().getToken;
+      debugPrint("Session token $token");
       final route = await authService.dashboardRoute();
       Get.offAllNamed(route);
 
