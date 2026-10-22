@@ -26,142 +26,138 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return UpdateService.build(
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light.copyWith(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: AppColors.background,
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ),
-        child: Scaffold(
-          key: controller.scaffoldKey,
-          backgroundColor: AppColors.background,
-          drawer: BuildDrawer(controller: controller),
-          body: SafeArea(
-            top: false,
-            bottom: true,
-            child: Stack(
-              children: [
-                Obx(() {
-                  return controller.hasInternet.value == true
-                      ? RefreshIndicator(
-                        onRefresh: controller.checkInternet,
-                        color: AppColors.primary,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-
-                            children: [
-                              //_buildHeader(context),
-                              WorkProgressHeader(
-                                title: "Welcome ${controller.userName.value}",
-                                subtitle:
-                                    "Assigned State - ${controller.assignedState.value}",
-                                avatarAssetPath: ImageAssets.emblemImage,
-                                onAvatarTap: () {
-                                  controller.openDrawer();
-                                },
-
-                                refreshIcon: Icons.refresh,
-                                onIconPressed: () {
-                                  controller.checkInternet();
-                                },
-                                widget: TopHeaderQuickOverview(
-                                  controller: controller,
-                                ),
-
-                                // onBackPress: () => controller.openDrawer(),
-                              ),
-                              _buildQuickOverview(context),
-                              (controller
-                                                  .data
-                                                  .value
-                                                  .projectsNotVisitedFor3Months ??
-                                              0) >
-                                          0 &&
-                                      controller.pendingProjects.isNotEmpty
-                                  ? BuildUrgentWorkList(controller: controller)
-                                  : SizedBox.shrink(),
-                              BuildWorkList(controller: controller),
-                              const SizedBox(height: AppDimensions.sm),
-                            ],
-                          ),
-                        ),
-                      )
-                      : Center(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        key: controller.scaffoldKey,
+        backgroundColor: AppColors.background,
+        drawer: BuildDrawer(controller: controller),
+        body: SafeArea(
+          top: false,
+          bottom: true,
+          child: Stack(
+            children: [
+              Obx(() {
+                return controller.hasInternet.value == true
+                    ? RefreshIndicator(
+                      onRefresh: controller.checkInternet,
+                      color: AppColors.primary,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
                           children: [
+                            //_buildHeader(context),
                             WorkProgressHeader(
-                              title: "Welcome Back",
-                              subtitle: "Track Progress of works in real-time",
+                              title: "Welcome ${controller.userName.value}",
+                              subtitle:
+                                  "Assigned State - ${controller.assignedState.value}",
                               avatarAssetPath: ImageAssets.emblemImage,
                               onAvatarTap: () {
-                                // controller.openDrawer();
+                                controller.openDrawer();
                               },
+
                               refreshIcon: Icons.refresh,
                               onIconPressed: () {
                                 controller.checkInternet();
                               },
-                            ),
-                            SizedBox(
-                              height: AppDimensions.sideIndicator2Height,
-                            ),
-                            TitleText(text: "No Internet"),
-                            const SizedBox(height: AppDimensions.gigantic),
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                horizontal: AppDimensions.gigantic,
-                                vertical: AppDimensions.xxl,
+                              widget: TopHeaderQuickOverview(
+                                controller: controller,
                               ),
-                              child: AuthSubmitButton(
-                                title: "Open Project List",
-                                isEnabled: true,
-                                onPressed: () {
-                                  Get.offNamed(
-                                    AppRoutes.projectList,
-                                    arguments: {
-                                      'status': "noInternet",
-                                      'paramName': "noInternet",
-                                      'statusFilter': "",
-                                    },
-                                  );
-                                },
-                              ),
+
+                              // onBackPress: () => controller.openDrawer(),
                             ),
+                            _buildQuickOverview(context),
+                            (controller
+                                                .data
+                                                .value
+                                                .projectsNotVisitedFor3Months ??
+                                            0) >
+                                        0 &&
+                                    controller.pendingProjects.isNotEmpty
+                                ? BuildUrgentWorkList(controller: controller)
+                                : SizedBox.shrink(),
+                            BuildWorkList(controller: controller),
+                            const SizedBox(height: AppDimensions.sm),
                           ],
                         ),
-                      );
-                }),
-                Obx(
-                  () =>
-                      controller.isSyncing.value
-                          ? Positioned.fill(
-                            child: IgnorePointer(
-                              child: Container(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: CircularProgressIndicator(
-                                      color: AppColors.primary,
-                                    ),
+                      ),
+                    )
+                    : Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          WorkProgressHeader(
+                            title: "Welcome Back",
+                            subtitle: "Track Progress of works in real-time",
+                            avatarAssetPath: ImageAssets.emblemImage,
+                            onAvatarTap: () {
+                              // controller.openDrawer();
+                            },
+                            refreshIcon: Icons.refresh,
+                            onIconPressed: () {
+                              controller.checkInternet();
+                            },
+                          ),
+                          SizedBox(height: AppDimensions.sideIndicator2Height),
+                          TitleText(text: "No Internet"),
+                          const SizedBox(height: AppDimensions.gigantic),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: AppDimensions.gigantic,
+                              vertical: AppDimensions.xxl,
+                            ),
+                            child: AuthSubmitButton(
+                              title: "Open Project List",
+                              isEnabled: true,
+                              onPressed: () {
+                                Get.offNamed(
+                                  AppRoutes.projectList,
+                                  arguments: {
+                                    'status': "noInternet",
+                                    'paramName': "noInternet",
+                                    'statusFilter': "",
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+              }),
+              Obx(
+                () =>
+                    controller.isSyncing.value
+                        ? Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primary,
                                   ),
                                 ),
                               ),
                             ),
-                          )
-                          : const SizedBox.shrink(),
-                ),
-              ],
-            ),
+                          ),
+                        )
+                        : const SizedBox.shrink(),
+              ),
+            ],
           ),
         ),
       ),
