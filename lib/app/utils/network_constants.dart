@@ -1,5 +1,6 @@
 sealed class NetworkConstants {
-  static final String baseUrl = "http://49.249.23.234:80/";
+  //static final String baseUrl = "http://49.249.23.234:80/";
+  static final String baseUrl = "https://pmjvk.minorityaffairs.gov.in/";
   //http://49.249.23.234
 
   //static final String baseUrl = "https://msdp.minorityaffairs.gov.in/";

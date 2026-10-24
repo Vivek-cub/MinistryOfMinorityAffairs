@@ -578,6 +578,7 @@ class FunctionalController extends GetxController
         // debugPrint('PROJECT TYPE: FUNCTIONAL');
         // debugPrint('==========================================');
 
+        /* Questionnaire validation is temporarily disabled.
         final form = formKey.currentState;
 
         if (form == null) {
@@ -610,6 +611,7 @@ class FunctionalController extends GetxController
 
         // Update dynamic form values after validation.
         onDynamicFormChanged();
+        */
 
         if (videoPath.value.trim().isEmpty) {
           debugPrint('Video is required for functional project.');
@@ -639,14 +641,13 @@ class FunctionalController extends GetxController
           return;
         }
 
-        final questionnaireSuccess = await submitQuestionaire();
-
-        if (!questionnaireSuccess) {
-          debugPrint('Questionnaire submission failed.');
-          return;
-        }
-
-        debugPrint('Questionnaire submission successful.');
+        // Temporarily disabled questionnaire submission.
+        // final questionnaireSuccess = await submitQuestionaire();
+        // if (!questionnaireSuccess) {
+        //   debugPrint('Questionnaire submission failed.');
+        //   return;
+        // }
+        // debugPrint('Questionnaire submission successful.');
 
         final functionalitySuccess = await updateFunctionality(
           uploadVideo: true,
@@ -662,7 +663,8 @@ class FunctionalController extends GetxController
         showSuccessDialog(
           Get.context!,
           title: 'Success',
-          message: 'Questionnaire and video submitted successfully.',
+          //message: 'Questionnaire and video submitted successfully.',
+          message: 'Video submitted successfully.',
           onPressed: () async {
             Helpers().refreshHomeIfAvailable();
             await _navigateToDashboard();
