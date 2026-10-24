@@ -98,7 +98,7 @@ class FunctionalController extends GetxController
       }
       debugPrint("project Id: ${projectId.value}");
     }
-    _loadQuestionnaire();
+    //_loadQuestionnaire();
   }
 
   String? get displayedVideoPath {
@@ -142,21 +142,21 @@ class FunctionalController extends GetxController
       // ============================================================
       // 2. ACCURACY MUST BE <= 15 METERS
       // ============================================================
-      if (accuracy > 15) {
-        if (locationLoaderShown) {
-          Get.back();
-          locationLoaderShown = false;
-        }
+      // if (accuracy > 15) {
+      //   if (locationLoaderShown) {
+      //     Get.back();
+      //     locationLoaderShown = false;
+      //   }
 
-        showErrorDialog(
-          Get.context!,
-          message:
-              "Location accuracy is ${accuracy.toStringAsFixed(1)} meters.\n"
-              "Please try again in an open area.",
-        );
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         "Location accuracy is ${accuracy.toStringAsFixed(1)} meters.\n"
+      //         "Please try again in an open area.",
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // Save validated location
       userLat.value = position.latitude;
@@ -189,21 +189,21 @@ class FunctionalController extends GetxController
       // ============================================================
       // 4. NO LAT/LNG + NO BLOCK = ERROR
       // ============================================================
-      if (!hasLatLng && !(hasState && hasBlock)) {
-        if (locationLoaderShown) {
-          Get.back();
-          locationLoaderShown = false;
-        }
+      // if (!hasLatLng && !(hasState && hasBlock)) {
+      //   if (locationLoaderShown) {
+      //     Get.back();
+      //     locationLoaderShown = false;
+      //   }
 
-        showErrorDialog(
-          Get.context!,
-          message:
-              "Project location is not configured. "
-              "Valid coordinates or both state and block are required.",
-        );
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         "Project location is not configured. "
+      //         "Valid coordinates or both state and block are required.",
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // ============================================================
       // 5. CHECK GEO-FENCE
@@ -235,17 +235,17 @@ class FunctionalController extends GetxController
       // ============================================================
       // 6. GEO-FENCE FAILED
       // ============================================================
-      if (!insideGeofence) {
-        showErrorDialog(
-          Get.context!,
-          message:
-              hasLatLng
-                  ? "You are outside the location."
-                  : "You are outside the assigned block.",
-        );
+      // if (!insideGeofence) {
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         hasLatLng
+      //             ? "You are outside the location."
+      //             : "You are outside the assigned block.",
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // ============================================================
       // 7. GEO-FENCE PASSED → CAPTURE VIDEO
