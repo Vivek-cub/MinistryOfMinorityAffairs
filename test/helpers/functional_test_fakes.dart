@@ -49,6 +49,8 @@ class FakeFunctionalRepo implements FunctionalRepo {
   Future<CommonResponseModel> updateFunctionality({
     required String projectId,
     required bool isFunctional,
+    required String lat,
+    required String lng,
     String? videoPath,
   }) async {
     return CommonResponseModel(statusCode: '200');

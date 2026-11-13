@@ -80,8 +80,9 @@ class PinLoginController extends GetxController with PopupMixin, SnackBarMixin {
           await authService.setUserRole(role);
         }
         //final hasPin = await authService.checkPinFromStorage();
-
-        Get.offNamed(AppRoutes.home);
+        final route = await authService.dashboardRoute();
+        Get.offNamed(route);
+        // Get.offNamed(AppRoutes.home);
       } else {
         otp.value = "";
         otpKey.currentState?.clear();

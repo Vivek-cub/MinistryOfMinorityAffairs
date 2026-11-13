@@ -3,6 +3,7 @@ import 'package:ministry_of_minority_affairs/app/core/theme/theme_constants.dart
 import 'package:ministry_of_minority_affairs/app/core/widgets/custom_text.dart';
 import 'package:ministry_of_minority_affairs/app/core/widgets/title_text.dart';
 import 'package:ministry_of_minority_affairs/app/stateModules/officerLIst/data/officer_list_response_model.dart';
+import 'package:ministry_of_minority_affairs/app/utils/helpers.dart';
 
 class OfficerListCard extends StatelessWidget {
   final FieldOfficers project;
@@ -46,7 +47,7 @@ class OfficerListCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.05),
+                  color: Colors.black.withValues(alpha: .05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -62,7 +63,12 @@ class OfficerListCard extends StatelessWidget {
                         ? ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: Image.network(
-                            project.profilePath ?? "",
+                            Helpers().resolveImageUrl(
+                              project.profilePath ?? "",
+                            ),
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(Icons.person, size: 30);
+                            },
                             height: 30,
                             width: 30,
                             fit: BoxFit.cover,

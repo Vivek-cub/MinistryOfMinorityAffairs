@@ -86,7 +86,7 @@ class UrgentWorkDetailsInfoWidget extends StatelessWidget {
               value: project.address ?? "",
               showLocationIcon: true,
             ),
-          project.unitProject?.districtName != null
+          project.districtName != null
               ? const SizedBox(height: 16)
               : SizedBox.shrink(),
           userProject.unitDetails?.districtName != null

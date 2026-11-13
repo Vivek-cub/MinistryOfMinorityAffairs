@@ -83,20 +83,15 @@ class WorkDetailInfoWidget extends StatelessWidget {
           //     value: project.address ?? "",
           //     showLocationIcon: true,
           //   ),
-          if (project.unitProject?.districtName != null)
-            const SizedBox(height: 16),
-          if (project.unitProject?.districtName != null)
+          if (project.districtName != null) const SizedBox(height: 16),
+          if (project.districtName != null)
             _buildDetailRow(
               label: 'District',
-              value: project.unitProject?.districtName ?? "No Address Found",
+              value: project.districtName ?? "No Address Found",
             ),
-          if (project.unitProject?.blockTownName != null)
-            const SizedBox(height: 16),
-          if (project.unitProject?.blockTownName != null)
-            _buildDetailRow(
-              label: 'Block',
-              value: project.unitProject?.blockTownName,
-            ),
+          if (project.blockName != null) const SizedBox(height: 16),
+          if (project.blockName != null)
+            _buildDetailRow(label: 'Block', value: project.blockName),
 
           // if (project.visitCount != null) const SizedBox(height: 16),
           // if (project.visitCount != null)

@@ -217,9 +217,10 @@ class HomeController extends GetxController
       try {
         if (item.submission.progress ==
             OfflineSubmissionType.functionalProject) {
-          // Temporarily disabled questionnaire sync for functional projects.
-          // final questionnaireSynced = await _syncFunctionalQuestionnaire(item);
-          // if (!questionnaireSynced) continue;
+          /* Questionnaire sync is temporarily disabled.
+          final questionnaireSynced = await _syncFunctionalQuestionnaire(item);
+          if (!questionnaireSynced) continue;
+          */
 
           final response = await functionalRepo.updateFunctionality(
             projectId: item.submission.projectId,
@@ -266,7 +267,7 @@ class HomeController extends GetxController
     }
   }
 
-  /* Temporarily disabled questionnaire sync helpers.
+  /* Questionnaire sync helpers are temporarily disabled.
   Future<bool> _syncFunctionalQuestionnaire(PendingSubmission item) async {
     if (item.submission.projectStatus != 'true') return true;
 
@@ -328,6 +329,7 @@ class HomeController extends GetxController
 
     return <String, dynamic>{};
   }
+
   */
 
   Future<void> _cleanupUploadedSubmission(

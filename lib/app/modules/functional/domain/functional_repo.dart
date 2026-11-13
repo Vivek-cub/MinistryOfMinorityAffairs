@@ -6,6 +6,8 @@ abstract class FunctionalRepo {
   Future<CommonResponseModel> updateFunctionality({
     required String projectId,
     required bool isFunctional,
+    required String lat,
+    required String lng,
     //Map<String, dynamic> formValues = const {},
     String? videoPath,
   });

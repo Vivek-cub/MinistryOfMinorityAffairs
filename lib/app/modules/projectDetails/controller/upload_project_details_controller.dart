@@ -495,34 +495,34 @@ class UploadProjectDetailsController extends GetxController
 
       final position = await LocationService.getAccurateLocation();
 
-      final accuracy = position.accuracy;
+      // final accuracy = position.accuracy;
 
-      debugPrint("================================");
-      debugPrint("IMAGE INDEX : $index");
-      debugPrint("LATITUDE    : ${position.latitude}");
-      debugPrint("LONGITUDE   : ${position.longitude}");
-      debugPrint("ACCURACY    : $accuracy m");
-      debugPrint("================================");
+      // debugPrint("================================");
+      // debugPrint("IMAGE INDEX : $index");
+      // debugPrint("LATITUDE    : ${position.latitude}");
+      // debugPrint("LONGITUDE   : ${position.longitude}");
+      // debugPrint("ACCURACY    : $accuracy m");
+      // debugPrint("================================");
 
       // ============================================================
       // 2. ACCURACY VALIDATION
       // Accuracy must be <= 15 meters
       // ============================================================
-      if (accuracy > 15) {
-        if (loaderShown) {
-          Get.back();
-          loaderShown = false;
-        }
+      // if (accuracy > 50) {
+      //   if (loaderShown) {
+      //     Get.back();
+      //     loaderShown = false;
+      //   }
 
-        showErrorDialog(
-          Get.context!,
-          message:
-              "Location accuracy is ${accuracy.toStringAsFixed(1)} meters.\n"
-              "Please move to an open area and try again.",
-        );
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         "Location accuracy is ${accuracy.toStringAsFixed(1)} meters.\n"
+      //         "Please move to an open area and try again.",
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // Save validated location
       userLat.value = position.latitude;
@@ -531,47 +531,47 @@ class UploadProjectDetailsController extends GetxController
       // ============================================================
       // 3. GET PROJECT LOCATION / BLOCK
       // ============================================================
-      final projectLat = data.value.lat;
-      final projectLng = data.value.lng;
+      // final projectLat = data.value.lat;
+      // final projectLng = data.value.lng;
 
-      final stateName = data.value.unitProject?.stateName?.trim();
-      final blockName = data.value.unitProject?.blockTownName?.trim();
+      // final blockName = data.value.blockName?.trim();
+      // final stateName = data.value.stateName?.trim();
 
-      final hasLatLng =
-          projectLat != null &&
-          projectLng != null &&
-          projectLat != 0.0 &&
-          projectLng != 0.0;
+      // final hasLatLng =
+      //     projectLat != null &&
+      //     projectLng != null &&
+      //     projectLat != 0.0 &&
+      //     projectLng != 0.0;
 
-      final hasState = stateName != null && stateName.isNotEmpty;
-      final hasBlock = blockName != null && blockName.isNotEmpty;
+      // final hasState = stateName != null && stateName.isNotEmpty;
+      // final hasBlock = blockName != null && blockName.isNotEmpty;
 
-      debugPrint("Has Project Lat/Lng : $hasLatLng");
-      debugPrint("Project Lat         : $projectLat");
-      debugPrint("Project Lng         : $projectLng");
-      debugPrint("Has Block           : $hasBlock");
-      debugPrint("Project Block       : $blockName");
+      // debugPrint("Has Project Lat/Lng : $hasLatLng");
+      // debugPrint("Project Lat         : $projectLat");
+      // debugPrint("Project Lng         : $projectLng");
+      // debugPrint("Has Block           : $hasBlock");
+      // debugPrint("Project Block       : $blockName");
 
       // ============================================================
       // 4. NOTHING AVAILABLE FOR GEO-FENCING
       // ============================================================
-      if (!hasLatLng && !(hasState && hasBlock)) {
-        if (loaderShown) {
-          Get.back();
-          loaderShown = false;
-        }
+      // if (!hasLatLng && !(hasState && hasBlock)) {
+      //   if (loaderShown) {
+      //     Get.back();
+      //     loaderShown = false;
+      //   }
 
-        isInsideFence.value = false;
+      //   isInsideFence.value = false;
 
-        showErrorDialog(
-          Get.context!,
-          message:
-              "Project location information is unavailable.\n"
-              "Valid coordinates or both state and block are required.",
-        );
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         "Project location information is unavailable.\n"
+      //         "Valid coordinates or both state and block are required.",
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // ============================================================
       // 5. GEO-FENCING
@@ -581,38 +581,43 @@ class UploadProjectDetailsController extends GetxController
       //   B. No Lat/Lng -> Block validation
       // ============================================================
 
-      final insideGeofence = await checkGeoFence(
-        lat: hasLatLng ? projectLat : null,
-        lng: hasLatLng ? projectLng : null,
-        blockName: hasBlock ? blockName : null,
-        stateName: hasState ? stateName : null,
-        position: position,
-      );
+      // final insideGeofence = await checkGeoFence(
+      //   lat: hasLatLng ? projectLat : null,
+      //   lng: hasLatLng ? projectLng : null,
+      //   blockName: hasBlock ? blockName : null,
+      //   stateName: hasState ? stateName : null,
+      //   position: position,
+      // );
 
-      // Close location loader
-      if (loaderShown) {
-        Get.back();
-        loaderShown = false;
-      }
+      // // Close location loader
+      // if (loaderShown) {
+      //   Get.back();
+      //   loaderShown = false;
+      // }
 
-      // ============================================================
-      // 6. GEO-FENCE VALIDATION
-      // ============================================================
-      if (!insideGeofence) {
-        showErrorDialog(
-          Get.context!,
-          message:
-              hasLatLng
-                  ? "You are outside the location."
-                  : "You are outside the assigned project block.",
-        );
+      // // ============================================================
+      // // 6. GEO-FENCE VALIDATION
+      // // ============================================================
+      // if (!insideGeofence) {
+      //   showErrorDialog(
+      //     Get.context!,
+      //     message:
+      //         hasLatLng
+      //             ? "You are outside the location."
+      //             : "You are outside the assigned project block.",
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // ============================================================
       // 7. CAPTURE PHOTO
       // ============================================================
+
+      if (loaderShown) {
+        Get.back();
+        loaderShown = false;
+      }
       await takePhoto(index, position: position);
     } catch (e, stackTrace) {
       debugPrint("Capture validation error: $e");

@@ -67,7 +67,7 @@ class FunctionalController extends GetxController
   @override
   RxBool isInsideFence = false.obs;
   RxBool isFunctional = false.obs;
-  final RxBool isFormLoading = true.obs;
+  final RxBool isFormLoading = false.obs;
   final Rxn<FunctionalResponseModel> questionnaire =
       Rxn<FunctionalResponseModel>();
 
@@ -98,7 +98,7 @@ class FunctionalController extends GetxController
       }
       debugPrint("project Id: ${projectId.value}");
     }
-    //_loadQuestionnaire();
+    // _loadQuestionnaire();
   }
 
   String? get displayedVideoPath {
@@ -120,24 +120,24 @@ class FunctionalController extends GetxController
 
       final position = await LocationService.getAccurateLocation();
 
-      final accuracy = position.accuracy;
+      // final accuracy = position.accuracy;
 
-      debugPrint("==========================================");
-      debugPrint("VIDEO LOCATION");
-      debugPrint("Latitude  : ${position.latitude}");
-      debugPrint("Longitude : ${position.longitude}");
-      debugPrint("Longitude : ${position.longitude}");
-      debugPrint("Accuracy  : $accuracy m");
-      final geocoding = Geocoding();
+      // debugPrint("==========================================");
+      // debugPrint("VIDEO LOCATION");
+      // debugPrint("Latitude  : ${position.latitude}");
+      // debugPrint("Longitude : ${position.longitude}");
+      // debugPrint("Longitude : ${position.longitude}");
+      // debugPrint("Accuracy  : $accuracy m");
+      // final geocoding = Geocoding();
 
-      final placemarks = await geocoding.placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      // final placemarks = await geocoding.placemarkFromCoordinates(
+      //   position.latitude,
+      //   position.longitude,
+      // );
 
-      debugPrint("Accuracy  : ${placemarks.first.subAdministrativeArea} ");
-      debugPrint("Accuracy  : ${placemarks.first.administrativeArea} ");
-      debugPrint("==========================================");
+      // debugPrint("Accuracy  : ${placemarks.first.subAdministrativeArea} ");
+      // debugPrint("Accuracy  : ${placemarks.first.administrativeArea} ");
+      // debugPrint("==========================================");
 
       // ============================================================
       // 2. ACCURACY MUST BE <= 15 METERS
@@ -158,33 +158,29 @@ class FunctionalController extends GetxController
       //   return;
       // }
 
-      // Save validated location
-      userLat.value = position.latitude;
-      userLng.value = position.longitude;
-
       // ============================================================
       // 3. PROJECT LOCATION / BLOCK
       // ============================================================
-      final projectLat = data.value.lat;
-      final projectLng = data.value.lng;
+      // final projectLat = data.value.lat;
+      // final projectLng = data.value.lng;
 
-      final blockName = data.value.unitProject?.blockTownName?.trim();
-      final stateName = data.value.unitProject?.stateName?.trim();
+      // final blockName = data.value.blockName?.trim();
+      // final stateName = data.value.stateName?.trim();
 
-      final hasLatLng =
-          projectLat != null &&
-          projectLng != null &&
-          projectLat != 0.0 &&
-          projectLng != 0.0;
+      // final hasLatLng =
+      //     projectLat != null &&
+      //     projectLng != null &&
+      //     projectLat != 0.0 &&
+      //     projectLng != 0.0;
 
-      final hasState = stateName != null && stateName.isNotEmpty;
-      final hasBlock = blockName != null && blockName.isNotEmpty;
+      // final hasState = stateName != null && stateName.isNotEmpty;
+      // final hasBlock = blockName != null && blockName.isNotEmpty;
 
-      debugPrint("Project Lat : $projectLat");
-      debugPrint("Project Lng : $projectLng");
-      debugPrint("Block       : $blockName");
-      debugPrint("Has LatLng  : $hasLatLng");
-      debugPrint("Has Block   : $hasBlock");
+      // debugPrint("Project Lat : $projectLat");
+      // debugPrint("Project Lng : $projectLng");
+      // debugPrint("Block       : $blockName");
+      // debugPrint("Has LatLng  : $hasLatLng");
+      // debugPrint("Has Block   : $hasBlock");
 
       // ============================================================
       // 4. NO LAT/LNG + NO BLOCK = ERROR
@@ -214,27 +210,27 @@ class FunctionalController extends GetxController
       // Lat/Lng unavailable:
       //     → Block validation
       // ============================================================
-      debugPrint("Checking geofence...");
+      //debugPrint("Checking geofence...");
 
-      final insideGeofence = await checkGeoFence(
-        lat: hasLatLng ? projectLat : null,
-        lng: hasLatLng ? projectLng : null,
-        blockName: hasBlock ? blockName : null,
-        stateName: hasState ? stateName : null,
-        position: position,
-      );
+      // final insideGeofence = await checkGeoFence(
+      //   lat: hasLatLng ? projectLat : null,
+      //   lng: hasLatLng ? projectLng : null,
+      //   blockName: hasBlock ? blockName : null,
+      //   stateName: hasState ? stateName : null,
+      //   position: position,
+      // );
 
-      // Close location loader
-      if (locationLoaderShown) {
-        Get.back();
-        locationLoaderShown = false;
-      }
+      // // Close location loader
+      // if (locationLoaderShown) {
+      //   Get.back();
+      //   locationLoaderShown = false;
+      // }
 
-      debugPrint("Inside Geofence/Block: $insideGeofence");
+      // debugPrint("Inside Geofence/Block: $insideGeofence");
 
-      // ============================================================
-      // 6. GEO-FENCE FAILED
-      // ============================================================
+      // // ============================================================
+      // // 6. GEO-FENCE FAILED
+      // // ============================================================
       // if (!insideGeofence) {
       //   showErrorDialog(
       //     Get.context!,
@@ -250,8 +246,16 @@ class FunctionalController extends GetxController
       // ============================================================
       // 7. GEO-FENCE PASSED → CAPTURE VIDEO
       // ============================================================
-      debugPrint("Geofence passed.");
+      //debugPrint("Geofence passed.");
+      // Save validated location
+      userLat.value = position.latitude;
+      userLng.value = position.longitude;
       debugPrint("Starting video capture...");
+
+      if (locationLoaderShown) {
+        Get.back();
+        locationLoaderShown = false;
+      }
 
       final compressedFile = await captureProjectVideo(
         maxDuration: const Duration(minutes: 2),
@@ -337,6 +341,7 @@ class FunctionalController extends GetxController
     videoPath.value = '';
   }
 
+  /* Questionnaire loading and form helpers are temporarily disabled.
   Future<void> _loadQuestionnaire() async {
     try {
       isFormLoading.value = true;
@@ -565,6 +570,8 @@ class FunctionalController extends GetxController
         '${date.year}';
   }
 
+  */
+
   Future<void> submitData() async {
     if (isSubmitting.value) {
       return;
@@ -641,13 +648,14 @@ class FunctionalController extends GetxController
           return;
         }
 
-        // Temporarily disabled questionnaire submission.
-        // final questionnaireSuccess = await submitQuestionaire();
-        // if (!questionnaireSuccess) {
-        //   debugPrint('Questionnaire submission failed.');
-        //   return;
-        // }
-        // debugPrint('Questionnaire submission successful.');
+        /* Questionnaire submission is temporarily disabled.
+        final questionnaireSuccess = await submitQuestionaire();
+        if (!questionnaireSuccess) {
+          debugPrint('Questionnaire submission failed.');
+          return;
+        }
+        debugPrint('Questionnaire submission successful.');
+        */
 
         final functionalitySuccess = await updateFunctionality(
           uploadVideo: true,
@@ -727,6 +735,7 @@ class FunctionalController extends GetxController
     }
   }
 
+  /* Questionnaire offline payload is temporarily disabled.
   String _offlineQuestionnairePayload() {
     if (isFunctionalProject.value != true) return '';
 
@@ -739,6 +748,8 @@ class FunctionalController extends GetxController
     });
   }
 
+  */
+
   Future<void> saveOffline() async {
     final userId = await authService.getUserToken();
     if (userId == null || userId.isEmpty) {
@@ -746,23 +757,25 @@ class FunctionalController extends GetxController
       return;
     }
 
-    final questionnaireMedia =
-        isFunctionalProject.value == true ? getAssessmentMedia() : const [];
+    // Questionnaire media is disabled; keep the video-only offline flow.
+    // final questionnaireMedia =
+    //     isFunctionalProject.value == true ? getAssessmentMedia() : const [];
 
     await repository.save(
       userId: userId,
       projectId: projectId.value,
-      images:
-          questionnaireMedia
-              .map((item) => item['path']?.toString() ?? '')
-              .where((path) => path.isNotEmpty)
-              .toList(),
+      // images: questionnaireMedia
+      //     .map((item) => item['path']?.toString() ?? '')
+      //     .where((path) => path.isNotEmpty)
+      //     .toList(),
+      images: const [],
       videoPath:
           isFunctionalProject.value == true && videoPath.value.isNotEmpty
               ? videoPath.value
               : null,
       remarks: '',
-      questionnairePayload: _offlineQuestionnairePayload(),
+      // questionnairePayload: _offlineQuestionnairePayload(),
+      questionnairePayload: '',
       isSynced: false,
       userLat: userLat.value.toString(),
       userLng: userLng.value.toString(),
@@ -779,6 +792,7 @@ class FunctionalController extends GetxController
     await _navigateToDashboard();
   }
 
+  /* Questionnaire submission helper is temporarily disabled.
   Future<bool> submitQuestionaire() async {
     try {
       final payload = <String, dynamic>{
@@ -833,7 +847,9 @@ class FunctionalController extends GetxController
     }
   }
 
-  Future<bool> updateFunctionality({required bool uploadVideo}) async {
+  */
+
+  Future<bool> updateFunctionality({required bool uploadVideo, re}) async {
     try {
       showAlertCustom(
         backBtnDisable: true,
@@ -858,7 +874,8 @@ class FunctionalController extends GetxController
         projectId: videoProjectId.value,
 
         isFunctional: isFunctionalProject.value ?? false,
-
+        lat: userLat.toString(),
+        lng: userLng.toString(),
         videoPath: video,
       );
 

@@ -190,11 +190,15 @@ class FunctionalRepoImpl extends FunctionalRepo with PopupMixin, SnackBarMixin {
   Future<CommonResponseModel> updateFunctionality({
     required String projectId,
     required bool isFunctional,
+    required String lat,
+    required String lng,
     String? videoPath,
   }) async {
     try {
       final formData = FormData.fromMap({
         'projectId': projectId,
+        'lat': lat,
+        'lng': lng,
         'isFunctional': isFunctional.toString(),
       });
 
@@ -214,6 +218,8 @@ class FunctionalRepoImpl extends FunctionalRepo with PopupMixin, SnackBarMixin {
       debugPrint('projectId: $projectId');
       debugPrint('isFunctional: $isFunctional');
       debugPrint('videoPath: $videoPath');
+      debugPrint('lat: $lat');
+      debugPrint('lng: $lng');
       debugPrint('===========================================');
 
       final response = await apiService.post(
